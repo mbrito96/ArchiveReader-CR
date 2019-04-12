@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("EepromVisualAccess")]
-[assembly: AssemblyDescription("Lectura de memoria EEPROM en PLC")]
+[assembly: AssemblyTitle("Archive Reader")]
+[assembly: AssemblyDescription("Lector de historial de operaciones")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Slicetex Electronics")]
-[assembly: AssemblyProduct("EepromVisualAccess")]
+[assembly: AssemblyCompany("Marcos Brito")]
+[assembly: AssemblyProduct("ArchiveReader")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -7,8 +7,8 @@
     <ProjectGuid>{DCB378BA-EA01-42F7-B862-C2D3884CD344}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EepromVisualAccess</RootNamespace>
-    <AssemblyName>EepromVisualAccess</AssemblyName>
+    <RootNamespace>ArchiveReader</RootNamespace>
+    <AssemblyName>Archive Reader</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
