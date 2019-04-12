@@ -379,7 +379,7 @@ namespace EepromVisualAccess
             this.columnHeaderDebug2.Width = 50;
             ArchiveViewer.Columns.Insert(ArchiveViewer.Columns.Count - 1, columnHeaderDebug2);
         }
-        private String GetErrorString(String code, Int32 param)
+        private String GetErrorString(String code, String param)
         {
             String errorString = "Codigo: " + code + Environment.NewLine;
             if (model == MacModel.A40TR)
@@ -388,120 +388,120 @@ namespace EepromVisualAccess
                 switch (code)
                 {
                     case "00":          //ERR_SENSOR
-                        {
-                            errorString += "Valor de sensores no coherentes.";
-                            break;
-                        }
+                    {
+                        errorString += "Valor de sensores no coherentes.";
+                        break;
+                    }
                     case "01":      // ERR_TEMP_SENSOR
-                        {
-                            errorString += "Valor improbable en sensor de temperatura. Valor: " + param.ToString();
-                            break;
-                        }
+                    {
+                        errorString += "Valor improbable en sensor de temperatura. Valor: " + param;
+                        break;
+                    }
                     case "02":      // ERR_EEPROM_READ
-                        {
-                            errorString += "Falla lectura EEPROM. Direccion: " + param.ToString();
-                            break;
-                        }
+                    {
+                        errorString += "Falla lectura EEPROM. Direccion: " + param;
+                        break;
+                    }
                     case "03":      // ERR_EEPROM_WRITE
-                        {
-                            errorString += "Falla escritura EEPROM. Direccion: " + param.ToString();
-                            break;
-                        }
+                    {
+                        errorString += "Falla escritura EEPROM. Direccion: " + param;
+                        break;
+                    }
                     case "04":      // ERR_OP_VALUES
-                        {
-                            errorString += "SetPoint recuperado de memoria no coherente. \n Se configuraron los valores por defecto.";
-                            break;
-                        }
+                    {
+                        errorString += "SetPoint recuperado de memoria no coherente. \n Se configuraron los valores por defecto.";
+                        break;
+                    }
                     case "05":      // ERR_CREATE_TIMEOUT
-                        {
-                            errorString += "Error al crear Timeout " + param.ToString();
-                            break;
-                        }
+                    {
+                        errorString += "Error al crear Timeout " + param;
+                        break;
+                    }
                     case "06":      // ERR_SYS_WATCHDOG
-                        {
-                            errorString += "System Watchdog. Se continuó la operacion normalmente.";
-                            break;
-                        }
+                    {
+                        errorString += "System Watchdog. Se continuó la operacion normalmente.";
+                        break;
+                    }
                     case "07":      // ERR_FATAL_ERROR
-                        {
-                            errorString += "Excepcion no manejada. Imposible operar.";
-                            break;
-                        }
+                    {
+                        errorString += "Excepcion no manejada. Imposible operar.";
+                        break;
+                    }
                     case "08":      // ERR_ARCHIVE_INIT
-                        {
-                            errorString += "Error iniciando historial. Se perdieron los datos pasados.";
-                            break;
-                        }
+                    {
+                        errorString += "Error iniciando historial. Se perdieron los datos pasados.";
+                        break;
+                    }
                     case "09":      // ERR_RTC_FAIL
-                        {
-                            errorString += "Fecha y hora invalida.";
-                            break;
-                        }
+                    {
+                        errorString += "Fecha y hora invalida.";
+                        break;
+                    }
                     case "0A":      // ERR_FLOW
-                        {
-                            errorString += "FlowSwitch Evaporador.";
-                            break;
-                        }
+                    {
+                        errorString += "FlowSwitch Evaporador.";
+                        break;
+                    }
                     case "0B":      // ERR_P_HIGH
-                        {
-                            errorString += "Presion alta : " + param.ToString();
-                            break;
-                        }
+                    {
+                        errorString += "Presion alta : " + param;
+                        break;
+                    }
                     case "0C":      // ERR_P_LOW
-                        {
-                            errorString += "Presion baja: " + param.ToString();
-                            break;
-                        }
+                    {
+                        errorString += "Presion baja: " + param;
+                        break;
+                    }
                     case "0D":      // ERR_P_DIF
-                        {
-                            errorString += "Presion diferencial: " + param.ToString();
-                            break;
-                        }
+                    {
+                        errorString += "Presion diferencial: " + param;
+                        break;
+                    }
                     case "0E":      // ERR_T_CRIT
-                        {
-                            errorString += "Temp. evaporador: " + param.ToString();
-                            break;
-                        }
+                    {
+                        errorString += "Temp. evaporador: " + param;
+                        break;
+                    }
                     case "0F":      // ERR_T_MAX
-                        {
-                            errorString += "Temperatura por encima de máxima: " + param.ToString();
-                            break;
-                        }
+                    {
+                        errorString += "Temperatura por encima de máxima: " + param;
+                        break;
+                    }
                     case "10":      // ERR_COOLDOWN
-                        {
-                            errorString += "Imposible disminuir P. alta en etapa de arranque. \n Presion alta: " + param.ToString();
-                            break;
-                        }
+                    {
+                        errorString += "Imposible disminuir P. alta en etapa de arranque. \n Presion alta: " + param;
+                        break;
+                    }
                     case "11":      // ERR_COMP_OL
-                        {
-                            errorString += "Consumo compresor.";
-                            break;
-                        }
+                    {
+                        errorString += "Consumo compresor.";
+                        break;
+                    }
                     case "12":      // ERR_CMP_WATCHDOG
-                        {
-                            errorString += "Compressor Watchdog.";
-                            break;
-                        }
+                    {
+                        errorString += "Compressor Watchdog.";
+                        break;
+                    }
                     case "13":      // ERR_VENT1_OL
-                        {
-                            errorString += "Consumo ventilador 1.";
-                            break;
-                        }
+                    {
+                        errorString += "Consumo ventilador 1.";
+                        break;
+                    }
                     case "14":      // ERR_VENT2_OL
-                        {
-                            errorString += "Consumo ventilador 2.";
-                            break;
-                        }
+                    {
+                        errorString += "Consumo ventilador 2.";
+                        break;
+                    }
                     case "15":      // ERR_VENT3_OL
-                        {
-                            errorString += "Consumo ventilador 3.";
-                            break;
-                        }
+                    {
+                        errorString += "Consumo ventilador 3.";
+                        break;
+                    }
                     case "16":      // ERR_PUMP_OL
-                        {
-                            errorString += "Consumo bomba de agua.";
-                            break;
-                        }
+                    {
+                        errorString += "Consumo bomba de agua.";
+                        break;
+                    }
                 }
                 #endregion
             }
@@ -640,7 +640,7 @@ namespace EepromVisualAccess
                     ErrorViewer.BringToFront();
                     ErrorViewer.Visible = true;
                     String errorCode = selected[0].SubItems[CODE].Text;
-                    Int32 param = Convert.ToInt32(selected[0].SubItems[TEMPIN].Text);
+                    String param = selected[0].SubItems[TEMPIN].Text;
 
                     ErrorViewer.Text = GetErrorString(errorCode, param); 
 
