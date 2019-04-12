@@ -405,8 +405,8 @@ namespace EepromVisualAccess
             // 
             // groupBox5
             // 
-            this.groupBox5.Controls.Add(this.DetailViewer);
             this.groupBox5.Controls.Add(this.ErrorViewer);
+            this.groupBox5.Controls.Add(this.DetailViewer);
             this.groupBox5.Location = new System.Drawing.Point(496, 75);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(583, 103);
@@ -501,7 +501,7 @@ namespace EepromVisualAccess
             this.ErrorViewer.Multiline = true;
             this.ErrorViewer.Name = "ErrorViewer";
             this.ErrorViewer.ReadOnly = true;
-            this.ErrorViewer.Size = new System.Drawing.Size(571, 63);
+            this.ErrorViewer.Size = new System.Drawing.Size(571, 76);
             this.ErrorViewer.TabIndex = 1;
             this.ErrorViewer.Visible = false;
             // 

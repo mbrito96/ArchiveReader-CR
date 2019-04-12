@@ -50,7 +50,7 @@
   <ItemGroup>
     <Reference Include="stx8xxx, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\stx8xxx.dll</HintPath>
+      <HintPath>..\stx8xxx.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
