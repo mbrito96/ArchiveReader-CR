@@ -114,6 +114,7 @@ namespace EepromVisualAccess
             this.columnHeader14 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader15 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.ErrorViewer = new System.Windows.Forms.TextBox();
             this.DetailViewer = new System.Windows.Forms.ListView();
             this.columnHeader27 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader18 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -126,7 +127,6 @@ namespace EepromVisualAccess
             this.columnHeader28 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader25 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader26 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.ErrorViewer = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.txtCount = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
@@ -145,6 +145,8 @@ namespace EepromVisualAccess
             this.dateFilterEnd = new System.Windows.Forms.DateTimePicker();
             this.label6 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
+            this.statstrFilePath = new System.Windows.Forms.StatusStrip();
+            this.statStripDataPath = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)(this.numArchiveSize)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -153,6 +155,7 @@ namespace EepromVisualAccess
             this.groupBox5.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox6.SuspendLayout();
+            this.statstrFilePath.SuspendLayout();
             this.SuspendLayout();
             // 
             // butReadEeprom
@@ -414,6 +417,17 @@ namespace EepromVisualAccess
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Detalles";
             // 
+            // ErrorViewer
+            // 
+            this.ErrorViewer.BackColor = System.Drawing.SystemColors.Window;
+            this.ErrorViewer.Location = new System.Drawing.Point(6, 21);
+            this.ErrorViewer.Multiline = true;
+            this.ErrorViewer.Name = "ErrorViewer";
+            this.ErrorViewer.ReadOnly = true;
+            this.ErrorViewer.Size = new System.Drawing.Size(571, 76);
+            this.ErrorViewer.TabIndex = 1;
+            this.ErrorViewer.Visible = false;
+            // 
             // DetailViewer
             // 
             this.DetailViewer.BackColor = System.Drawing.SystemColors.Window;
@@ -493,17 +507,6 @@ namespace EepromVisualAccess
             // 
             this.columnHeader26.Text = "Bomba";
             this.columnHeader26.Width = 50;
-            // 
-            // ErrorViewer
-            // 
-            this.ErrorViewer.BackColor = System.Drawing.SystemColors.Window;
-            this.ErrorViewer.Location = new System.Drawing.Point(6, 21);
-            this.ErrorViewer.Multiline = true;
-            this.ErrorViewer.Name = "ErrorViewer";
-            this.ErrorViewer.ReadOnly = true;
-            this.ErrorViewer.Size = new System.Drawing.Size(571, 76);
-            this.ErrorViewer.TabIndex = 1;
-            this.ErrorViewer.Visible = false;
             // 
             // label3
             // 
@@ -700,11 +703,28 @@ namespace EepromVisualAccess
             this.label1.TabIndex = 12;
             this.label1.Text = "Desde";
             // 
+            // statstrFilePath
+            // 
+            this.statstrFilePath.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statstrFilePath.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statStripDataPath});
+            this.statstrFilePath.Location = new System.Drawing.Point(0, 597);
+            this.statstrFilePath.Name = "statstrFilePath";
+            this.statstrFilePath.Size = new System.Drawing.Size(1311, 24);
+            this.statstrFilePath.TabIndex = 13;
+            this.statstrFilePath.Text = "Puto";
+            // 
+            // statStripDataPath
+            // 
+            this.statStripDataPath.Name = "statStripDataPath";
+            this.statStripDataPath.Size = new System.Drawing.Size(0, 19);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1311, 606);
+            this.ClientSize = new System.Drawing.Size(1311, 621);
+            this.Controls.Add(this.statstrFilePath);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox5);
@@ -725,7 +745,10 @@ namespace EepromVisualAccess
             this.groupBox4.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
+            this.statstrFilePath.ResumeLayout(false);
+            this.statstrFilePath.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -792,6 +815,8 @@ namespace EepromVisualAccess
         private System.Windows.Forms.CheckBox chkboxShowOp;
         private System.Windows.Forms.CheckBox chkboxShowErrors;
         private System.Windows.Forms.Button butExport2CSV;
+        private System.Windows.Forms.StatusStrip statstrFilePath;
+        private System.Windows.Forms.ToolStripStatusLabel statStripDataPath;
     }
 }
 

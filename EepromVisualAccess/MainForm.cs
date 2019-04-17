@@ -147,6 +147,7 @@ namespace EepromVisualAccess
                     //Get the path of specified file
                     filePath = openFileDialog.FileName;
                     workingPath = openFileDialog.FileName; // Save the path for future operations
+                    statStripDataPath.Text = filePath;
 
                     //Read the contents of the file into a stream
                     var fileStream = openFileDialog.OpenFile();
