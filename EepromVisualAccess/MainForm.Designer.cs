@@ -3,6 +3,8 @@ namespace EepromVisualAccess
 {
     partial class MainForm
     {
+        private const bool DEBUGGING = false;
+
         enum EntryType : byte{
             NO_DATA,
             ERROR_DATA,
@@ -22,16 +24,45 @@ namespace EepromVisualAccess
             A80TR,
             W90TR
         }
-        private const bool DEBUGGING = false;
 
-        private const int DEFAULT_DATA_SIZE = 32588;
-        private const int METADATA_ADDRESS = 180;
-        private const int METADATA_SIZE = 8;
-        private const int MAP_ADDRESS = 191;
-        private const int MAP_SIZE = 97;
-        private const int ARCHIVE_ADDRESS = 288;
+        private struct ArchiveInfo
+        {
+            public int archiveSize,
+            metadataAddress,
+            metadataSize,
+            mapAddress,
+            mapSize,
+            regFileAddress,
+            regFileSize;
+
+            public ArchiveInfo(int arcSize, int metaAdd, int metaSize, int mapAdd, int mapS, int regfAdd, int regfSize)
+            {
+                archiveSize = arcSize;
+                metadataAddress = metaAdd;
+                metadataSize = metaSize;
+                mapAddress = mapAdd;
+                mapSize = mapS;
+                regFileAddress = regfAdd;
+                regFileSize = regfSize;
+            }
+        }
+
+        private ArchiveInfo arcInfo;
+
+        // Defined Archive parameters for: { A40TR, A80TR, W90TR } 
+        private int[] ENTIRE_DATA_SIZE = { 32588, 32616 };
+        private int[] METADATA_ADDRESS = { 180, 152 };
+        private int[] METADATA_SIZE = { 8, 8 };
+        private int[] MAP_ADDRESS = { 191, 160 };
+        private int[] MAP_SIZE = { 97, 128 };
+        private int[] ARCHIVE_ADDRESS = { 288, 288 };
+        private int[] ARCHIVE_SIZE = { 32480, 32480 };
+
         private const byte OP_HISTORY_MASK = (0x80);
         private const byte ERROR_MASK = (0x40);
+        private int OP_ENTRY_SIZE = 9;
+        private int ERROR_ENTRY_SIZE = 3;
+        private int MAX_ENTRY_SIZE = 9;
         // Defines for accessing entry subItems
         private const int NUMBER = 0;
         private const int DATE = 1;
@@ -87,8 +118,6 @@ namespace EepromVisualAccess
         private void InitializeComponent()
         {
             this.butReadEeprom = new System.Windows.Forms.Button();
-            this.numArchiveSize = new System.Windows.Forms.NumericUpDown();
-            this.label2 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.modelSelector = new System.Windows.Forms.ComboBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -147,7 +176,6 @@ namespace EepromVisualAccess
             this.label1 = new System.Windows.Forms.Label();
             this.statstrFilePath = new System.Windows.Forms.StatusStrip();
             this.statStripDataPath = new System.Windows.Forms.ToolStripStatusLabel();
-            ((System.ComponentModel.ISupportInitialize)(this.numArchiveSize)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -169,54 +197,12 @@ namespace EepromVisualAccess
             this.butReadEeprom.UseVisualStyleBackColor = true;
             this.butReadEeprom.Click += new System.EventHandler(this.butReadEeprom_Click);
             // 
-            // numArchiveSize
-            // 
-            this.numArchiveSize.Enabled = false;
-            this.numArchiveSize.Increment = new decimal(new int[] {
-            4,
-            0,
-            0,
-            0});
-            this.numArchiveSize.Location = new System.Drawing.Point(106, 110);
-            this.numArchiveSize.Margin = new System.Windows.Forms.Padding(4);
-            this.numArchiveSize.Maximum = new decimal(new int[] {
-            32768,
-            0,
-            0,
-            0});
-            this.numArchiveSize.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.numArchiveSize.Name = "numArchiveSize";
-            this.numArchiveSize.Size = new System.Drawing.Size(84, 22);
-            this.numArchiveSize.TabIndex = 2;
-            this.numArchiveSize.Value = new decimal(new int[] {
-            32480,
-            0,
-            0,
-            0});
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(8, 112);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(90, 17);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "Tamaño (By)";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.modelSelector);
             this.groupBox1.Controls.Add(this.pictureBox1);
             this.groupBox1.Controls.Add(this.butLoadFile);
-            this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.butReadEeprom);
-            this.groupBox1.Controls.Add(this.numArchiveSize);
             this.groupBox1.Location = new System.Drawing.Point(19, 13);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
@@ -231,7 +217,8 @@ namespace EepromVisualAccess
             this.modelSelector.CausesValidation = false;
             this.modelSelector.FormattingEnabled = true;
             this.modelSelector.Items.AddRange(new object[] {
-            "GWF-A-20/30/40TR"});
+            "GWF-A-20/30/40TR",
+            "GWF-A-80TR"});
             this.modelSelector.Location = new System.Drawing.Point(11, 49);
             this.modelSelector.Name = "modelSelector";
             this.modelSelector.Size = new System.Drawing.Size(179, 24);
@@ -708,16 +695,16 @@ namespace EepromVisualAccess
             this.statstrFilePath.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statstrFilePath.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statStripDataPath});
-            this.statstrFilePath.Location = new System.Drawing.Point(0, 597);
+            this.statstrFilePath.Location = new System.Drawing.Point(0, 599);
             this.statstrFilePath.Name = "statstrFilePath";
-            this.statstrFilePath.Size = new System.Drawing.Size(1311, 24);
+            this.statstrFilePath.Size = new System.Drawing.Size(1311, 22);
             this.statstrFilePath.TabIndex = 13;
             this.statstrFilePath.Text = "Puto";
             // 
             // statStripDataPath
             // 
             this.statStripDataPath.Name = "statStripDataPath";
-            this.statStripDataPath.Size = new System.Drawing.Size(0, 19);
+            this.statStripDataPath.Size = new System.Drawing.Size(0, 17);
             // 
             // MainForm
             // 
@@ -733,9 +720,7 @@ namespace EepromVisualAccess
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Text = "Historial de operaciones";
-            ((System.ComponentModel.ISupportInitialize)(this.numArchiveSize)).EndInit();
             this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
@@ -755,8 +740,6 @@ namespace EepromVisualAccess
         #endregion
 
         private System.Windows.Forms.Button butReadEeprom;
-        private System.Windows.Forms.NumericUpDown numArchiveSize;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.ListView ArchiveViewer;

@@ -4,21 +4,17 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Collections;
 
-// Incluir en Namespace la Librería STX8XXX de Slicetex.
 /// <summary>
 /// ----------------------------------------------------------------------------------------------
 /// File        : MainForm.cs
-/// Title       : Ejemplo para acceder a datos de memoria EEPROM en PLC desde Visual C#
+/// Title       : Lector de historial de operaciones para máquinas GWF
 /// 
-/// Revised     : 07/Feb/2018
-/// Created     : 07/Feb/2018
-/// Version     : N/A
+/// Revised     : 25/Abr/2019
+/// Created     : 07/Feb/2019
 /// 
-/// Author      : Boris Estudiez <devel@slicetex.com>
-/// Website     : www.slicetex.com
+/// Author      : Marcos Brito
 /// 
-/// License     : (C) Slicetex Electronics 2018. 
-///             : Marcos Brito
+/// License     : (C) Marcos Brito 2019. 
 /// 
 /// ----------------------------------------------------------------------------------------------
 /// </summary>
@@ -52,10 +48,10 @@ namespace EepromVisualAccess
 
             // Crear un array donde se almacenarán los bytes recibidos de la memoria EEPROM.
             // Tamaño inicial igual al solicitado desde ventana.
-            byte[] EepromBytes = new byte[(int)(DEFAULT_DATA_SIZE)];
+            byte[] EepromBytes = new byte[ arcInfo.archiveSize ];
 
             // Dirección inicial donde comenzar a leer los bytes de EEPROM.
-            int EepromStartAddress = (int)METADATA_ADDRESS;
+            int EepromStartAddress = arcInfo.metadataAddress;
 
             // Número de bytes leidos.
             int BytesRead = 0;
@@ -64,7 +60,7 @@ namespace EepromVisualAccess
             int BytesToRetrieve = 0;
 
             // Número de bytes que deben leerse de memoria EEPROM.
-            int BytesToRead = (int)(DEFAULT_DATA_SIZE);
+            int BytesToRead = arcInfo.archiveSize;
 
             // Comprobar cantidad de bytes a leer.
             if (BytesToRead > 100)
@@ -152,10 +148,10 @@ namespace EepromVisualAccess
                     //Read the contents of the file into a stream
                     var fileStream = openFileDialog.OpenFile();
 
-                    if (fileStream.Length == DEFAULT_DATA_SIZE)
+                    if (fileStream.Length == arcInfo.archiveSize)
                     {
-                        byte[] fileData = new byte[DEFAULT_DATA_SIZE];
-                        fileStream.Read(fileData, 0, DEFAULT_DATA_SIZE);
+                        byte[] fileData = new byte[arcInfo.archiveSize];
+                        fileStream.Read(fileData, 0, arcInfo.archiveSize);
                         ProcessData(fileData);
                     }
                     else
@@ -169,17 +165,17 @@ namespace EepromVisualAccess
     #region RAW DATA PROCESSING
         private void ProcessData(byte[] data)
         {
-            byte[] metadataBytes = new byte[METADATA_SIZE];
-            Array.Copy(data, 0, metadataBytes, 0, METADATA_SIZE);
+            byte[] metadataBytes = new byte[arcInfo.metadataSize];
+            Array.Copy(data, 0, metadataBytes, 0, arcInfo.metadataSize);
             GetMetadataFromEeprom(metadataBytes);
 
-            byte[] mapBytes = new byte[MAP_SIZE];
-            Array.Copy(data, MAP_ADDRESS - METADATA_ADDRESS, mapBytes, 0, MAP_SIZE);
+            byte[] mapBytes = new byte[arcInfo.mapSize];
+            Array.Copy(data, arcInfo.mapAddress - arcInfo.metadataAddress, mapBytes, 0, arcInfo.mapSize);
             GetMemoryMapFromEeprom(mapBytes);
 
 
-            byte[] archiveBytes = new byte[(int)numArchiveSize.Value];
-            Array.Copy(data, ARCHIVE_ADDRESS - METADATA_ADDRESS, archiveBytes, 0, (int)numArchiveSize.Value);
+            byte[] archiveBytes = new byte[arcInfo.regFileSize];
+            Array.Copy(data,  arcInfo.regFileAddress - arcInfo.metadataAddress, archiveBytes, 0, arcInfo.regFileSize);
             GetEntries(archiveBytes);
         }
         private void GetMetadataFromEeprom(byte[] metadataBytes)
@@ -230,18 +226,18 @@ namespace EepromVisualAccess
             ListViewItem entry;
             EntryType type = EntryType.NO_DATA;
             int i = Convert.ToInt32(txtTail.Text);
-            byte[] entryArray = new byte[9 * 4];   // Temp array to save one complete entry
+            byte[] entryArray = new byte[MAX_ENTRY_SIZE * 4];   // Temp array to save one complete entry
             while (done == false)
             {
                 // First grab ID
                 if ((EepromBytes[(i * 4 + 7) % EepromBytes.Length] & (0xC0)) == OP_HISTORY_MASK)
                 {
-                    dataSize = 9;
+                    dataSize = OP_ENTRY_SIZE;
                     type = EntryType.OP_HISTORY;
                 }
                 else if ((EepromBytes[(i * 4 + 7) % EepromBytes.Length] & (0xC0)) == ERROR_MASK)
                 {
-                    dataSize = 3;
+                    dataSize = ERROR_ENTRY_SIZE;
                     type = EntryType.ERROR_DATA;
                 }
                 else
@@ -272,7 +268,7 @@ namespace EepromVisualAccess
                 if (DEBUGGING)
                 {
                     entry.SubItems.Add(i.ToString());                   // Save Index
-                    entry.SubItems.Add((ARCHIVE_ADDRESS + i * 4).ToString());    // Save Address
+                    entry.SubItems.Add((arcInfo.regFileAddress + i * 4).ToString());    // Save Address
                 }
 
                 ArchiveViewer.Items.Add(entry);
@@ -319,7 +315,7 @@ namespace EepromVisualAccess
                 ValueInteger &= ~(3 << 30); // Clear mask
                 entry.SubItems.Add(ValueInteger.ToString("X4"));    // Save Digital Cell
 
-                for (int j = 0; j < 7; j++)  // Save 7 sensor values
+                for (int j = 0; j < (OP_ENTRY_SIZE-2) ; j++)  // Save sensor values
                 {
                     ValueFloat = BitConverter.ToSingle(entryData, 8 + j * 4);
                     entry.SubItems.Add(ValueFloat.ToString());
@@ -395,110 +391,125 @@ namespace EepromVisualAccess
                     }
                     case "01":      // ERR_TEMP_SENSOR
                     {
-                        errorString += "Valor improbable en sensor de temperatura. Valor: " + param;
+                        errorString += "Valor improbable en sensor de temperatura de entrada. Valor: " + param;
                         break;
                     }
-                    case "02":      // ERR_EEPROM_READ
+                    case "02":      // ERR_TEMP_SENSOR
+                    {
+                        errorString += "Valor improbable en sensor de temperatura de salida. Valor: " + param;
+                        break;
+                    }
+                    case "03":      // ERR_TEMP_SENSOR
+                    {
+                        errorString += "Valor improbable en sensor de temperatura del evaporador. Valor: " + param;
+                        break;
+                    }
+                    case "04":      // ERR_TEMP_SENSOR
+                    {
+                        errorString += "Valor improbable en sensor de temperatura ambiente. Valor: " + param;
+                        break;
+                    }
+                    case "05":      // ERR_EEPROM_READ
                     {
                         errorString += "Falla lectura EEPROM. Direccion: " + param;
                         break;
                     }
-                    case "03":      // ERR_EEPROM_WRITE
+                    case "06":      // ERR_EEPROM_WRITE
                     {
                         errorString += "Falla escritura EEPROM. Direccion: " + param;
                         break;
                     }
-                    case "04":      // ERR_OP_VALUES
+                    case "07":      // ERR_OP_VALUES
                     {
                         errorString += "SetPoint recuperado de memoria no coherente. \n Se configuraron los valores por defecto.";
                         break;
                     }
-                    case "05":      // ERR_CREATE_TIMEOUT
+                    case "08":      // ERR_CREATE_TIMEOUT
                     {
                         errorString += "Error al crear Timeout " + param;
                         break;
                     }
-                    case "06":      // ERR_SYS_WATCHDOG
+                    case "09":      // ERR_SYS_WATCHDOG
                     {
                         errorString += "System Watchdog. Se continuó la operacion normalmente.";
                         break;
                     }
-                    case "07":      // ERR_FATAL_ERROR
+                    case "0A":      // ERR_FATAL_ERROR
                     {
                         errorString += "Excepcion no manejada. Imposible operar.";
                         break;
                     }
-                    case "08":      // ERR_ARCHIVE_INIT
+                    case "0B":      // ERR_ARCHIVE_INIT
                     {
                         errorString += "Error iniciando historial. Se perdieron los datos pasados.";
                         break;
                     }
-                    case "09":      // ERR_RTC_FAIL
+                    case "0C":      // ERR_RTC_FAIL
                     {
                         errorString += "Fecha y hora invalida.";
                         break;
                     }
-                    case "0A":      // ERR_FLOW
+                    case "0D":      // ERR_FLOW
                     {
                         errorString += "FlowSwitch Evaporador.";
                         break;
                     }
-                    case "0B":      // ERR_P_HIGH
+                    case "0E":      // ERR_P_HIGH
                     {
                         errorString += "Presion alta : " + param;
                         break;
                     }
-                    case "0C":      // ERR_P_LOW
+                    case "0F":      // ERR_P_LOW
                     {
                         errorString += "Presion baja: " + param;
                         break;
                     }
-                    case "0D":      // ERR_P_DIF
+                    case "10":      // ERR_P_DIF
                     {
                         errorString += "Presion diferencial: " + param;
                         break;
                     }
-                    case "0E":      // ERR_T_CRIT
+                    case "11":      // ERR_T_CRIT
                     {
                         errorString += "Temp. evaporador: " + param;
                         break;
                     }
-                    case "0F":      // ERR_T_MAX
+                    case "12":      // ERR_T_MAX
                     {
                         errorString += "Temperatura por encima de máxima: " + param;
                         break;
                     }
-                    case "10":      // ERR_COOLDOWN
+                    case "13":      // ERR_COOLDOWN
                     {
                         errorString += "Imposible disminuir P. alta en etapa de arranque. \n Presion alta: " + param;
                         break;
                     }
-                    case "11":      // ERR_COMP_OL
+                    case "14":      // ERR_COMP_OL
                     {
                         errorString += "Consumo compresor.";
                         break;
                     }
-                    case "12":      // ERR_CMP_WATCHDOG
+                    case "15":      // ERR_CMP_WATCHDOG
                     {
                         errorString += "Compressor Watchdog.";
                         break;
                     }
-                    case "13":      // ERR_VENT1_OL
+                    case "16":      // ERR_VENT1_OL
                     {
                         errorString += "Consumo ventilador 1.";
                         break;
                     }
-                    case "14":      // ERR_VENT2_OL
+                    case "17":      // ERR_VENT2_OL
                     {
                         errorString += "Consumo ventilador 2.";
                         break;
                     }
-                    case "15":      // ERR_VENT3_OL
+                    case "18":      // ERR_VENT3_OL
                     {
                         errorString += "Consumo ventilador 3.";
                         break;
                     }
-                    case "16":      // ERR_PUMP_OL
+                    case "19":      // ERR_PUMP_OL
                     {
                         errorString += "Consumo bomba de agua.";
                         break;
@@ -718,6 +729,7 @@ namespace EepromVisualAccess
                     model = MacModel.W90TR;
                     break;
             }
+            arcInfo = new ArchiveInfo(ENTIRE_DATA_SIZE[(int)model], METADATA_ADDRESS[(int)model], METADATA_SIZE[(int)model], MAP_ADDRESS[(int)model], MAP_SIZE[(int)model], ARCHIVE_ADDRESS[(int)model], ARCHIVE_SIZE[(int)model]);
             ArchiveViewer_SelectedIndexChanged(sender, e);  // Update detailed view
         }
         private void pictureBox1_Click(object sender, EventArgs e)
