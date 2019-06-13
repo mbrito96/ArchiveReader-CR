@@ -1,33 +1,33 @@
-﻿
-namespace EepromVisualAccess
+﻿namespace EepromVisualAccess
 {
     partial class MainForm
     {
-        private const bool DEBUGGING = false;
+        const bool DEBUGGING = false;
 
-        enum EntryType : byte{
+        public enum EntryType : byte
+        {
             NO_DATA,
             ERROR_DATA,
             OP_HISTORY,
             MSG_DATA
         }
-        enum OpStatus : byte
+        public enum OpStatus : byte
         {
             IDLE,
             RUNNING,
             POSTOP,
             DISABLED_STATE
         }
-        enum MacModel : byte
+        public enum MacModel : byte
         {
             A40TR,
             A80TR,
             W90TR
         }
 
-        private struct ArchiveInfo
+        static class ArchiveInfo
         {
-            public int archiveSize,
+            public static int archiveSize,
             metadataAddress,
             metadataSize,
             mapAddress,
@@ -35,34 +35,35 @@ namespace EepromVisualAccess
             regFileAddress,
             regFileSize;
 
-            public ArchiveInfo(int arcSize, int metaAdd, int metaSize, int mapAdd, int mapS, int regfAdd, int regfSize)
+            public static int opEntrySize, errorEntrySize;
+            
+            public static int MaxEntrySize()
             {
-                archiveSize = arcSize;
-                metadataAddress = metaAdd;
-                metadataSize = metaSize;
-                mapAddress = mapAdd;
-                mapSize = mapS;
-                regFileAddress = regfAdd;
-                regFileSize = regfSize;
+                if (opEntrySize > errorEntrySize)
+                    return opEntrySize;
+                else
+                    return errorEntrySize;
             }
         }
 
-        private ArchiveInfo arcInfo;
 
         // Defined Archive parameters for: { A40TR, A80TR, W90TR } 
-        private int[] ENTIRE_DATA_SIZE = { 32588, 32616 };
-        private int[] METADATA_ADDRESS = { 180, 152 };
-        private int[] METADATA_SIZE = { 8, 8 };
-        private int[] MAP_ADDRESS = { 191, 160 };
-        private int[] MAP_SIZE = { 97, 128 };
-        private int[] ARCHIVE_ADDRESS = { 288, 288 };
-        private int[] ARCHIVE_SIZE = { 32480, 32480 };
+        static int[] ENTIRE_DATA_SIZE = { 32588, 32616 };
+        static int[] METADATA_ADDRESS = { 180, 152 };
+        static int[] METADATA_SIZE = { 8, 8 };
+        static int[] MAP_ADDRESS = { 191, 160 };
+        static int[] MAP_SIZE = { 97, 128 };
+        static int[] ARCHIVE_ADDRESS = { 288, 288 };
+        static int[] ARCHIVE_SIZE = { 32480, 32480 };
+        static int[] OP_ENTRY_SIZE = { 9, 12 };
+        static int[] ERROR_ENTRY_SIZE = { 3, 3 };
+
+        static byte[] BACK_COLOR_OP = new byte[3] { 135, 206, 235 };
+        static byte[] BACK_COLOR_ERROR = new byte[3] { 255, 165, 119 };
+        static byte[] FORE_COLOR_BAD_DATA = new byte[3] { 229, 5, 5 };
 
         private const byte OP_HISTORY_MASK = (0x80);
         private const byte ERROR_MASK = (0x40);
-        private int OP_ENTRY_SIZE = 9;
-        private int ERROR_ENTRY_SIZE = 3;
-        private int MAX_ENTRY_SIZE = 9;
         // Defines for accessing entry subItems
         private const int NUMBER = 0;
         private const int DATE = 1;
@@ -77,14 +78,10 @@ namespace EepromVisualAccess
         private const int INDEX = 10;
         private const int ADDRESS = 11;
 
-        private byte[] BACK_COLOR_OP = new byte[3] { 135, 206, 235 };
-        private byte[] BACK_COLOR_ERROR = new byte[3] { 255, 165, 119 };
-        private byte[] FORE_COLOR_BAD_DATA = new byte[3] { 229, 5, 5 };
 
         private string workingPath = "C:\\Users\\mdevo\\Desktop";
 
-
-        private MacModel model;
+        
         private bool modelSelected = false;
         private bool showInvalidEntries = true;
         private bool showOpEntries = true;
@@ -125,16 +122,6 @@ namespace EepromVisualAccess
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.deletedEntries = new System.Windows.Forms.ListView();
             this.ArchiveViewer = new System.Windows.Forms.ListView();
-            this.columnHeader16 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.MapViewer = new System.Windows.Forms.ListView();
             this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -143,19 +130,8 @@ namespace EepromVisualAccess
             this.columnHeader14 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader15 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.ErrorViewer = new System.Windows.Forms.TextBox();
             this.DetailViewer = new System.Windows.Forms.ListView();
-            this.columnHeader27 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader18 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader19 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader20 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader21 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader22 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader23 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader24 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader28 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader25 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader26 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.ErrorViewer = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.txtCount = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
@@ -271,17 +247,6 @@ namespace EepromVisualAccess
             // ArchiveViewer
             // 
             this.ArchiveViewer.AutoArrange = false;
-            this.ArchiveViewer.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader16,
-            this.columnHeader2,
-            this.columnHeader3,
-            this.columnHeader4,
-            this.columnHeader5,
-            this.columnHeader6,
-            this.columnHeader7,
-            this.columnHeader8,
-            this.columnHeader9,
-            this.columnHeader10});
             this.ArchiveViewer.FullRowSelect = true;
             this.ArchiveViewer.GridLines = true;
             this.ArchiveViewer.Location = new System.Drawing.Point(17, 29);
@@ -292,54 +257,6 @@ namespace EepromVisualAccess
             this.ArchiveViewer.UseCompatibleStateImageBehavior = false;
             this.ArchiveViewer.View = System.Windows.Forms.View.Details;
             this.ArchiveViewer.SelectedIndexChanged += new System.EventHandler(this.ArchiveViewer_SelectedIndexChanged);
-            // 
-            // columnHeader16
-            // 
-            this.columnHeader16.Text = "#";
-            this.columnHeader16.Width = 43;
-            // 
-            // columnHeader2
-            // 
-            this.columnHeader2.Text = "Fecha/Hora";
-            this.columnHeader2.Width = 145;
-            // 
-            // columnHeader3
-            // 
-            this.columnHeader3.Text = "Codigo";
-            this.columnHeader3.Width = 55;
-            // 
-            // columnHeader4
-            // 
-            this.columnHeader4.Text = "Temp Ent/Parametro";
-            this.columnHeader4.Width = 120;
-            // 
-            // columnHeader5
-            // 
-            this.columnHeader5.Text = "Temp Sal.";
-            this.columnHeader5.Width = 65;
-            // 
-            // columnHeader6
-            // 
-            this.columnHeader6.Text = "Temp Evap";
-            this.columnHeader6.Width = 70;
-            // 
-            // columnHeader7
-            // 
-            this.columnHeader7.Text = "Temp Amb";
-            this.columnHeader7.Width = 65;
-            // 
-            // columnHeader8
-            // 
-            this.columnHeader8.Text = "P. Alta";
-            // 
-            // columnHeader9
-            // 
-            this.columnHeader9.Text = "P. Baja";
-            // 
-            // columnHeader10
-            // 
-            this.columnHeader10.Text = "P. Dif";
-            this.columnHeader10.Width = 65;
             // 
             // groupBox3
             // 
@@ -395,14 +312,27 @@ namespace EepromVisualAccess
             // 
             // groupBox5
             // 
-            this.groupBox5.Controls.Add(this.ErrorViewer);
             this.groupBox5.Controls.Add(this.DetailViewer);
+            this.groupBox5.Controls.Add(this.ErrorViewer);
             this.groupBox5.Location = new System.Drawing.Point(496, 75);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(583, 103);
             this.groupBox5.TabIndex = 10;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Detalles";
+            // 
+            // DetailViewer
+            // 
+            this.DetailViewer.BackColor = System.Drawing.SystemColors.Window;
+            this.DetailViewer.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.DetailViewer.Location = new System.Drawing.Point(6, 21);
+            this.DetailViewer.MultiSelect = false;
+            this.DetailViewer.Name = "DetailViewer";
+            this.DetailViewer.Size = new System.Drawing.Size(571, 76);
+            this.DetailViewer.TabIndex = 0;
+            this.DetailViewer.UseCompatibleStateImageBehavior = false;
+            this.DetailViewer.View = System.Windows.Forms.View.Details;
+            this.DetailViewer.Visible = false;
             // 
             // ErrorViewer
             // 
@@ -415,86 +345,6 @@ namespace EepromVisualAccess
             this.ErrorViewer.TabIndex = 1;
             this.ErrorViewer.Visible = false;
             // 
-            // DetailViewer
-            // 
-            this.DetailViewer.BackColor = System.Drawing.SystemColors.Window;
-            this.DetailViewer.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader27,
-            this.columnHeader18,
-            this.columnHeader19,
-            this.columnHeader20,
-            this.columnHeader21,
-            this.columnHeader22,
-            this.columnHeader23,
-            this.columnHeader24,
-            this.columnHeader28,
-            this.columnHeader25,
-            this.columnHeader26});
-            this.DetailViewer.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.DetailViewer.Location = new System.Drawing.Point(6, 21);
-            this.DetailViewer.MultiSelect = false;
-            this.DetailViewer.Name = "DetailViewer";
-            this.DetailViewer.Size = new System.Drawing.Size(571, 76);
-            this.DetailViewer.TabIndex = 0;
-            this.DetailViewer.UseCompatibleStateImageBehavior = false;
-            this.DetailViewer.View = System.Windows.Forms.View.Details;
-            this.DetailViewer.Visible = false;
-            // 
-            // columnHeader27
-            // 
-            this.columnHeader27.Text = "Estado";
-            this.columnHeader27.Width = 62;
-            // 
-            // columnHeader18
-            // 
-            this.columnHeader18.Text = "FS";
-            this.columnHeader18.Width = 30;
-            // 
-            // columnHeader19
-            // 
-            this.columnHeader19.Text = "Cmp";
-            this.columnHeader19.Width = 39;
-            // 
-            // columnHeader20
-            // 
-            this.columnHeader20.Text = "V1";
-            this.columnHeader20.Width = 28;
-            // 
-            // columnHeader21
-            // 
-            this.columnHeader21.Text = "V2";
-            this.columnHeader21.Width = 28;
-            // 
-            // columnHeader22
-            // 
-            this.columnHeader22.Text = "V3";
-            this.columnHeader22.Width = 28;
-            // 
-            // columnHeader23
-            // 
-            this.columnHeader23.Text = "Cmp";
-            this.columnHeader23.Width = 39;
-            // 
-            // columnHeader24
-            // 
-            this.columnHeader24.Text = "V1";
-            this.columnHeader24.Width = 28;
-            // 
-            // columnHeader28
-            // 
-            this.columnHeader28.Text = "V2";
-            this.columnHeader28.Width = 28;
-            // 
-            // columnHeader25
-            // 
-            this.columnHeader25.Text = "V3";
-            this.columnHeader25.Width = 28;
-            // 
-            // columnHeader26
-            // 
-            this.columnHeader26.Text = "Bomba";
-            this.columnHeader26.Width = 50;
-            // 
             // label3
             // 
             this.label3.AutoSize = true;
@@ -506,7 +356,7 @@ namespace EepromVisualAccess
             // 
             // txtCount
             // 
-            this.txtCount.Location = new System.Drawing.Point(85, 24);
+            this.txtCount.Location = new System.Drawing.Point(85, 21);
             this.txtCount.Name = "txtCount";
             this.txtCount.ReadOnly = true;
             this.txtCount.Size = new System.Drawing.Size(100, 22);
@@ -515,7 +365,7 @@ namespace EepromVisualAccess
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(206, 24);
+            this.label4.Location = new System.Drawing.Point(229, 24);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(31, 17);
             this.label4.TabIndex = 1;
@@ -524,7 +374,7 @@ namespace EepromVisualAccess
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(366, 24);
+            this.label5.Location = new System.Drawing.Point(414, 24);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(42, 17);
             this.label5.TabIndex = 2;
@@ -532,7 +382,7 @@ namespace EepromVisualAccess
             // 
             // txtTail
             // 
-            this.txtTail.Location = new System.Drawing.Point(243, 24);
+            this.txtTail.Location = new System.Drawing.Point(266, 21);
             this.txtTail.Name = "txtTail";
             this.txtTail.ReadOnly = true;
             this.txtTail.Size = new System.Drawing.Size(100, 22);
@@ -540,7 +390,7 @@ namespace EepromVisualAccess
             // 
             // txtHead
             // 
-            this.txtHead.Location = new System.Drawing.Point(412, 24);
+            this.txtHead.Location = new System.Drawing.Point(460, 21);
             this.txtHead.Name = "txtHead";
             this.txtHead.ReadOnly = true;
             this.txtHead.Size = new System.Drawing.Size(100, 22);
@@ -699,7 +549,7 @@ namespace EepromVisualAccess
             this.statstrFilePath.Name = "statstrFilePath";
             this.statstrFilePath.Size = new System.Drawing.Size(1311, 22);
             this.statstrFilePath.TabIndex = 13;
-            this.statstrFilePath.Text = "Puto";
+            this.statstrFilePath.Text = "Ningun archivo elegido.";
             // 
             // statStripDataPath
             // 
@@ -743,14 +593,6 @@ namespace EepromVisualAccess
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.ListView ArchiveViewer;
-        private System.Windows.Forms.ColumnHeader columnHeader2;
-        private System.Windows.Forms.ColumnHeader columnHeader4;
-        private System.Windows.Forms.ColumnHeader columnHeader5;
-        private System.Windows.Forms.ColumnHeader columnHeader6;
-        private System.Windows.Forms.ColumnHeader columnHeader7;
-        private System.Windows.Forms.ColumnHeader columnHeader8;
-        private System.Windows.Forms.ColumnHeader columnHeader9;
-        private System.Windows.Forms.ColumnHeader columnHeader10;
         private System.Windows.Forms.ListView MapViewer;
         private System.Windows.Forms.ColumnHeader columnHeader11;
         private System.Windows.Forms.ColumnHeader columnHeader12;
@@ -758,24 +600,11 @@ namespace EepromVisualAccess
         private System.Windows.Forms.ColumnHeader columnHeader14;
         private System.Windows.Forms.ColumnHeader columnHeader15;
         private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.ColumnHeader columnHeader16;
         private System.Windows.Forms.ColumnHeader columnHeaderDebug2;
         private System.Windows.Forms.ColumnHeader columnHeaderDebug1;
         private System.Windows.Forms.Button butLoadFile;
-        private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.ListView DetailViewer;
-        private System.Windows.Forms.ColumnHeader columnHeader27;
-        private System.Windows.Forms.ColumnHeader columnHeader18;
-        private System.Windows.Forms.ColumnHeader columnHeader19;
-        private System.Windows.Forms.ColumnHeader columnHeader20;
-        private System.Windows.Forms.ColumnHeader columnHeader21;
-        private System.Windows.Forms.ColumnHeader columnHeader22;
-        private System.Windows.Forms.ColumnHeader columnHeader23;
-        private System.Windows.Forms.ColumnHeader columnHeader24;
-        private System.Windows.Forms.ColumnHeader columnHeader25;
-        private System.Windows.Forms.ColumnHeader columnHeader26;
-        private System.Windows.Forms.ColumnHeader columnHeader28;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.TextBox ErrorViewer;
         private System.Windows.Forms.Label label3;

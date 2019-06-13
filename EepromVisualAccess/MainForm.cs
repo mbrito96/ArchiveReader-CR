@@ -1,8 +1,8 @@
-﻿using stx8xxx;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections;
+using stx8xxx;
 
 /// <summary>
 /// ----------------------------------------------------------------------------------------------
@@ -14,8 +14,6 @@ using System.Collections;
 /// 
 /// Author      : Marcos Brito
 /// 
-/// License     : (C) Marcos Brito 2019. 
-/// 
 /// ----------------------------------------------------------------------------------------------
 /// </summary>
 
@@ -24,7 +22,359 @@ namespace EepromVisualAccess
 {
     public partial class MainForm : Form
     {
+        public class ArchiveInterpreter
+        {
+            public int entryCount;
+            public MacModel model { get; set; }
+
+            static Color ERROR_ENTRY_COLOR = Color.FromArgb(BACK_COLOR_ERROR[0], BACK_COLOR_ERROR[1], BACK_COLOR_ERROR[2]);
+            static Color OP_ENTRY_COLOR = Color.FromArgb(BACK_COLOR_OP[0], BACK_COLOR_OP[1], BACK_COLOR_OP[2]);
+            static Color INVALID_ENTRY_FORECOLOR = Color.FromArgb(FORE_COLOR_BAD_DATA[0], FORE_COLOR_BAD_DATA[1], FORE_COLOR_BAD_DATA[2]);
+
+            public ArchiveInterpreter(MacModel model, ListView arcViewer, ListView detViewer, ListView mViewer)
+            {
+                this.model = model;
+                entryCount = 0;
+                InitializeViewers(arcViewer, detViewer, mViewer);
+            }
+            private void InitializeViewers(ListView archiveViewer, ListView detailViewer, ListView mapViewer)
+            {
+                switch(model)
+                {
+                    case MacModel.A40TR:
+                        archiveViewer.Columns.Add("#", 43);
+                        archiveViewer.Columns.Add("Fecha/Hora", 145);
+                        archiveViewer.Columns.Add("Codigo", 55);
+                        archiveViewer.Columns.Add("Temp Ent/ Parametro", 120);
+                        archiveViewer.Columns.Add("Temp Sal.", 65);
+                        archiveViewer.Columns.Add("Temp Evap.", 70);
+                        archiveViewer.Columns.Add("Temp Amb.", 65);
+                        archiveViewer.Columns.Add("P. Alta", 60);
+                        archiveViewer.Columns.Add("P. Baja", 60);
+                        archiveViewer.Columns.Add("P. Dif", 65);
+
+                        detailViewer.Columns.Add("Estado", 62);
+                        detailViewer.Columns.Add("FS", 30);
+                        detailViewer.Columns.Add("Cmp", 39);
+                        detailViewer.Columns.Add("V1", 28);
+                        detailViewer.Columns.Add("V2", 28);
+                        detailViewer.Columns.Add("V3", 28);
+                        detailViewer.Columns.Add("Cmp", 39);
+                        detailViewer.Columns.Add("V1", 28);
+                        detailViewer.Columns.Add("V2", 28);
+                        detailViewer.Columns.Add("V3", 28);
+                        detailViewer.Columns.Add("Bomba", 50);
+                        break;
+                    case MacModel.A80TR:
+                        archiveViewer.Columns.Add("#", 43);
+                        archiveViewer.Columns.Add("Fecha/Hora", 145);
+                        archiveViewer.Columns.Add("Codigo", 55);
+                        archiveViewer.Columns.Add("Temp Ent/ Parametro", 120);
+                        archiveViewer.Columns.Add("Temp Sal.", 65);
+                        archiveViewer.Columns.Add("Temp Evap.", 70);
+                        archiveViewer.Columns.Add("Temp Amb.", 65);
+                        archiveViewer.Columns.Add("P. A Alta", 60);
+                        archiveViewer.Columns.Add("P. A Baja", 60);
+                        archiveViewer.Columns.Add("P. A Dif", 65);
+                        archiveViewer.Columns.Add("P. B Alta", 60);
+                        archiveViewer.Columns.Add("P. B Baja", 60);
+                        archiveViewer.Columns.Add("P. B Dif", 65);
+
+                        detailViewer.Columns.Add("Estado", 62);
+                        detailViewer.Columns.Add("FS", 30);
+                        detailViewer.Columns.Add("Cmp A", 39);
+                        detailViewer.Columns.Add("Cmp B", 39);
+                        detailViewer.Columns.Add("V.A1", 28);
+                        detailViewer.Columns.Add("V.A2", 28);
+                        detailViewer.Columns.Add("V.A3", 28);
+                        detailViewer.Columns.Add("V.B1", 28);
+                        detailViewer.Columns.Add("V.B2", 28);
+                        detailViewer.Columns.Add("V.B3", 28);
+                        detailViewer.Columns.Add("Cmp A", 39);
+                        detailViewer.Columns.Add("Cmp B", 39);
+                        detailViewer.Columns.Add("V.A1", 28);
+                        detailViewer.Columns.Add("V.A2", 28);
+                        detailViewer.Columns.Add("V.A3", 28);
+                        detailViewer.Columns.Add("V.B1", 28);
+                        detailViewer.Columns.Add("V.B2", 28);
+                        detailViewer.Columns.Add("V.B3", 28);
+                        detailViewer.Columns.Add("Bomba", 50);
+                        break;
+                }
+            }
+
+            
+            public bool ProcessEntry(byte[] entryData, EntryType type, ListViewItem entry)
+            {
+                entryCount++;
+                entry.Text = entryCount.ToString();    // Save Entry number
+                Int32 ValueInteger;
+                float ValueFloat;
+                bool retVal = true;
+    
+                if (type == EntryType.OP_HISTORY)
+                {
+                    entry.BackColor = OP_ENTRY_COLOR;
+
+                    // Get Timestamp
+                    ValueInteger = BitConverter.ToInt32(entryData, 0);
+                    if (ValueInteger < 0)
+                    {
+                        retVal = false;
+                        entry.ForeColor = INVALID_ENTRY_FORECOLOR;
+                        entry.SubItems.Add(ValueInteger.ToString());    // Save Timestamp
+                    }
+                    else
+                    {
+                        DateTime date = new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(ValueInteger);
+                        entry.SubItems.Add(date.ToString());        // Save Timestamp
+                    }   
+                    
+                    // Get Digital Cell
+                    ValueInteger = BitConverter.ToInt32(entryData, 4);
+                    ValueInteger &= ~(3 << 30); // Clear mask
+                    entry.SubItems.Add(ValueInteger.ToString("X4"));    // Save Digital Cell
+    
+                    // Get analog values
+                    for (int j = 0; j < (ArchiveInfo.opEntrySize - 2); j++)  // Save sensor values
+                    {
+                        ValueFloat = BitConverter.ToSingle(entryData, 8 + j * 4);
+                        entry.SubItems.Add(ValueFloat.ToString());
+                    }
+                }
+                else if (type == EntryType.ERROR_DATA)
+                {
+                    entry.BackColor = ERROR_ENTRY_COLOR;
+
+                    // Get Timestamp
+                    ValueInteger = BitConverter.ToInt32(entryData, 0); 
+                    if (ValueInteger < 0)
+                    {
+                        retVal = false;
+                        entry.ForeColor = INVALID_ENTRY_FORECOLOR;
+                        entry.SubItems.Add(ValueInteger.ToString());    // Save Timestamp
+                    }
+                    else
+                    {
+                        DateTime date = new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(ValueInteger);
+                        entry.SubItems.Add(date.ToString());        // Save Timestamp
+                    }
+    
+                    // Get error code
+                    ValueInteger = BitConverter.ToInt32(entryData, 4);
+                    ValueInteger &= ~(3 << 30); // Clear mask
+                    entry.SubItems.Add(ValueInteger.ToString("X2"));    // Save error Code
+                
+                    // Get error parameter
+                    ValueFloat = BitConverter.ToSingle(entryData, 8);
+                    entry.SubItems.Add(ValueFloat.ToString());      // Save Error Value
+                }
+                return retVal;
+            }
+            public String GetErrorString(String code, String param)
+            {
+                String errorString = "Codigo: " + code + Environment.NewLine;
+                if (model == MacModel.A40TR)
+                {
+                    #region GWF-40TR ErrorMessages
+                    switch (code)
+                    {
+                        case "00":          //ERR_SENSOR
+                            {
+                                errorString += "Valor de sensores no coherentes.";
+                                break;
+                            }
+                        case "01":      // ERR_TEMP_SENSOR
+                            {
+                                errorString += "Valor improbable en sensor de temperatura de entrada. Valor: " + param;
+                                break;
+                            }
+                        case "02":      // ERR_TEMP_SENSOR
+                            {
+                                errorString += "Valor improbable en sensor de temperatura de salida. Valor: " + param;
+                                break;
+                            }
+                        case "03":      // ERR_TEMP_SENSOR
+                            {
+                                errorString += "Valor improbable en sensor de temperatura del evaporador. Valor: " + param;
+                                break;
+                            }
+                        case "04":      // ERR_TEMP_SENSOR
+                            {
+                                errorString += "Valor improbable en sensor de temperatura ambiente. Valor: " + param;
+                                break;
+                            }
+                        case "05":      // ERR_EEPROM_READ
+                            {
+                                errorString += "Falla lectura EEPROM. Direccion: " + param;
+                                break;
+                            }
+                        case "06":      // ERR_EEPROM_WRITE
+                            {
+                                errorString += "Falla escritura EEPROM. Direccion: " + param;
+                                break;
+                            }
+                        case "07":      // ERR_OP_VALUES
+                            {
+                                errorString += "SetPoint recuperado de memoria no coherente. \n Se configuraron los valores por defecto.";
+                                break;
+                            }
+                        case "08":      // ERR_CREATE_TIMEOUT
+                            {
+                                errorString += "Error al crear Timeout " + param;
+                                break;
+                            }
+                        case "09":      // ERR_SYS_WATCHDOG
+                            {
+                                errorString += "System Watchdog. Se continuó la operacion normalmente.";
+                                break;
+                            }
+                        case "0A":      // ERR_FATAL_ERROR
+                            {
+                                errorString += "Excepcion no manejada. Imposible operar.";
+                                break;
+                            }
+                        case "0B":      // ERR_ARCHIVE_INIT
+                            {
+                                errorString += "Error iniciando historial. Se perdieron los datos pasados.";
+                                break;
+                            }
+                        case "0C":      // ERR_RTC_FAIL
+                            {
+                                errorString += "Fecha y hora invalida.";
+                                break;
+                            }
+                        case "0D":      // ERR_FLOW
+                            {
+                                errorString += "FlowSwitch Evaporador.";
+                                break;
+                            }
+                        case "0E":      // ERR_P_HIGH
+                            {
+                                errorString += "Presion alta : " + param;
+                                break;
+                            }
+                        case "0F":      // ERR_P_LOW
+                            {
+                                errorString += "Presion baja: " + param;
+                                break;
+                            }
+                        case "10":      // ERR_P_DIF
+                            {
+                                errorString += "Presion diferencial: " + param;
+                                break;
+                            }
+                        case "11":      // ERR_T_CRIT
+                            {
+                                errorString += "Temp. evaporador: " + param;
+                                break;
+                            }
+                        case "12":      // ERR_T_MAX
+                            {
+                                errorString += "Temperatura por encima de máxima: " + param;
+                                break;
+                            }
+                        case "13":      // ERR_COOLDOWN
+                            {
+                                errorString += "Imposible disminuir P. alta en etapa de arranque. \n Presion alta: " + param;
+                                break;
+                            }
+                        case "14":      // ERR_COMP_OL
+                            {
+                                errorString += "Consumo compresor.";
+                                break;
+                            }
+                        case "15":      // ERR_CMP_WATCHDOG
+                            {
+                                errorString += "Compressor Watchdog.";
+                                break;
+                            }
+                        case "16":      // ERR_VENT1_OL
+                            {
+                                errorString += "Consumo ventilador 1.";
+                                break;
+                            }
+                        case "17":      // ERR_VENT2_OL
+                            {
+                                errorString += "Consumo ventilador 2.";
+                                break;
+                            }
+                        case "18":      // ERR_VENT3_OL
+                            {
+                                errorString += "Consumo ventilador 3.";
+                                break;
+                            }
+                        case "19":      // ERR_PUMP_OL
+                            {
+                                errorString += "Consumo bomba de agua.";
+                                break;
+                            }
+                    }
+                    #endregion
+                }
+                return errorString;
+            }
+            public EntryType GetEntryType(ListViewItem item)
+            {
+
+                EntryType retVal = EntryType.NO_DATA;
+                if (item.BackColor == ERROR_ENTRY_COLOR && item.ForeColor != INVALID_ENTRY_FORECOLOR)  // If else, item.ForeColor == FORE_COLOR_BAD_DATA, return NO_DATA
+                    retVal = EntryType.ERROR_DATA;
+                else if (item.BackColor == OP_ENTRY_COLOR)
+                    retVal = EntryType.OP_HISTORY;
+
+                return retVal;
+            }
+            
+            public void DecodeDigitalCell(ListViewItem item, Int32 code)
+            {
+                switch (model)
+                {
+                    case MacModel.A40TR:
+                        A40TR_DecodeDigitalCell(item, code);
+                        break;
+                }
+
+            }
+            void A40TR_DecodeDigitalCell(ListViewItem item, Int32 digitalCell)
+            {
+                String text;
+                OpStatus status = (OpStatus)((digitalCell >> 10) & 0x3);
+                switch (status)
+                {
+                    case OpStatus.IDLE:
+                        text = "LISTO";
+                        break;
+                    case OpStatus.RUNNING:
+                        text = "OPERANDO";
+                        break;
+                    case OpStatus.POSTOP:
+                        text = "POSTOP";
+                        break;
+                    case OpStatus.DISABLED_STATE:
+                        text = "DESHAB.";
+                        break;
+                    default:
+                        text = "...";
+                        break;
+                }
+
+                item.Text = text;
+                item.SubItems.Add((digitalCell & 0x1).ToString());  // Flowswitch
+                item.SubItems.Add((digitalCell >> 1 & 0x1).ToString());  // Compressor
+                item.SubItems.Add((digitalCell >> 2 & 0x1).ToString());  // Fan 1
+                item.SubItems.Add((digitalCell >> 3 & 0x1).ToString());  // Fan 2
+                item.SubItems.Add((digitalCell >> 4 & 0x1).ToString());  // Fan 3
+                item.SubItems.Add((digitalCell >> 5 & 0x1).ToString());  // Consumo Cmp
+                item.SubItems.Add((digitalCell >> 6 & 0x1).ToString());  // Consumo Fan 1
+                item.SubItems.Add((digitalCell >> 7 & 0x1).ToString());  // Consumo Fan 2
+                item.SubItems.Add((digitalCell >> 8 & 0x1).ToString());  // Consumo Fan 3
+                item.SubItems.Add((digitalCell >> 9 & 0x1).ToString());  // Consumo Bomba
+            }
+        }
+
         public Stx8xxx PioBoard;
+        public ArchiveInterpreter arch1;
         OpenFileDialog openFileDialog;
 
         public MainForm()
@@ -48,10 +398,10 @@ namespace EepromVisualAccess
 
             // Crear un array donde se almacenarán los bytes recibidos de la memoria EEPROM.
             // Tamaño inicial igual al solicitado desde ventana.
-            byte[] EepromBytes = new byte[ arcInfo.archiveSize ];
+            byte[] EepromBytes = new byte[ ArchiveInfo.archiveSize ];
 
             // Dirección inicial donde comenzar a leer los bytes de EEPROM.
-            int EepromStartAddress = arcInfo.metadataAddress;
+            int EepromStartAddress = ArchiveInfo.metadataAddress;
 
             // Número de bytes leidos.
             int BytesRead = 0;
@@ -60,7 +410,7 @@ namespace EepromVisualAccess
             int BytesToRetrieve = 0;
 
             // Número de bytes que deben leerse de memoria EEPROM.
-            int BytesToRead = arcInfo.archiveSize;
+            int BytesToRead = ArchiveInfo.archiveSize;
 
             // Comprobar cantidad de bytes a leer.
             if (BytesToRead > 100)
@@ -148,10 +498,10 @@ namespace EepromVisualAccess
                     //Read the contents of the file into a stream
                     var fileStream = openFileDialog.OpenFile();
 
-                    if (fileStream.Length == arcInfo.archiveSize)
+                    if (fileStream.Length == ArchiveInfo.archiveSize)
                     {
-                        byte[] fileData = new byte[arcInfo.archiveSize];
-                        fileStream.Read(fileData, 0, arcInfo.archiveSize);
+                        byte[] fileData = new byte[ArchiveInfo.archiveSize];
+                        fileStream.Read(fileData, 0, ArchiveInfo.archiveSize);
                         ProcessData(fileData);
                     }
                     else
@@ -165,17 +515,16 @@ namespace EepromVisualAccess
     #region RAW DATA PROCESSING
         private void ProcessData(byte[] data)
         {
-            byte[] metadataBytes = new byte[arcInfo.metadataSize];
-            Array.Copy(data, 0, metadataBytes, 0, arcInfo.metadataSize);
+            byte[] metadataBytes = new byte[ArchiveInfo.metadataSize];
+            Array.Copy(data, 0, metadataBytes, 0, ArchiveInfo.metadataSize);
             GetMetadataFromEeprom(metadataBytes);
 
-            byte[] mapBytes = new byte[arcInfo.mapSize];
-            Array.Copy(data, arcInfo.mapAddress - arcInfo.metadataAddress, mapBytes, 0, arcInfo.mapSize);
+            byte[] mapBytes = new byte[ArchiveInfo.mapSize];
+            Array.Copy(data, ArchiveInfo.mapAddress - ArchiveInfo.metadataAddress, mapBytes, 0, ArchiveInfo.mapSize);
             GetMemoryMapFromEeprom(mapBytes);
 
-
-            byte[] archiveBytes = new byte[arcInfo.regFileSize];
-            Array.Copy(data,  arcInfo.regFileAddress - arcInfo.metadataAddress, archiveBytes, 0, arcInfo.regFileSize);
+            byte[] archiveBytes = new byte[ArchiveInfo.regFileSize];
+            Array.Copy(data,  ArchiveInfo.regFileAddress - ArchiveInfo.metadataAddress, archiveBytes, 0, ArchiveInfo.regFileSize);
             GetEntries(archiveBytes);
         }
         private void GetMetadataFromEeprom(byte[] metadataBytes)
@@ -210,7 +559,6 @@ namespace EepromVisualAccess
         {
             ClearFilter();
             ArchiveViewer.Items.Clear();
-            UInt16 entryNumber = 0;
 
             if (DEBUGGING)
                 Debug_AddColumns();
@@ -226,18 +574,20 @@ namespace EepromVisualAccess
             ListViewItem entry;
             EntryType type = EntryType.NO_DATA;
             int i = Convert.ToInt32(txtTail.Text);
-            byte[] entryArray = new byte[MAX_ENTRY_SIZE * 4];   // Temp array to save one complete entry
+            byte[] entryArray = new byte[ArchiveInfo.MaxEntrySize() * 4];   // Temp array to save one complete entry
             while (done == false)
             {
-                // First grab ID
-                if ((EepromBytes[(i * 4 + 7) % EepromBytes.Length] & (0xC0)) == OP_HISTORY_MASK)
+                #region GET ENTRY FROM BUFFER
+                // First identify entry type
+                byte id = (byte)(EepromBytes[(i * 4 + 7) % EepromBytes.Length] & (0xC0));
+                if (id == OP_HISTORY_MASK)
                 {
-                    dataSize = OP_ENTRY_SIZE;
+                    dataSize = ArchiveInfo.opEntrySize;
                     type = EntryType.OP_HISTORY;
                 }
-                else if ((EepromBytes[(i * 4 + 7) % EepromBytes.Length] & (0xC0)) == ERROR_MASK)
+                else if (id == ERROR_MASK)
                 {
-                    dataSize = ERROR_ENTRY_SIZE;
+                    dataSize = ArchiveInfo.errorEntrySize;
                     type = EntryType.ERROR_DATA;
                 }
                 else
@@ -247,124 +597,52 @@ namespace EepromVisualAccess
                     break;
                 }
 
-                // Copy entry to a temporal array to simplify access
-                if ((i + dataSize) <= EepromBytes.Length / 4)
-                    Array.Copy(EepromBytes, i * 4, entryArray, 0, dataSize * 4);    // If entire entry available
+                // Copy entry to a temporary array to simplify access
+                if ((i + dataSize) <= EepromBytes.Length / 4)  
+                    // If entire entry available:
+                    Array.Copy(EepromBytes, i * 4, entryArray, 0, dataSize * 4);    
                 else
                 {
-                    // Else, must wrap around buffer
+                    // Else, must wrap around buffer:
                     int dataSize2 = (i + dataSize) % (EepromBytes.Length / 4);
                     int dataSize1 = dataSize - dataSize2;
                     Array.Copy(EepromBytes, i * 4, entryArray, 0, dataSize1 * 4);
                     Array.Copy(EepromBytes, 0, entryArray, dataSize1 * 4, dataSize2 * 4);
                 }
+                #endregion GET ENTRY FROM BUFFER
 
-                entryNumber++;
-                entry = new ListViewItem(entryNumber.ToString());    // Save Entry number
-
-                if (ProcessEntry(entryArray, type, entry) == false)
+                entry = new ListViewItem("");
+                if (arch1.ProcessEntry(entryArray, type, entry) == false)
                     dataError = true;
 
                 if (DEBUGGING)
                 {
                     entry.SubItems.Add(i.ToString());                   // Save Index
-                    entry.SubItems.Add((arcInfo.regFileAddress + i * 4).ToString());    // Save Address
+                    entry.SubItems.Add((ArchiveInfo.regFileAddress + i * 4).ToString());    // Save Address
                 }
 
+                // Push entry to list viewer
                 ArchiveViewer.Items.Add(entry);
-                i = (i + dataSize) % (EepromBytes.Length / 4);
 
-
-                if (entryNumber.ToString() == txtCount.Text)
+                i = (i + dataSize) % (EepromBytes.Length / 4);  // Advance index
+                if (arch1.entryCount.ToString() == txtCount.Text)    // Check if done
                     done = true;
             }
+
+
+            UpdateDateFilterInput();
             if (dataError == true)
                 MessageBox.Show("Algunas entradas presentan datos invalidos.", "Error en datos de registro.", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            UpdateDateFilterInput();
-            if (entryNumber.ToString() != txtCount.Text)
+            if (arch1.entryCount.ToString() != txtCount.Text)
             {
+                MessageBox.Show("Algunas entradas no se pudieron mostrar", "Error en datos de registro.", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 entry = new ListViewItem("...");
                 ArchiveViewer.Items.Add(entry);
             }
 
         }
-        private bool ProcessEntry(byte[] entryData, EntryType type, ListViewItem entry)
-        {
-            Int32 ValueInteger;
-            float ValueFloat;
-            bool retVal = true;
-
-            if (type == EntryType.OP_HISTORY)
-            {
-                entry.BackColor = Color.FromArgb(BACK_COLOR_OP[0], BACK_COLOR_OP[1], BACK_COLOR_OP[2]);
-
-                ValueInteger = BitConverter.ToInt32(entryData, 0);
-                if (ValueInteger < 0)
-                {
-                    retVal = false;
-                    entry.ForeColor = Color.FromArgb(FORE_COLOR_BAD_DATA[0], FORE_COLOR_BAD_DATA[1], FORE_COLOR_BAD_DATA[2]); ;
-                    entry.SubItems.Add(ValueInteger.ToString());    // Save Timestamp
-                }
-                else
-                {
-                    DateTime date = new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(ValueInteger);
-                    entry.SubItems.Add(date.ToString());        // Save Timestamp
-                }
-
-                ValueInteger = BitConverter.ToInt32(entryData, 4);
-                ValueInteger &= ~(3 << 30); // Clear mask
-                entry.SubItems.Add(ValueInteger.ToString("X4"));    // Save Digital Cell
-
-                for (int j = 0; j < (OP_ENTRY_SIZE-2) ; j++)  // Save sensor values
-                {
-                    ValueFloat = BitConverter.ToSingle(entryData, 8 + j * 4);
-                    entry.SubItems.Add(ValueFloat.ToString());
-                }
-            }
-            else if (type == EntryType.ERROR_DATA)
-            {
-                entry.BackColor = Color.FromArgb(BACK_COLOR_ERROR[0], BACK_COLOR_ERROR[1], BACK_COLOR_ERROR[2]);
-
-                ValueInteger = BitConverter.ToInt32(entryData, 0);
-                if (ValueInteger < 0)
-                {
-                    retVal = false;
-                    entry.ForeColor = Color.FromArgb(FORE_COLOR_BAD_DATA[0], FORE_COLOR_BAD_DATA[1], FORE_COLOR_BAD_DATA[2]);
-                    entry.SubItems.Add(ValueInteger.ToString());    // Save Timestamp
-                }
-                else
-                {
-                    DateTime date = new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(ValueInteger);
-                    entry.SubItems.Add(date.ToString());        // Save Timestamp
-                }
-
-                ValueInteger = BitConverter.ToInt32(entryData, 4);
-                ValueInteger &= ~(3 << 30); // Clear mask
-                entry.SubItems.Add(ValueInteger.ToString("X2"));    // Save error Code
-
-                ValueFloat = BitConverter.ToSingle(entryData, 8);
-                entry.SubItems.Add(ValueFloat.ToString());      // Save Error Value
-            }
-            return retVal;
-        }
-
     #endregion
-
-
-        private EntryType GetEntryType(ListViewItem item)
-        {
-            Color errorColor = Color.FromArgb(BACK_COLOR_ERROR[0], BACK_COLOR_ERROR[1], BACK_COLOR_ERROR[2]);
-            Color opColor = Color.FromArgb(BACK_COLOR_OP[0], BACK_COLOR_OP[1], BACK_COLOR_OP[2]);
-            Color invalidForeColor = Color.FromArgb(FORE_COLOR_BAD_DATA[0], FORE_COLOR_BAD_DATA[1], FORE_COLOR_BAD_DATA[2]);
-
-            EntryType retVal = EntryType.NO_DATA;
-            if (item.BackColor == errorColor && item.ForeColor != invalidForeColor)  // If else, item.ForeColor == FORE_COLOR_BAD_DATA, return NO_DATA
-                retVal = EntryType.ERROR_DATA;
-            else if (item.BackColor == opColor)
-                retVal = EntryType.OP_HISTORY;
-
-            return retVal;
-        }
+        
         private void Debug_AddColumns()
         {
             this.columnHeaderDebug1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -376,163 +654,8 @@ namespace EepromVisualAccess
             this.columnHeaderDebug2.Width = 50;
             ArchiveViewer.Columns.Insert(ArchiveViewer.Columns.Count - 1, columnHeaderDebug2);
         }
-        private String GetErrorString(String code, String param)
-        {
-            String errorString = "Codigo: " + code + Environment.NewLine;
-            if (model == MacModel.A40TR)
-            {
-                #region GWF-40TR ErrorMessages
-                switch (code)
-                {
-                    case "00":          //ERR_SENSOR
-                    {
-                        errorString += "Valor de sensores no coherentes.";
-                        break;
-                    }
-                    case "01":      // ERR_TEMP_SENSOR
-                    {
-                        errorString += "Valor improbable en sensor de temperatura de entrada. Valor: " + param;
-                        break;
-                    }
-                    case "02":      // ERR_TEMP_SENSOR
-                    {
-                        errorString += "Valor improbable en sensor de temperatura de salida. Valor: " + param;
-                        break;
-                    }
-                    case "03":      // ERR_TEMP_SENSOR
-                    {
-                        errorString += "Valor improbable en sensor de temperatura del evaporador. Valor: " + param;
-                        break;
-                    }
-                    case "04":      // ERR_TEMP_SENSOR
-                    {
-                        errorString += "Valor improbable en sensor de temperatura ambiente. Valor: " + param;
-                        break;
-                    }
-                    case "05":      // ERR_EEPROM_READ
-                    {
-                        errorString += "Falla lectura EEPROM. Direccion: " + param;
-                        break;
-                    }
-                    case "06":      // ERR_EEPROM_WRITE
-                    {
-                        errorString += "Falla escritura EEPROM. Direccion: " + param;
-                        break;
-                    }
-                    case "07":      // ERR_OP_VALUES
-                    {
-                        errorString += "SetPoint recuperado de memoria no coherente. \n Se configuraron los valores por defecto.";
-                        break;
-                    }
-                    case "08":      // ERR_CREATE_TIMEOUT
-                    {
-                        errorString += "Error al crear Timeout " + param;
-                        break;
-                    }
-                    case "09":      // ERR_SYS_WATCHDOG
-                    {
-                        errorString += "System Watchdog. Se continuó la operacion normalmente.";
-                        break;
-                    }
-                    case "0A":      // ERR_FATAL_ERROR
-                    {
-                        errorString += "Excepcion no manejada. Imposible operar.";
-                        break;
-                    }
-                    case "0B":      // ERR_ARCHIVE_INIT
-                    {
-                        errorString += "Error iniciando historial. Se perdieron los datos pasados.";
-                        break;
-                    }
-                    case "0C":      // ERR_RTC_FAIL
-                    {
-                        errorString += "Fecha y hora invalida.";
-                        break;
-                    }
-                    case "0D":      // ERR_FLOW
-                    {
-                        errorString += "FlowSwitch Evaporador.";
-                        break;
-                    }
-                    case "0E":      // ERR_P_HIGH
-                    {
-                        errorString += "Presion alta : " + param;
-                        break;
-                    }
-                    case "0F":      // ERR_P_LOW
-                    {
-                        errorString += "Presion baja: " + param;
-                        break;
-                    }
-                    case "10":      // ERR_P_DIF
-                    {
-                        errorString += "Presion diferencial: " + param;
-                        break;
-                    }
-                    case "11":      // ERR_T_CRIT
-                    {
-                        errorString += "Temp. evaporador: " + param;
-                        break;
-                    }
-                    case "12":      // ERR_T_MAX
-                    {
-                        errorString += "Temperatura por encima de máxima: " + param;
-                        break;
-                    }
-                    case "13":      // ERR_COOLDOWN
-                    {
-                        errorString += "Imposible disminuir P. alta en etapa de arranque. \n Presion alta: " + param;
-                        break;
-                    }
-                    case "14":      // ERR_COMP_OL
-                    {
-                        errorString += "Consumo compresor.";
-                        break;
-                    }
-                    case "15":      // ERR_CMP_WATCHDOG
-                    {
-                        errorString += "Compressor Watchdog.";
-                        break;
-                    }
-                    case "16":      // ERR_VENT1_OL
-                    {
-                        errorString += "Consumo ventilador 1.";
-                        break;
-                    }
-                    case "17":      // ERR_VENT2_OL
-                    {
-                        errorString += "Consumo ventilador 2.";
-                        break;
-                    }
-                    case "18":      // ERR_VENT3_OL
-                    {
-                        errorString += "Consumo ventilador 3.";
-                        break;
-                    }
-                    case "19":      // ERR_PUMP_OL
-                    {
-                        errorString += "Consumo bomba de agua.";
-                        break;
-                    }
-                }
-                #endregion
-            }
-            return errorString;
-        }
 
-
-        
-
-
-    #region FILTER METHODS
-        private void butSetFilter_Click(object sender, EventArgs e)
-        {
-            ClearFilter();    // First clear the filter in order to apply new filter 
-
-            //Apply filter from fastest to slowest algorithm
-            ApplyTypeFilter();
-            ApplyDateFilter();
-        }
+        #region FILTER METHODS
         private void ApplyTypeFilter()
         {
             bool deleteItem = false;
@@ -540,7 +663,7 @@ namespace EepromVisualAccess
             foreach (ListViewItem i in ArchiveViewer.Items)
             {
                 deleteItem = false;
-                EntryType type = GetEntryType(i);
+                EntryType type = arch1.GetEntryType(i);
                 if (type == EntryType.NO_DATA && showInvalidEntries == false)
                     deleteItem = true;
                 else if (type == EntryType.ERROR_DATA && showErrorEntries == false)
@@ -579,10 +702,6 @@ namespace EepromVisualAccess
                 }
             }
 
-        }
-        private void butClearFilter_Click(object sender, EventArgs e)
-        {
-            ClearFilter();
         }
         private void ClearFilter()
         {
@@ -627,18 +746,6 @@ namespace EepromVisualAccess
                 dateFilterEnd.Value = DateTime.Now;
             }
         }
-        private void chkboxShowInvalid_CheckedChanged(object sender, EventArgs e)
-        {
-            showInvalidEntries = chkboxShowInvalid.Checked;
-        }
-        private void chkboxShowOp_CheckedChanged(object sender, EventArgs e)
-        {
-            showOpEntries = chkboxShowOp.Checked;
-        }
-        private void chkboxShowErrors_CheckedChanged(object sender, EventArgs e)
-        {
-            showErrorEntries = chkboxShowErrors.Checked;
-        }
     #endregion
 
     #region FORM INPUT ACTIONS
@@ -647,74 +754,40 @@ namespace EepromVisualAccess
             ListView.SelectedListViewItemCollection selected = this.ArchiveViewer.SelectedItems;
             if (selected.Count > 0)
             {
-                if(GetEntryType(selected[0]) == EntryType.ERROR_DATA)   // If entry type ERROR
+                ListViewItem it = selected[0];
+                if (arch1.GetEntryType(it) == EntryType.ERROR_DATA)   // If entry type ERROR
                 {
                     ErrorViewer.BringToFront();
+                    String errorCode = it.SubItems[CODE].Text;
+                    String param = it.SubItems[TEMPIN].Text;
+
+                    ErrorViewer.Text = arch1.GetErrorString(errorCode, param);
                     ErrorViewer.Visible = true;
-                    String errorCode = selected[0].SubItems[CODE].Text;
-                    String param = selected[0].SubItems[TEMPIN].Text;
-
-                    ErrorViewer.Text = GetErrorString(errorCode, param); 
-
                 }
-                else if(GetEntryType(selected[0]) == EntryType.OP_HISTORY)
+                else if (arch1.GetEntryType(it) == EntryType.OP_HISTORY)
                 {
                     DetailViewer.Items.Clear();
                     DetailViewer.BringToFront();
+                    // Get digital cell and decode it into a DetailViewer item.
+                    Int32 digital = Convert.ToInt32(it.SubItems[CODE].Text, 16);
+                    //        if (((digital >> 24) & 0xC0) == ERROR_MASK)
+                    //           return;
+                    ListViewItem digitalItem = new ListViewItem("");
+                    arch1.DecodeDigitalCell(digitalItem, digital);
+
+                    DetailViewer.Items.Add(digitalItem);
                     DetailViewer.Visible = true;
-                    String code = selected[0].SubItems[CODE].Text;
-                    Int32 digital = Convert.ToInt32(code, 16);
-                    if (((digital >> 24) & 0xC0) == ERROR_MASK)
-                        return;
-
-
-                    String text;
-                    OpStatus status = (OpStatus)((digital >> 10) & 0x3);
-                    switch (status)
-                    {
-                        case OpStatus.IDLE:
-                            text = "LISTO";
-                            break;
-                        case OpStatus.RUNNING:
-                            text = "OPERANDO";
-                            break;
-                        case OpStatus.POSTOP:
-                            text = "POSTOP";
-                            break;
-                        case OpStatus.DISABLED_STATE:
-                            text = "DESHAB.";
-                            break;
-                        default:
-                            text = "...";
-                            break;
-                    }
-
-                    ListViewItem item = new ListViewItem(text);
-                    item.SubItems.Add((digital & 0x1).ToString());  // Flowswitch
-                    item.SubItems.Add((digital >> 1 & 0x1).ToString());  // Compressor
-                    item.SubItems.Add((digital >> 2 & 0x1).ToString());  // Fan 1
-                    item.SubItems.Add((digital >> 3 & 0x1).ToString());  // Fan 2
-                    item.SubItems.Add((digital >> 4 & 0x1).ToString());  // Fan 3
-                    item.SubItems.Add((digital >> 5 & 0x1).ToString());  // Consumo Cmp
-                    item.SubItems.Add((digital >> 6 & 0x1).ToString());  // Consumo Fan 1
-                    item.SubItems.Add((digital >> 7 & 0x1).ToString());  // Consumo Fan 2
-                    item.SubItems.Add((digital >> 8 & 0x1).ToString());  // Consumo Fan 3
-                    item.SubItems.Add((digital >> 9 & 0x1).ToString());  // Consumo Bomba
-                    DetailViewer.Items.Add(item);
                 }
-
-
             }
             else
             {
                 DetailViewer.Visible = false;
                 ErrorViewer.Visible = false;
             }
-
-
         }
         private void modelSelector_SelectedIndexChanged(object sender, EventArgs e)
         {
+            MacModel model;
             if (modelSelected == false)
                 modelSelected = true;
             switch (modelSelector.SelectedItem.ToString())
@@ -728,8 +801,23 @@ namespace EepromVisualAccess
                 case "GWF-W-90TR":
                     model = MacModel.W90TR;
                     break;
+                default:
+                    return;
             }
-            arcInfo = new ArchiveInfo(ENTIRE_DATA_SIZE[(int)model], METADATA_ADDRESS[(int)model], METADATA_SIZE[(int)model], MAP_ADDRESS[(int)model], MAP_SIZE[(int)model], ARCHIVE_ADDRESS[(int)model], ARCHIVE_SIZE[(int)model]);
+            ArchiveInfo.archiveSize = ENTIRE_DATA_SIZE[(int)model];
+            ArchiveInfo.metadataAddress = METADATA_ADDRESS[(int)model];
+            ArchiveInfo.metadataSize = METADATA_SIZE[(int)model];
+            ArchiveInfo.mapAddress = MAP_ADDRESS[(int)model];
+            ArchiveInfo.mapSize = MAP_SIZE[(int)model];
+            ArchiveInfo.regFileAddress = ARCHIVE_ADDRESS[(int)model];
+            ArchiveInfo.regFileSize = ARCHIVE_SIZE[(int)model];
+            ArchiveInfo.opEntrySize = OP_ENTRY_SIZE[(int)model];
+            ArchiveInfo.errorEntrySize = ERROR_ENTRY_SIZE[(int)model];
+
+            ArchiveViewer.Clear();
+            DetailViewer.Clear();
+            arch1 = new ArchiveInterpreter(model, ArchiveViewer, DetailViewer, MapViewer);
+            
             ArchiveViewer_SelectedIndexChanged(sender, e);  // Update detailed view
         }
         private void pictureBox1_Click(object sender, EventArgs e)
@@ -764,7 +852,7 @@ namespace EepromVisualAccess
                 EntryType type = EntryType.NO_DATA;
                 foreach(ListViewItem i in ArchiveViewer.Items)
                 {
-                    type = GetEntryType(i);
+                    type = arch1.GetEntryType(i);
                     fileStr += type.ToString() + ";";
                     for (int j = 0; j < i.SubItems.Count; j++)
                     {
@@ -800,10 +888,34 @@ namespace EepromVisualAccess
                 }
             }
         }
-    #endregion
+        private void butSetFilter_Click(object sender, EventArgs e)
+        {
+            ClearFilter();    // First clear the filter in order to apply new filter 
+
+            //Apply filter from fastest to slowest algorithm
+            ApplyTypeFilter();
+            ApplyDateFilter();
+        }
+        private void butClearFilter_Click(object sender, EventArgs e)
+        {
+            ClearFilter();
+        }
+        private void chkboxShowInvalid_CheckedChanged(object sender, EventArgs e)
+        {
+            showInvalidEntries = chkboxShowInvalid.Checked;
+        }
+        private void chkboxShowOp_CheckedChanged(object sender, EventArgs e)
+        {
+            showOpEntries = chkboxShowOp.Checked;
+        }
+        private void chkboxShowErrors_CheckedChanged(object sender, EventArgs e)
+        {
+            showErrorEntries = chkboxShowErrors.Checked;
+        }
+        #endregion
 
 
-    #region PLC COMMS
+        #region PLC COMMS
         /// <summary>
         /// Envia una petición por UDP al PLC para leer la memoria EEPROM.
         /// </summary>
@@ -932,7 +1044,8 @@ namespace EepromVisualAccess
             // Retorno de método.
             return ErrorsFound;
         }
-    #endregion
+        #endregion
+        
     }
 
     class ListViewItemComparer : IComparer
