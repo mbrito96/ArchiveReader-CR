@@ -139,7 +139,7 @@ namespace EepromVisualAccess
                     for (int j = 0; j < (ArchiveInfo.opEntrySize - 2); j++)  // Save sensor values
                     {
                         ValueFloat = BitConverter.ToSingle(entryData, 8 + j * 4);
-                        entry.SubItems.Add(ValueFloat.ToString());
+                        entry.SubItems.Add(ValueFloat.ToString("F2"));
                     }
                 }
                 else if (type == EntryType.ERROR_DATA)
@@ -167,7 +167,7 @@ namespace EepromVisualAccess
                 
                     // Get error parameter
                     ValueFloat = BitConverter.ToSingle(entryData, 8);
-                    entry.SubItems.Add(ValueFloat.ToString());      // Save Error Value
+                    entry.SubItems.Add(ValueFloat.ToString("F2"));      // Save Error Value
                 }
                 return retVal;
             }
