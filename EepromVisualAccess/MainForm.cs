@@ -59,10 +59,6 @@ namespace EepromVisualAccess
                         detailViewer.Columns.Add("V1", 28);
                         detailViewer.Columns.Add("V2", 28);
                         detailViewer.Columns.Add("V3", 28);
-                        detailViewer.Columns.Add("Cmp", 39);
-                        detailViewer.Columns.Add("V1", 28);
-                        detailViewer.Columns.Add("V2", 28);
-                        detailViewer.Columns.Add("V3", 28);
                         detailViewer.Columns.Add("Bomba", 50);
                         break;
                     case MacModel.A80TR:
@@ -80,24 +76,17 @@ namespace EepromVisualAccess
                         archiveViewer.Columns.Add("P. B Baja", 60);
                         archiveViewer.Columns.Add("P. B Dif", 65);
 
+                        detailViewer.Columns.Add("Modo", 62);
                         detailViewer.Columns.Add("Estado", 62);
                         detailViewer.Columns.Add("FS", 30);
-                        detailViewer.Columns.Add("Cmp A", 39);
-                        detailViewer.Columns.Add("Cmp B", 39);
-                        detailViewer.Columns.Add("V.A1", 28);
-                        detailViewer.Columns.Add("V.A2", 28);
-                        detailViewer.Columns.Add("V.A3", 28);
-                        detailViewer.Columns.Add("V.B1", 28);
-                        detailViewer.Columns.Add("V.B2", 28);
-                        detailViewer.Columns.Add("V.B3", 28);
-                        detailViewer.Columns.Add("Cmp A", 39);
-                        detailViewer.Columns.Add("Cmp B", 39);
-                        detailViewer.Columns.Add("V.A1", 28);
-                        detailViewer.Columns.Add("V.A2", 28);
-                        detailViewer.Columns.Add("V.A3", 28);
-                        detailViewer.Columns.Add("V.B1", 28);
-                        detailViewer.Columns.Add("V.B2", 28);
-                        detailViewer.Columns.Add("V.B3", 28);
+                        detailViewer.Columns.Add("Cmp.A", 45);
+                        detailViewer.Columns.Add("Cmp.B", 45);
+                        detailViewer.Columns.Add("V.A1", 38);
+                        detailViewer.Columns.Add("V.A2", 38);
+                        detailViewer.Columns.Add("V.A3", 38);
+                        detailViewer.Columns.Add("V.B1", 38);
+                        detailViewer.Columns.Add("V.B2", 38);
+                        detailViewer.Columns.Add("V.B3", 38);
                         detailViewer.Columns.Add("Bomba", 50);
                         break;
                 }
@@ -179,136 +168,146 @@ namespace EepromVisualAccess
                     #region GWF-40TR ErrorMessages
                     switch (code)
                     {
-                        case "00":          //ERR_SENSOR
-                            {
-                                errorString += "Valor de sensores no coherentes.";
-                                break;
-                            }
-                        case "01":      // ERR_TEMP_SENSOR
-                            {
-                                errorString += "Valor improbable en sensor de temperatura de entrada. Valor: " + param;
-                                break;
-                            }
-                        case "02":      // ERR_TEMP_SENSOR
-                            {
-                                errorString += "Valor improbable en sensor de temperatura de salida. Valor: " + param;
-                                break;
-                            }
-                        case "03":      // ERR_TEMP_SENSOR
-                            {
-                                errorString += "Valor improbable en sensor de temperatura del evaporador. Valor: " + param;
-                                break;
-                            }
-                        case "04":      // ERR_TEMP_SENSOR
-                            {
-                                errorString += "Valor improbable en sensor de temperatura ambiente. Valor: " + param;
-                                break;
-                            }
-                        case "05":      // ERR_EEPROM_READ
-                            {
-                                errorString += "Falla lectura EEPROM. Direccion: " + param;
-                                break;
-                            }
-                        case "06":      // ERR_EEPROM_WRITE
-                            {
-                                errorString += "Falla escritura EEPROM. Direccion: " + param;
-                                break;
-                            }
-                        case "07":      // ERR_OP_VALUES
-                            {
-                                errorString += "SetPoint recuperado de memoria no coherente. \n Se configuraron los valores por defecto.";
-                                break;
-                            }
-                        case "08":      // ERR_CREATE_TIMEOUT
-                            {
-                                errorString += "Error al crear Timeout " + param;
-                                break;
-                            }
-                        case "09":      // ERR_SYS_WATCHDOG
-                            {
-                                errorString += "System Watchdog. Se continuó la operacion normalmente.";
-                                break;
-                            }
-                        case "0A":      // ERR_FATAL_ERROR
-                            {
-                                errorString += "Excepcion no manejada. Imposible operar.";
-                                break;
-                            }
-                        case "0B":      // ERR_ARCHIVE_INIT
-                            {
-                                errorString += "Error iniciando historial. Se perdieron los datos pasados.";
-                                break;
-                            }
-                        case "0C":      // ERR_RTC_FAIL
-                            {
-                                errorString += "Fecha y hora invalida.";
-                                break;
-                            }
-                        case "0D":      // ERR_FLOW
-                            {
-                                errorString += "FlowSwitch Evaporador.";
-                                break;
-                            }
-                        case "0E":      // ERR_P_HIGH
-                            {
-                                errorString += "Presion alta : " + param;
-                                break;
-                            }
-                        case "0F":      // ERR_P_LOW
-                            {
-                                errorString += "Presion baja: " + param;
-                                break;
-                            }
-                        case "10":      // ERR_P_DIF
-                            {
-                                errorString += "Presion diferencial: " + param;
-                                break;
-                            }
-                        case "11":      // ERR_T_CRIT
-                            {
-                                errorString += "Temp. evaporador: " + param;
-                                break;
-                            }
-                        case "12":      // ERR_T_MAX
-                            {
-                                errorString += "Temperatura por encima de máxima: " + param;
-                                break;
-                            }
-                        case "13":      // ERR_COOLDOWN
-                            {
-                                errorString += "Imposible disminuir P. alta en etapa de arranque. \n Presion alta: " + param;
-                                break;
-                            }
-                        case "14":      // ERR_COMP_OL
-                            {
-                                errorString += "Consumo compresor.";
-                                break;
-                            }
-                        case "15":      // ERR_CMP_WATCHDOG
-                            {
-                                errorString += "Compressor Watchdog.";
-                                break;
-                            }
-                        case "16":      // ERR_VENT1_OL
-                            {
-                                errorString += "Consumo ventilador 1.";
-                                break;
-                            }
-                        case "17":      // ERR_VENT2_OL
-                            {
-                                errorString += "Consumo ventilador 2.";
-                                break;
-                            }
-                        case "18":      // ERR_VENT3_OL
-                            {
-                                errorString += "Consumo ventilador 3.";
-                                break;
-                            }
-                        case "19":      // ERR_PUMP_OL
-                            {
-                                errorString += "Consumo bomba de agua.";
-                                break;
-                            }
+						case "00":          //ERR_SENSOR
+						{
+							errorString += "Valor de sensores no coherentes.";
+							break;
+						}
+						case "01":      // ERR_TEMP_SENSOR
+						{
+							errorString += "Valor improbable en sensor de temperatura de entrada. Valor: " + param;
+							break;
+						}
+						case "02":      // ERR_TEMP_SENSOR
+						{
+							errorString += "Valor improbable en sensor de temperatura de salida. Valor: " + param;
+							break;
+						}
+						case "03":      // ERR_TEMP_SENSOR
+						{
+							errorString += "Valor improbable en sensor de temperatura del evaporador. Valor: " + param;
+							break;
+						}
+						case "04":      // ERR_TEMP_SENSOR
+						{
+							errorString += "Valor improbable en sensor de temperatura ambiente. Valor: " + param;
+							break;
+						}
+						case "05":      // ERR_EEPROM_READ
+						{
+							errorString += "Falla lectura EEPROM. Direccion: " + param;
+							break;
+						}
+						case "06":      // ERR_EEPROM_WRITE
+						{
+							errorString += "Falla escritura EEPROM. Direccion: " + param;
+							break;
+						}
+						case "07":      // ERR_OP_VALUES
+						{
+							errorString += "SetPoint recuperado de memoria no coherente. \n Se configuraron los valores por defecto.";
+							break;
+						}
+						case "08":      // ERR_CREATE_TIMEOUT
+						{
+							errorString += "Error al crear Timeout " + param;
+							break;
+						}
+						case "09":      // ERR_SYS_WATCHDOG
+						{
+							errorString += "System Watchdog. Se continuó la operacion normalmente.";
+							break;
+						}
+						case "0A":      // ERR_FATAL_ERROR
+						{
+							errorString += "Excepcion no manejada. Imposible operar.";
+							break;
+						}
+						case "0B":      // ERR_ARCHIVE_INIT
+						{
+							errorString += "Error iniciando historial. Se perdieron los datos pasados.";
+							break;
+						}
+						case "0C":      // ERR_RTC_FAIL
+						{
+							errorString += "Fecha y hora invalida.";
+							break;
+						}
+						case "0D":      // ERR_RTC_FAIL
+						{
+							errorString += "Error al intentar envío de email." + Environment.NewLine + "Verifique conexión a internet.";
+							break;
+						}
+						case "0E":      // ERR_RTC_FAIL
+						{
+							errorString += "Falla durante el envío de mail.";
+							break;
+						}
+						case "0F":      // ERR_FLOW
+						{
+							errorString += "FlowSwitch Evaporador.";
+							break;
+						}
+						case "10":      // ERR_P_HIGH
+						{
+							errorString += "Presion alta : " + param;
+							break;
+						}
+						case "11":      // ERR_P_LOW
+						{
+							errorString += "Presion baja: " + param;
+							break;
+						}
+						case "12":      // ERR_P_DIF
+						{
+							errorString += "Presion diferencial: " + param;
+							break;
+						}
+						case "13":      // ERR_T_CRIT
+						{
+							errorString += "Temp. evaporador: " + param;
+							break;
+						}
+						case "14":      // ERR_T_MAX
+						{
+							errorString += "Temperatura por encima de máxima: " + param;
+							break;
+						}
+						case "15":      // ERR_COOLDOWN
+						{
+							errorString += "Imposible disminuir P. alta en etapa de arranque. \n Presion alta: " + param;
+							break;
+						}
+						case "16":      // ERR_COMP_OL
+						{
+							errorString += "Consumo compresor.";
+							break;
+						}
+						case "17":      // ERR_CMP_WATCHDOG
+						{
+							errorString += "Compressor Watchdog.";
+							break;
+						}
+						case "18":      // ERR_VENT1_OL
+						{
+							errorString += "Consumo ventilador 1.";
+							break;
+						}
+						case "19":      // ERR_VENT2_OL
+						{
+							errorString += "Consumo ventilador 2.";
+							break;
+						}
+						case "1A":      // ERR_VENT3_OL
+						{
+							errorString += "Consumo ventilador 3.";
+							break;
+						}
+						case "1B":      // ERR_PUMP_OL
+						{
+							errorString += "Consumo bomba de agua.";
+							break;
+						}
                     }
                     #endregion
                 }
@@ -332,6 +331,9 @@ namespace EepromVisualAccess
                 {
                     case MacModel.A40TR:
                         A40TR_DecodeDigitalCell(item, code);
+                        break;
+                    case MacModel.A80TR:
+                        A80TR_DecodeDigitalCell(item, code);
                         break;
                 }
 
@@ -361,19 +363,97 @@ namespace EepromVisualAccess
 
                 item.Text = text;
                 item.SubItems.Add((digitalCell & 0x1).ToString());  // Flowswitch
-                item.SubItems.Add((digitalCell >> 1 & 0x1).ToString());  // Compressor
-                item.SubItems.Add((digitalCell >> 2 & 0x1).ToString());  // Fan 1
-                item.SubItems.Add((digitalCell >> 3 & 0x1).ToString());  // Fan 2
-                item.SubItems.Add((digitalCell >> 4 & 0x1).ToString());  // Fan 3
-                item.SubItems.Add((digitalCell >> 5 & 0x1).ToString());  // Consumo Cmp
-                item.SubItems.Add((digitalCell >> 6 & 0x1).ToString());  // Consumo Fan 1
-                item.SubItems.Add((digitalCell >> 7 & 0x1).ToString());  // Consumo Fan 2
-                item.SubItems.Add((digitalCell >> 8 & 0x1).ToString());  // Consumo Fan 3
-                item.SubItems.Add((digitalCell >> 9 & 0x1).ToString());  // Consumo Bomba
-            }
-        }
+                String tempStr = (digitalCell >> 5 & 0x1) == 0 ? (digitalCell >> 1 & 0x1).ToString() : "-1";   // -1 if Consumo Cmp = 1, else store Cmp ON/OFF value
+                item.SubItems.Add(tempStr);  // Compressor 
 
-        public Stx8xxx PioBoard;
+                tempStr = (digitalCell >> 6 & 0x1) == 0 ? (digitalCell >> 2 & 0x1).ToString() : "-1";   // -1 if Consumo Fan 1 = 1, else store Fan 1 ON/OFF value
+                item.SubItems.Add(tempStr);  // Fan 1 
+
+                tempStr = (digitalCell >> 7 & 0x1) == 0 ? (digitalCell >> 3 & 0x1).ToString() : "-1";   // -1 if Consumo Fan 2 = 1, else store Fan 2 ON/OFF value
+                item.SubItems.Add(tempStr);  // Fan 2 
+
+                tempStr = (digitalCell >> 8 & 0x1) == 0 ? (digitalCell >> 4 & 0x1).ToString() : "-1";   // -1 if Consumo Fan 3 = 1, else store Fan 3 ON/OFF value
+                item.SubItems.Add(tempStr);  // Fan 3 
+
+                item.SubItems.Add( (digitalCell >> 9 & 0x1) == 0 ? "0" : "-1" );  // Consumo Bomba
+            }
+        
+            void A80TR_DecodeDigitalCell(ListViewItem item, Int32 digitalCell)
+            {
+                String text;
+                Byte opMode = (Byte)((digitalCell >> 20) & 0x3);
+                switch(opMode)
+                {
+                    case 0x00:
+                        text = "80TR";
+                        break;
+                    case 0x01:
+                        text = "40TR-BAL";
+                        break;
+                    case 0x02:
+                        text = "40TR-A";
+                        break;
+                    case 0x03:
+                        text = "40TR-B";
+                        break;
+                    default:
+                        text = "...";
+                        break;
+                }
+                item.Text = text;   // Save machine Operation Mode
+
+                Byte status = (Byte)((digitalCell >> 18) & 0x3);
+                switch (status)
+                {
+                    case 0x00:
+                        text = "LISTO";
+                        break;
+                    case 0x01:
+                        text = "COOLING";
+                        break;
+                    case 0x02:
+                        text = "OPERANDO";
+                        break;
+                    case 0x03:
+                        text = "POSTOP";
+                        break;
+                    default:
+                        text = "...";
+                        break;
+                }
+                item.SubItems.Add(text);    // Save machine status
+
+                item.SubItems.Add((digitalCell & 0x1).ToString());  // Flowswitch
+
+                String tempStr = (digitalCell >> 9 & 0x1) == 0 ? (digitalCell >> 1 & 0x1).ToString() : "-1";   // -1 if Consumo Cmp A = 1, else store Cmp A ON/OFF value
+                item.SubItems.Add(tempStr);  // Compressor A
+
+                tempStr = (digitalCell >> 10 & 0x1) == 0 ? (digitalCell >> 2 & 0x1).ToString() : "-1";   // -1 if Consumo Cmp B = 1, else store Cmp B ON/OFF value
+                item.SubItems.Add(tempStr);  // Compressor B
+
+                tempStr = (digitalCell >> 11 & 0x1) == 0 ? (digitalCell >> 3 & 0x1).ToString() : "-1";   // -1 if Consumo Vent A1 = 1, else store Vent A1 ON/OFF value
+                item.SubItems.Add(tempStr);  // Vent A1
+
+                tempStr = (digitalCell >> 12 & 0x1) == 0 ? (digitalCell >> 4 & 0x1).ToString() : "-1";   // -1 if Consumo Vent A2 = 1, else store Vent A2 ON/OFF value
+                item.SubItems.Add(tempStr);  // Vent A2
+
+                tempStr = (digitalCell >> 13 & 0x1) == 0 ? (digitalCell >> 5 & 0x1).ToString() : "-1";   // -1 if Consumo Vent A3 = 1, else store Vent A3 ON/OFF value
+                item.SubItems.Add(tempStr);  // Vent A3
+
+                tempStr = (digitalCell >> 14 & 0x1) == 0 ? (digitalCell >> 6 & 0x1).ToString() : "-1";   // -1 if Consumo Vent B1 = 1, else store Vent B1 ON/OFF value
+                item.SubItems.Add(tempStr);  // Vent B1
+
+                tempStr = (digitalCell >> 15 & 0x1) == 0 ? (digitalCell >> 7 & 0x1).ToString() : "-1";   // -1 if Consumo Vent B2 = 1, else store Vent B2 ON/OFF value
+                item.SubItems.Add(tempStr);  // Vent B2
+
+                tempStr = (digitalCell >> 16 & 0x1) == 0 ? (digitalCell >> 8 & 0x1).ToString() : "-1";   // -1 if Consumo Vent B1 = 1, else store Vent B1 ON/OFF value
+                item.SubItems.Add(tempStr);  // Vent B3
+
+                item.SubItems.Add( (digitalCell >> 17 & 0x1)==0 ? "0" : "-1" );    // Consumo Bomba agua
+            }
+    }
+
+    public Stx8xxx PioBoard;
         public ArchiveInterpreter arch1;
         OpenFileDialog openFileDialog;
 
@@ -515,6 +595,7 @@ namespace EepromVisualAccess
     #region RAW DATA PROCESSING
         private void ProcessData(byte[] data)
         {
+            arch1.entryCount = 0;
             byte[] metadataBytes = new byte[ArchiveInfo.metadataSize];
             Array.Copy(data, 0, metadataBytes, 0, ArchiveInfo.metadataSize);
             GetMetadataFromEeprom(metadataBytes);
@@ -813,7 +894,7 @@ namespace EepromVisualAccess
             ArchiveInfo.regFileSize = ARCHIVE_SIZE[(int)model];
             ArchiveInfo.opEntrySize = OP_ENTRY_SIZE[(int)model];
             ArchiveInfo.errorEntrySize = ERROR_ENTRY_SIZE[(int)model];
-
+            txtboxPlcVersion.Text = PLC_MATCHING_VERSION[(int)model];
             ArchiveViewer.Clear();
             DetailViewer.Clear();
             arch1 = new ArchiveInterpreter(model, ArchiveViewer, DetailViewer, MapViewer);

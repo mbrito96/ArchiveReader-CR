@@ -36,7 +36,7 @@
             regFileSize;
 
             public static int opEntrySize, errorEntrySize;
-            
+
             public static int MaxEntrySize()
             {
                 if (opEntrySize > errorEntrySize)
@@ -46,7 +46,7 @@
             }
         }
 
-
+        static string[] PLC_MATCHING_VERSION = { "V2.2.6", "V1.0.0" };
         // Defined Archive parameters for: { A40TR, A80TR, W90TR } 
         static int[] ENTIRE_DATA_SIZE = { 32588, 32616 };
         static int[] METADATA_ADDRESS = { 180, 152 };
@@ -116,6 +116,8 @@
         {
             this.butReadEeprom = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.txtboxPlcVersion = new System.Windows.Forms.TextBox();
             this.modelSelector = new System.Windows.Forms.ComboBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.butLoadFile = new System.Windows.Forms.Button();
@@ -175,6 +177,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Controls.Add(this.txtboxPlcVersion);
             this.groupBox1.Controls.Add(this.modelSelector);
             this.groupBox1.Controls.Add(this.pictureBox1);
             this.groupBox1.Controls.Add(this.butLoadFile);
@@ -187,6 +191,25 @@
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Parámetros de lectura en memoria EEPROM";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(7, 91);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(151, 17);
+            this.label2.TabIndex = 11;
+            this.label2.Text = "Lector compatible con:";
+            // 
+            // txtboxPlcVersion
+            // 
+            this.txtboxPlcVersion.Font = new System.Drawing.Font("Arial Rounded MT Bold", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtboxPlcVersion.Location = new System.Drawing.Point(11, 116);
+            this.txtboxPlcVersion.Name = "txtboxPlcVersion";
+            this.txtboxPlcVersion.ReadOnly = true;
+            this.txtboxPlcVersion.Size = new System.Drawing.Size(179, 25);
+            this.txtboxPlcVersion.TabIndex = 10;
+            this.txtboxPlcVersion.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // modelSelector
             // 
@@ -225,6 +248,9 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.Controls.Add(this.deletedEntries);
             this.groupBox2.Controls.Add(this.ArchiveViewer);
             this.groupBox2.Controls.Add(this.groupBox3);
@@ -246,6 +272,9 @@
             // 
             // ArchiveViewer
             // 
+            this.ArchiveViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.ArchiveViewer.AutoArrange = false;
             this.ArchiveViewer.FullRowSelect = true;
             this.ArchiveViewer.GridLines = true;
@@ -312,6 +341,8 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox5.Controls.Add(this.DetailViewer);
             this.groupBox5.Controls.Add(this.ErrorViewer);
             this.groupBox5.Location = new System.Drawing.Point(496, 75);
@@ -323,6 +354,8 @@
             // 
             // DetailViewer
             // 
+            this.DetailViewer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.DetailViewer.BackColor = System.Drawing.SystemColors.Window;
             this.DetailViewer.ForeColor = System.Drawing.SystemColors.WindowText;
             this.DetailViewer.Location = new System.Drawing.Point(6, 21);
@@ -421,6 +454,8 @@
             // 
             // groupBox6
             // 
+            this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox6.Controls.Add(this.butExport2CSV);
             this.groupBox6.Controls.Add(this.chkboxShowOp);
             this.groupBox6.Controls.Add(this.chkboxShowErrors);
@@ -440,6 +475,8 @@
             // 
             // butExport2CSV
             // 
+            this.butExport2CSV.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.butExport2CSV.Location = new System.Drawing.Point(13, 519);
             this.butExport2CSV.Name = "butExport2CSV";
             this.butExport2CSV.Size = new System.Drawing.Size(178, 42);
@@ -571,6 +608,7 @@
             this.Name = "MainForm";
             this.Text = "Historial de operaciones";
             this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
@@ -629,6 +667,8 @@
         private System.Windows.Forms.Button butExport2CSV;
         private System.Windows.Forms.StatusStrip statstrFilePath;
         private System.Windows.Forms.ToolStripStatusLabel statStripDataPath;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txtboxPlcVersion;
     }
 }
 
