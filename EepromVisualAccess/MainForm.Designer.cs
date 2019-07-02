@@ -46,7 +46,7 @@
             }
         }
 
-        static string[] PLC_MATCHING_VERSION = { "V2.2.6", "V1.0.0" };
+        static string[] PLC_MATCHING_VERSION = { "V2.2.6", "V0.0.0" };
         // Defined Archive parameters for: { A40TR, A80TR, W90TR } 
         static int[] ENTIRE_DATA_SIZE = { 32588, 32616 };
         static int[] METADATA_ADDRESS = { 180, 152 };
