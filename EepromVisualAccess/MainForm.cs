@@ -963,8 +963,7 @@ private void ApplyTypeFilter()
 
 		if (deleteItem == true)
 		{
-			deletedEntries.Items.Insert(deletedEntries.Items.Count, (ListViewItem)i.Clone());  // Insert at the end of list
-			i.Remove();
+			DeleteEntry(i);
 		}
 	}
 }
@@ -987,8 +986,7 @@ private void ApplyDateFilter()
 		tryParseResult = DateTime.TryParse(i.SubItems[DATE].Text, out entryDate);
 		if (tryParseResult == true && !(entryDate.CompareTo(startDate.Date) > -1 && entryDate.CompareTo(endDate.Date) == -1))
 		{
-			deletedEntries.Items.Insert(deletedEntries.Items.Count, (ListViewItem)i.Clone());  // Insert at the end of list
-			i.Remove();
+			DeleteEntry(i);
 		}
 	}
 
@@ -997,9 +995,31 @@ private void ClearFilter()
 {
 	foreach (ListViewItem j in deletedEntries.Items)
 	{
-		ArchiveViewer.Items.Insert(Convert.ToInt32(j.SubItems[NUMBER].Text) - 1, (ListViewItem)j.Clone());
-		j.Remove();
+		ArchiveViewer.Items.Insert(Convert.ToInt16(j.Text)-1, (ListViewItem)j.Clone());
+        j.Remove();
 	}
+}
+private void DeleteEntry(ListViewItem i)
+{
+	if(deletedEntries.Items.Count == 0)
+	{
+		deletedEntries.Items.Insert(0, (ListViewItem)i.Clone());
+		i.Remove();
+	}
+	else
+	{
+		for(int j = deletedEntries.Items.Count ; j>0 ; j--)
+		{
+			if(Convert.ToInt16(deletedEntries.Items[j-1].Text) < Convert.ToInt16(i.Text))
+			{
+				deletedEntries.Items.Insert(j, (ListViewItem)i.Clone());  // Insert at the end of list
+				i.Remove();
+				break;
+			}
+		}
+		
+	}
+	
 }
 private void SetDefaultFilterInput()
 {
@@ -1146,17 +1166,85 @@ private void butExport2CSV_Click(object sender, EventArgs e)
 			fileStr += type.ToString() + ";";
 			for (int j = 0; j < i.SubItems.Count; j++)
 			{
-					if (j == NUMBER)
+			/*		if (j == NUMBER)
 					{
 						fileStr += i.Index; // Save filtered index, not absolute index in the archive
-					}
-					else if (j == CODE && type == EntryType.OP_HISTORY)  // Op entries save code as binary
+					}*/
+					if (j == CODE && type == EntryType.OP_HISTORY)  // Op entries save code as binary
 						fileStr += Convert.ToString(Convert.ToInt32(i.SubItems[j].Text, 16), 2);    
 					else
 						fileStr += i.SubItems[j].Text;
 
 					if (j < i.SubItems.Count - 1) // Add separator except for last column
 						fileStr += ";";
+			}
+			if (i.Index < ArchiveViewer.Items.Count - 1)    // Unless its last item, add newline
+					fileStr += Environment.NewLine;
+		}
+
+		DialogResult result = DialogResult.Retry;
+		while(result == DialogResult.Retry)
+		{
+			try
+			{
+					System.IO.File.WriteAllText(sfd.FileName, fileStr);
+					MessageBox.Show("Se guardaron los datos exitosamente.", "Operacion exitosa", MessageBoxButtons.OK, MessageBoxIcon.None);
+					break;
+			}
+			catch (System.IO.IOException)
+			{
+					result = MessageBox.Show("Verificar que el archivo no se encuentre ya abierto.", "Error al guardar archivo", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
+			}
+		}
+	}
+}
+private void butExport2numCSV_Click(object sender, EventArgs e)
+{
+	SaveFileDialog sfd = new SaveFileDialog
+	{
+		Title = "Seleccione nombre de archivo a guardar",
+		FileName = "example.csv",
+		Filter = "CSV (*.csv)|*.csv",
+		FilterIndex = 0,
+		InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+	};
+
+	//show the dialog + display the results in a msgbox unless cancelled 
+	if (sfd.ShowDialog() == DialogResult.OK)
+	{ 
+		string fileStr = "Tipo;";
+		foreach (System.Windows.Forms.ColumnHeader i in ArchiveViewer.Columns)
+		{
+			fileStr += i.Text;
+			if (i.Index < ArchiveViewer.Columns.Count - 1) // Add separator except for last column
+					fileStr += ";";
+		}
+						  
+		fileStr += Environment.NewLine;
+
+		EntryType type = EntryType.NO_DATA;
+		foreach(ListViewItem i in ArchiveViewer.Items)
+		{
+			type = arch1.GetEntryType(i);
+			fileStr += (int) type + ";";
+			for (int j = 0; j < i.SubItems.Count; j++)
+			{
+				if (j == NUMBER)
+				{
+					fileStr += i.Text; // Save filtered index, not absolute index in the archive
+				}
+				else if (j == CODE)  // Op entries save code as binary
+					fileStr += Convert.ToString(Convert.ToInt32(i.SubItems[j].Text, 16));    
+				else if(j == DATE)
+				{
+					DateTime t = Convert.ToDateTime(i.SubItems[DATE].Text);
+					fileStr += t.ToString("yyMMddHHmmss");
+				}
+				else
+					fileStr += i.SubItems[j].Text;
+
+				if (j < i.SubItems.Count - 1) // Add separator except for last column
+					fileStr += ";";
 			}
 			if (i.Index < ArchiveViewer.Items.Count - 1)    // Unless its last item, add newline
 					fileStr += Environment.NewLine;
@@ -1334,20 +1422,30 @@ private bool WaitPlcResponse(out byte[] EepromBytes)
 	// Retorno de método.
 	return ErrorsFound;
 }
-#endregion
-		  
-}
+		#endregion
 
+
+	}
+/*
 class ListViewItemComparer : IComparer
 {
-public int Compare(object x, object y)
-{
-	Int32 entryNumberA = Convert.ToInt32(((ListViewItem)x).SubItems[0].Text);
-	Int32 entryNumberB = Convert.ToInt32(((ListViewItem)y).SubItems[0].Text);
-	if (entryNumberA <= entryNumberB)
-		return -1;
-	else
-		return 1;
-}
-}
+		public int CompareDate_LQT(object x, object y)
+		{
+			Int32 entryNumberA = Convert.ToInt32(((ListViewItem)x).SubItems[0].Text);
+			Int32 entryNumberB = Convert.ToInt32(((ListViewItem)y).SubItems[0].Text);
+			if (entryNumberA <= entryNumberB)
+				return -1;
+			else
+				return 1;
+		}
+		public int CompareIndex_LQT(object x, object y)
+		{
+			Int32 entryNumberA = Convert.ToInt32(((ListViewItem)x).SubItems[0].Text);
+			Int32 entryNumberB = Convert.ToInt32(((ListViewItem)y).SubItems[0].Text);
+			if (entryNumberA <= entryNumberB)
+				return -1;
+			else
+				return 1;
+		}
+	}*/
 }
