@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Collections;
 using stx8xxx;
+using System.IO;
 
 /// <summary>
 /// ----------------------------------------------------------------------------------------------
@@ -775,14 +776,22 @@ private void butLoadFile_Click(object sender, EventArgs e)
 		openFileDialog.InitialDirectory = workingPath;
 		openFileDialog.Filter = "binarios (*.bin)|*.bin|All files (*.*)|*.*";
 		openFileDialog.FilterIndex = 1;
-		openFileDialog.RestoreDirectory = true;
+		//openFileDialog.RestoreDirectory = true;
 
 		if (openFileDialog.ShowDialog() == DialogResult.OK)
 		{
 			//Get the path of specified file
 			filePath = openFileDialog.FileName;
-			workingPath = openFileDialog.FileName; // Save the path for future operations
 			statStripDataPath.Text = filePath;
+			try{
+				workingFileName = Path.GetFileNameWithoutExtension(filePath);
+				workingPath = Path.GetDirectoryName(filePath); // Save the path for future operations
+			}
+			catch{
+				workingFileName = "example";
+				workingPath = filePath; // Save the path for future operations
+			}
+			
 
 			//Read the contents of the file into a stream
 			var fileStream = openFileDialog.OpenFile();
@@ -1008,9 +1017,10 @@ private void DeleteEntry(ListViewItem i)
 	}
 	else
 	{
-		for(int j = deletedEntries.Items.Count ; j>0 ; j--)
+		for( int j = deletedEntries.Items.Count ; j >= 0 ; j--)
 		{
-			if(Convert.ToInt16(deletedEntries.Items[j-1].Text) < Convert.ToInt16(i.Text))
+			// Go through deleted entries (backwards) to find where to put new deleted entry
+			if( j == 0 || Convert.ToInt16(deletedEntries.Items[j-1].Text) < Convert.ToInt16(i.Text))
 			{
 				deletedEntries.Items.Insert(j, (ListViewItem)i.Clone());  // Insert at the end of list
 				i.Remove();
@@ -1138,17 +1148,23 @@ private void pictureBox1_Click(object sender, EventArgs e)
 private void butExport2CSV_Click(object sender, EventArgs e)
 {
 	SaveFileDialog sfd = new SaveFileDialog
-		{
-			Title = "Seleccione nombre de archivo a guardar",
-			FileName = "example.csv",
-			Filter = "CSV (*.csv)|*.csv",
-			FilterIndex = 0,
-			InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
-		};
+	{
+		Title = "Seleccione nombre de archivo a guardar",
+		FileName = workingFileName,
+		Filter = "CSV (*.csv)|*.csv",
+		FilterIndex = 0,
+		InitialDirectory = (csvPath == null ? workingPath : csvPath)
+	};
 
 	//show the dialog + display the results in a msgbox unless cancelled 
 	if (sfd.ShowDialog() == DialogResult.OK)
 	{ 
+		try{
+			csvPath = Path.GetDirectoryName(sfd.FileName); // Save the path for future operations
+		}
+		catch{
+			csvPath = null;
+		}
 		string fileStr = "Tipo;";
 		foreach (System.Windows.Forms.ColumnHeader i in ArchiveViewer.Columns)
 		{
@@ -1203,15 +1219,21 @@ private void butExport2numCSV_Click(object sender, EventArgs e)
 	SaveFileDialog sfd = new SaveFileDialog
 	{
 		Title = "Seleccione nombre de archivo a guardar",
-		FileName = "example.csv",
+		FileName = workingFileName,
 		Filter = "CSV (*.csv)|*.csv",
 		FilterIndex = 0,
-		InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+		InitialDirectory = (numCsvPath == null ? workingPath : numCsvPath)
 	};
 
 	//show the dialog + display the results in a msgbox unless cancelled 
 	if (sfd.ShowDialog() == DialogResult.OK)
 	{ 
+		try{
+			numCsvPath = Path.GetDirectoryName(sfd.FileName); // Save the path for future operations
+		}
+		catch{
+			numCsvPath = null;
+		}
 		string fileStr = "Tipo;";
 		foreach (System.Windows.Forms.ColumnHeader i in ArchiveViewer.Columns)
 		{
@@ -1238,10 +1260,10 @@ private void butExport2numCSV_Click(object sender, EventArgs e)
 				else if(j == DATE)
 				{
 					DateTime t = Convert.ToDateTime(i.SubItems[DATE].Text);
-					fileStr += t.ToString("yyMMddHHmmss");
+					fileStr += t.ToString("yy;MM;dd;HH;mm;ss");
 				}
 				else
-					fileStr += i.SubItems[j].Text;
+					fileStr += i.SubItems[j].Text.Replace(",", ".");
 
 				if (j < i.SubItems.Count - 1) // Add separator except for last column
 					fileStr += ";";
