@@ -47,6 +47,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>snoflake_icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="stx8xxx, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -65,6 +68,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AskModelPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AskModelPopup.Designer.cs">
+      <DependentUpon>AskModelPopup.cs</DependentUpon>
+    </Compile>
     <Compile Include="HelpVisor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -79,6 +88,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AskModelPopup.resx">
+      <DependentUpon>AskModelPopup.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="HelpVisor.resx">
       <DependentUpon>HelpVisor.cs</DependentUpon>
     </EmbeddedResource>
@@ -123,6 +135,10 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="snoflake_icon.ico" />
+    <Content Include="snoflake_icon2.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

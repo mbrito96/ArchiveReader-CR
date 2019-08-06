@@ -674,6 +674,22 @@ public MainForm()
 	// Inicializar objeto PioBoard con dirección IP del PLC.
 	// Recuerde especificar contraseña y tipo de dispositivo.
 	PioBoard = new Stx8xxx("192.168.1.81", 0, Stx8xxxId.STX8091);
+	String[] arguments = Environment.GetCommandLineArgs();
+	if(arguments.GetLength(0) > 1)
+	{
+		AskModelPopup askForModel = new AskModelPopup();
+		if(askForModel.ShowDialog() == DialogResult.OK)
+		{
+			modelSelected = true;
+			MacModel myModel = (MacModel) askForModel.selectedModel;
+			modelSelector.Text = modelSelector.Items[askForModel.selectedModel].ToString();
+			LoadMachineModelParameters(myModel);
+			OpenFileFromPath(arguments[1]);	
+		}
+		askForModel.Dispose();
+		
+	}
+//	MessageBox.Show("argc= " + arguments.GetLength(0) + Environment.NewLine + "GetCommandLineArgs: " + String.Join(" - ", arguments));
 }
 
 #region LOAD ARCHIVE DATA
@@ -780,33 +796,37 @@ private void butLoadFile_Click(object sender, EventArgs e)
 
 		if (openFileDialog.ShowDialog() == DialogResult.OK)
 		{
-			//Get the path of specified file
-			filePath = openFileDialog.FileName;
-			statStripDataPath.Text = filePath;
-			try{
-				workingFileName = Path.GetFileNameWithoutExtension(filePath);
-				workingPath = Path.GetDirectoryName(filePath); // Save the path for future operations
-			}
-			catch{
-				workingFileName = "example";
-				workingPath = filePath; // Save the path for future operations
-			}
-			
-
-			//Read the contents of the file into a stream
-			var fileStream = openFileDialog.OpenFile();
-
-			if (fileStream.Length == ArchiveInfo.archiveSize)
-			{
-					byte[] fileData = new byte[ArchiveInfo.archiveSize];
-					fileStream.Read(fileData, 0, ArchiveInfo.archiveSize);
-					ProcessData(fileData);
-			}
-			else
-					MessageBox.Show("Error en el tamaño de archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-			fileStream.Close();
+			OpenFileFromPath(openFileDialog.FileName);
+			//Stream fileStream = openFileDialog.OpenFile();
 		}
 	}
+}
+
+void OpenFileFromPath(String path)
+{
+	//Get the path of specified file
+	statStripDataPath.Text = path;
+	try{
+		workingFileName = Path.GetFileNameWithoutExtension(path);
+		workingPath = Path.GetDirectoryName(path); // Save the path for future operations
+	}
+	catch{
+		workingFileName = "example";
+		workingPath = path; // Save the path for future operations
+	}
+	
+	//Read the contents of the file into a stream
+	Stream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
+
+	if (fileStream.Length == ArchiveInfo.archiveSize)
+	{
+		byte[] fileData = new byte[ArchiveInfo.archiveSize];
+		fileStream.Read(fileData, 0, ArchiveInfo.archiveSize);
+		ProcessData(fileData);
+	}
+	else
+		MessageBox.Show("Error en el tamaño de archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+	fileStream.Close();
 }
 #endregion
 
@@ -1124,6 +1144,10 @@ private void modelSelector_SelectedIndexChanged(object sender, EventArgs e)
 		default:
 			return;
 	}
+	LoadMachineModelParameters(model);
+}
+private void LoadMachineModelParameters(MacModel model)
+{
 	ArchiveInfo.archiveSize = ENTIRE_DATA_SIZE[(int)model];
 	ArchiveInfo.metadataAddress = METADATA_ADDRESS[(int)model];
 	ArchiveInfo.metadataSize = METADATA_SIZE[(int)model];
@@ -1138,7 +1162,7 @@ private void modelSelector_SelectedIndexChanged(object sender, EventArgs e)
 	DetailViewer.Clear();
 	arch1 = new ArchiveInterpreter(model, ArchiveViewer, DetailViewer, MapViewer);
 				
-	ArchiveViewer_SelectedIndexChanged(sender, e);  // Update detailed view
+	ArchiveViewer_SelectedIndexChanged(null, null);  // Update detailed view
 }
 private void pictureBox1_Click(object sender, EventArgs e)
 {
