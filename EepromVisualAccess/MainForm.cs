@@ -463,57 +463,62 @@ public class ArchiveInterpreter
 					errorString += "Temperatura por encima de máxima: " + param + " C";
 					break;
 				}
-				case "1A":      // ERR_COOLDOWN
+				case "1A":      // ERR_COOLDOWN_A
 				{
-					errorString += "Imposible disminuir P. alta en etapa de arranque." + Environment.NewLine + "Presion alta: " + param + " PSI";
+					errorString += "Imposible disminuir P. alta del circuito A en etapa de arranque." + Environment.NewLine + "Presion alta: " + param + " PSI";
 					break;
 				}
-				case "1B":      // ERR_COMP_OL_A
+				case "1B":      // ERR_COOLDOWN_B
+				{
+					errorString += "Imposible disminuir P. alta del circuito B en etapa de arranque." + Environment.NewLine + "Presion alta: " + param + " PSI";
+					break;
+				}
+				case "1C":      // ERR_COMP_OL_A
 				{
 					errorString += "Consumo compresor A.";
 					break;
 				}
-				case "1C":      // ERR_COMP_OL_B
+				case "1D":      // ERR_COMP_OL_B
 				{
 					errorString += "Consumo compresor B.";
 					break;
 				}
-				case "1D":      // ERR_CMP_WATCHDOG
+				case "1E":      // ERR_CMP_WATCHDOG
 				{
 					errorString += "Compressor Watchdog.";
 					break;
 				}
-				case "1E":      // ERR_FAN_A1_OL
+				case "1F":      // ERR_FAN_A1_OL
 				{
 					errorString += "Consumo ventilador A1.";
 					break;
 				}
-				case "1F":      // ERR_FAN_A2_OL
+				case "20":      // ERR_FAN_A2_OL
 				{
 					errorString += "Consumo ventilador A2.";
 					break;
 				}
-				case "20":      // ERR_FAN_A3_OL
+				case "21":      // ERR_FAN_A3_OL
 				{
 					errorString += "Consumo ventilador A3.";
 					break;
 				}
-				case "21":      // ERR_FAN_B1_OL
+				case "22":      // ERR_FAN_B1_OL
 				{
 					errorString += "Consumo ventilador B1.";
 					break;
 				}
-				case "22":      // ERR_FAN_B2_OL
+				case "23":      // ERR_FAN_B2_OL
 				{
 					errorString += "Consumo ventilador B2.";
 					break;
 				}
-				case "23":      // ERR_FAN_B3_OL
+				case "24":      // ERR_FAN_B3_OL
 				{
 					errorString += "Consumo ventilador B3.";
 					break;
 				}
-				case "24":      // ERR_PUMP_OL
+				case "25":      // ERR_PUMP_OL
 				{
 					errorString += "Consumo bomba de agua.";
 					break;
@@ -894,6 +899,13 @@ private void GetEntries(byte[] EepromBytes)
 	EntryType type = EntryType.NO_DATA;
 	int i = Convert.ToInt32(txtTail.Text);
 	byte[] entryArray = new byte[ArchiveInfo.MaxEntrySize() * 4];   // Temp array to save one complete entry
+	if(txtCount.Text == "0")
+	{
+		done = true;
+		MessageBox.Show("No hay niguna entrada guardada en el historial.", "Historial vacío", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+	}
+	
+
 	while (done == false)
 	{
 		#region GET ENTRY FROM BUFFER

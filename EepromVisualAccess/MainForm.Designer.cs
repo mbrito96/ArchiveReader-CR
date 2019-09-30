@@ -46,7 +46,7 @@
             }
         }
 
-        static string[] PLC_MATCHING_VERSION = { "V2.2.8", "V0.0.0" };
+        static string[] PLC_MATCHING_VERSION = { "V2.2.8", "V0.0.2" };
         // Defined Archive parameters for: { A40TR, A80TR, W90TR } 
         static int[] ENTIRE_DATA_SIZE = { 32588, 32616 };
         static int[] METADATA_ADDRESS = { 180, 152 };
@@ -196,7 +196,7 @@
 			// 
 			this.txtboxPlcVersion.Font = new System.Drawing.Font("Arial Rounded MT Bold", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.txtboxPlcVersion.Location = new System.Drawing.Point(8, 94);
-			this.txtboxPlcVersion.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.txtboxPlcVersion.Margin = new System.Windows.Forms.Padding(2);
 			this.txtboxPlcVersion.Name = "txtboxPlcVersion";
 			this.txtboxPlcVersion.ReadOnly = true;
 			this.txtboxPlcVersion.Size = new System.Drawing.Size(135, 21);
@@ -211,7 +211,7 @@
             "GWF-A-20/30/40TR",
             "GWF-A-80TR"});
 			this.modelSelector.Location = new System.Drawing.Point(8, 40);
-			this.modelSelector.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.modelSelector.Margin = new System.Windows.Forms.Padding(2);
 			this.modelSelector.Name = "modelSelector";
 			this.modelSelector.Size = new System.Drawing.Size(135, 21);
 			this.modelSelector.TabIndex = 9;
@@ -222,7 +222,7 @@
 			// 
 			this.pictureBox1.Image = global::ArchiveReader.Properties.Resources.info_img;
 			this.pictureBox1.Location = new System.Drawing.Point(295, 9);
-			this.pictureBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.pictureBox1.Margin = new System.Windows.Forms.Padding(2);
 			this.pictureBox1.Name = "pictureBox1";
 			this.pictureBox1.Size = new System.Drawing.Size(32, 33);
 			this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -233,7 +233,7 @@
 			// butLoadFile
 			// 
 			this.butLoadFile.Location = new System.Drawing.Point(181, 80);
-			this.butLoadFile.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.butLoadFile.Margin = new System.Windows.Forms.Padding(2);
 			this.butLoadFile.Name = "butLoadFile";
 			this.butLoadFile.Size = new System.Drawing.Size(128, 35);
 			this.butLoadFile.TabIndex = 6;
@@ -250,10 +250,10 @@
 			this.groupBox2.Controls.Add(this.ArchiveViewer);
 			this.groupBox2.Controls.Add(this.groupBox3);
 			this.groupBox2.Location = new System.Drawing.Point(15, 147);
-			this.groupBox2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-			this.groupBox2.Size = new System.Drawing.Size(794, 337);
+			this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
+			this.groupBox2.Size = new System.Drawing.Size(895, 337);
 			this.groupBox2.TabIndex = 6;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Visor de historial";
@@ -261,7 +261,7 @@
 			// deletedEntries
 			// 
 			this.deletedEntries.Location = new System.Drawing.Point(628, 24);
-			this.deletedEntries.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.deletedEntries.Margin = new System.Windows.Forms.Padding(2);
 			this.deletedEntries.Name = "deletedEntries";
 			this.deletedEntries.Size = new System.Drawing.Size(153, 88);
 			this.deletedEntries.TabIndex = 9;
@@ -277,10 +277,10 @@
 			this.ArchiveViewer.FullRowSelect = true;
 			this.ArchiveViewer.GridLines = true;
 			this.ArchiveViewer.Location = new System.Drawing.Point(13, 24);
-			this.ArchiveViewer.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.ArchiveViewer.Margin = new System.Windows.Forms.Padding(2);
 			this.ArchiveViewer.MultiSelect = false;
 			this.ArchiveViewer.Name = "ArchiveViewer";
-			this.ArchiveViewer.Size = new System.Drawing.Size(769, 310);
+			this.ArchiveViewer.Size = new System.Drawing.Size(870, 310);
 			this.ArchiveViewer.TabIndex = 0;
 			this.ArchiveViewer.UseCompatibleStateImageBehavior = false;
 			this.ArchiveViewer.View = System.Windows.Forms.View.Details;
@@ -290,9 +290,9 @@
 			// 
 			this.groupBox3.Controls.Add(this.MapViewer);
 			this.groupBox3.Location = new System.Drawing.Point(13, 24);
-			this.groupBox3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.groupBox3.Margin = new System.Windows.Forms.Padding(2);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.groupBox3.Padding = new System.Windows.Forms.Padding(2);
 			this.groupBox3.Size = new System.Drawing.Size(188, 94);
 			this.groupBox3.TabIndex = 8;
 			this.groupBox3.TabStop = false;
@@ -308,7 +308,7 @@
             this.columnHeader14,
             this.columnHeader15});
 			this.MapViewer.Location = new System.Drawing.Point(4, 28);
-			this.MapViewer.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.MapViewer.Margin = new System.Windows.Forms.Padding(2);
 			this.MapViewer.Name = "MapViewer";
 			this.MapViewer.Size = new System.Drawing.Size(180, 58);
 			this.MapViewer.TabIndex = 7;
@@ -348,10 +348,10 @@
 			this.groupBox5.Controls.Add(this.DetailViewer);
 			this.groupBox5.Controls.Add(this.ErrorViewer);
 			this.groupBox5.Location = new System.Drawing.Point(372, 61);
-			this.groupBox5.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.groupBox5.Margin = new System.Windows.Forms.Padding(2);
 			this.groupBox5.Name = "groupBox5";
-			this.groupBox5.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
-			this.groupBox5.Size = new System.Drawing.Size(437, 84);
+			this.groupBox5.Padding = new System.Windows.Forms.Padding(2);
+			this.groupBox5.Size = new System.Drawing.Size(538, 84);
 			this.groupBox5.TabIndex = 10;
 			this.groupBox5.TabStop = false;
 			this.groupBox5.Text = "Detalles";
@@ -363,10 +363,10 @@
 			this.DetailViewer.BackColor = System.Drawing.SystemColors.Window;
 			this.DetailViewer.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.DetailViewer.Location = new System.Drawing.Point(4, 17);
-			this.DetailViewer.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.DetailViewer.Margin = new System.Windows.Forms.Padding(2);
 			this.DetailViewer.MultiSelect = false;
 			this.DetailViewer.Name = "DetailViewer";
-			this.DetailViewer.Size = new System.Drawing.Size(429, 62);
+			this.DetailViewer.Size = new System.Drawing.Size(530, 62);
 			this.DetailViewer.TabIndex = 0;
 			this.DetailViewer.UseCompatibleStateImageBehavior = false;
 			this.DetailViewer.View = System.Windows.Forms.View.Details;
@@ -374,13 +374,15 @@
 			// 
 			// ErrorViewer
 			// 
+			this.ErrorViewer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.ErrorViewer.BackColor = System.Drawing.SystemColors.Window;
 			this.ErrorViewer.Location = new System.Drawing.Point(4, 17);
-			this.ErrorViewer.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.ErrorViewer.Margin = new System.Windows.Forms.Padding(2);
 			this.ErrorViewer.Multiline = true;
 			this.ErrorViewer.Name = "ErrorViewer";
 			this.ErrorViewer.ReadOnly = true;
-			this.ErrorViewer.Size = new System.Drawing.Size(429, 62);
+			this.ErrorViewer.Size = new System.Drawing.Size(530, 62);
 			this.ErrorViewer.TabIndex = 1;
 			this.ErrorViewer.Visible = false;
 			// 
@@ -397,7 +399,7 @@
 			// txtCount
 			// 
 			this.txtCount.Location = new System.Drawing.Point(64, 17);
-			this.txtCount.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.txtCount.Margin = new System.Windows.Forms.Padding(2);
 			this.txtCount.Name = "txtCount";
 			this.txtCount.ReadOnly = true;
 			this.txtCount.Size = new System.Drawing.Size(76, 20);
@@ -426,7 +428,7 @@
 			// txtTail
 			// 
 			this.txtTail.Location = new System.Drawing.Point(200, 17);
-			this.txtTail.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.txtTail.Margin = new System.Windows.Forms.Padding(2);
 			this.txtTail.Name = "txtTail";
 			this.txtTail.ReadOnly = true;
 			this.txtTail.Size = new System.Drawing.Size(76, 20);
@@ -435,7 +437,7 @@
 			// txtHead
 			// 
 			this.txtHead.Location = new System.Drawing.Point(345, 17);
-			this.txtHead.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.txtHead.Margin = new System.Windows.Forms.Padding(2);
 			this.txtHead.Name = "txtHead";
 			this.txtHead.ReadOnly = true;
 			this.txtHead.Size = new System.Drawing.Size(76, 20);
@@ -450,9 +452,9 @@
 			this.groupBox4.Controls.Add(this.label5);
 			this.groupBox4.Controls.Add(this.label4);
 			this.groupBox4.Location = new System.Drawing.Point(372, 11);
-			this.groupBox4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.groupBox4.Margin = new System.Windows.Forms.Padding(2);
 			this.groupBox4.Name = "groupBox4";
-			this.groupBox4.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.groupBox4.Padding = new System.Windows.Forms.Padding(2);
 			this.groupBox4.Size = new System.Drawing.Size(438, 46);
 			this.groupBox4.TabIndex = 9;
 			this.groupBox4.TabStop = false;
@@ -462,7 +464,7 @@
 			// 
 			this.dateFilterStart.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
 			this.dateFilterStart.Location = new System.Drawing.Point(61, 28);
-			this.dateFilterStart.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.dateFilterStart.Margin = new System.Windows.Forms.Padding(2);
 			this.dateFilterStart.Name = "dateFilterStart";
 			this.dateFilterStart.Size = new System.Drawing.Size(84, 20);
 			this.dateFilterStart.TabIndex = 11;
@@ -482,10 +484,10 @@
 			this.groupBox6.Controls.Add(this.label6);
 			this.groupBox6.Controls.Add(this.label1);
 			this.groupBox6.Controls.Add(this.dateFilterStart);
-			this.groupBox6.Location = new System.Drawing.Point(819, 11);
-			this.groupBox6.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.groupBox6.Location = new System.Drawing.Point(920, 11);
+			this.groupBox6.Margin = new System.Windows.Forms.Padding(2);
 			this.groupBox6.Name = "groupBox6";
-			this.groupBox6.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.groupBox6.Padding = new System.Windows.Forms.Padding(2);
 			this.groupBox6.Size = new System.Drawing.Size(152, 474);
 			this.groupBox6.TabIndex = 12;
 			this.groupBox6.TabStop = false;
@@ -496,7 +498,7 @@
 			this.butExport2numCSV.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.butExport2numCSV.Location = new System.Drawing.Point(10, 368);
-			this.butExport2numCSV.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.butExport2numCSV.Margin = new System.Windows.Forms.Padding(2);
 			this.butExport2numCSV.Name = "butExport2numCSV";
 			this.butExport2numCSV.Size = new System.Drawing.Size(134, 34);
 			this.butExport2numCSV.TabIndex = 20;
@@ -509,7 +511,7 @@
 			this.butExport2CSV.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.butExport2CSV.Location = new System.Drawing.Point(10, 422);
-			this.butExport2CSV.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.butExport2CSV.Margin = new System.Windows.Forms.Padding(2);
 			this.butExport2CSV.Name = "butExport2CSV";
 			this.butExport2CSV.Size = new System.Drawing.Size(134, 34);
 			this.butExport2CSV.TabIndex = 10;
@@ -524,7 +526,7 @@
 			this.chkboxShowOp.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.chkboxShowOp.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.chkboxShowOp.Location = new System.Drawing.Point(10, 130);
-			this.chkboxShowOp.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.chkboxShowOp.Margin = new System.Windows.Forms.Padding(2);
 			this.chkboxShowOp.Name = "chkboxShowOp";
 			this.chkboxShowOp.Size = new System.Drawing.Size(129, 21);
 			this.chkboxShowOp.TabIndex = 19;
@@ -539,7 +541,7 @@
 			this.chkboxShowErrors.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.chkboxShowErrors.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.chkboxShowErrors.Location = new System.Drawing.Point(10, 162);
-			this.chkboxShowErrors.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.chkboxShowErrors.Margin = new System.Windows.Forms.Padding(2);
 			this.chkboxShowErrors.Name = "chkboxShowErrors";
 			this.chkboxShowErrors.Size = new System.Drawing.Size(125, 21);
 			this.chkboxShowErrors.TabIndex = 18;
@@ -554,7 +556,7 @@
 			this.chkboxShowInvalid.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.chkboxShowInvalid.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.chkboxShowInvalid.Location = new System.Drawing.Point(10, 98);
-			this.chkboxShowInvalid.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.chkboxShowInvalid.Margin = new System.Windows.Forms.Padding(2);
 			this.chkboxShowInvalid.Name = "chkboxShowInvalid";
 			this.chkboxShowInvalid.Size = new System.Drawing.Size(134, 21);
 			this.chkboxShowInvalid.TabIndex = 17;
@@ -566,7 +568,7 @@
 			// 
 			this.butClearFilter.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.butClearFilter.Location = new System.Drawing.Point(20, 263);
-			this.butClearFilter.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.butClearFilter.Margin = new System.Windows.Forms.Padding(2);
 			this.butClearFilter.Name = "butClearFilter";
 			this.butClearFilter.Size = new System.Drawing.Size(109, 34);
 			this.butClearFilter.TabIndex = 16;
@@ -578,7 +580,7 @@
 			// 
 			this.butSetFilter.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.butSetFilter.Location = new System.Drawing.Point(20, 212);
-			this.butSetFilter.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.butSetFilter.Margin = new System.Windows.Forms.Padding(2);
 			this.butSetFilter.Name = "butSetFilter";
 			this.butSetFilter.Size = new System.Drawing.Size(109, 34);
 			this.butSetFilter.TabIndex = 15;
@@ -590,7 +592,7 @@
 			// 
 			this.dateFilterEnd.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
 			this.dateFilterEnd.Location = new System.Drawing.Point(61, 58);
-			this.dateFilterEnd.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+			this.dateFilterEnd.Margin = new System.Windows.Forms.Padding(2);
 			this.dateFilterEnd.Name = "dateFilterEnd";
 			this.dateFilterEnd.Size = new System.Drawing.Size(84, 20);
 			this.dateFilterEnd.TabIndex = 14;
@@ -625,7 +627,7 @@
 			this.statstrFilePath.Location = new System.Drawing.Point(0, 483);
 			this.statstrFilePath.Name = "statstrFilePath";
 			this.statstrFilePath.Padding = new System.Windows.Forms.Padding(1, 0, 10, 0);
-			this.statstrFilePath.Size = new System.Drawing.Size(983, 22);
+			this.statstrFilePath.Size = new System.Drawing.Size(1084, 22);
 			this.statstrFilePath.TabIndex = 13;
 			this.statstrFilePath.Text = "Ningun archivo elegido.";
 			// 
@@ -638,7 +640,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(983, 505);
+			this.ClientSize = new System.Drawing.Size(1084, 505);
 			this.Controls.Add(this.statstrFilePath);
 			this.Controls.Add(this.groupBox6);
 			this.Controls.Add(this.groupBox4);
