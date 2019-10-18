@@ -532,7 +532,7 @@ public class ArchiveInterpreter
 	{
 
 		EntryType retVal = EntryType.NO_DATA;
-		if (item.BackColor == ERROR_ENTRY_COLOR && item.ForeColor != INVALID_ENTRY_FORECOLOR)  // If else, item.ForeColor == FORE_COLOR_BAD_DATA, return NO_DATA
+		if (item.BackColor == ERROR_ENTRY_COLOR)
 			retVal = EntryType.ERROR_DATA;
 		else if (item.BackColor == OP_ENTRY_COLOR)
 			retVal = EntryType.OP_HISTORY;
