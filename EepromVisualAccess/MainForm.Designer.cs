@@ -46,17 +46,17 @@
             }
         }
 
-        static string[] PLC_MATCHING_VERSION = { "V2.2.8", "V0.0.2" };
+        static string[] PLC_MATCHING_VERSION = { "V2.2.8", "V0.0.3", "V2.1.0" };
         // Defined Archive parameters for: { A40TR, A80TR, W90TR } 
-        static int[] ENTIRE_DATA_SIZE = { 32588, 32616 };
-        static int[] METADATA_ADDRESS = { 180, 152 };
-        static int[] METADATA_SIZE = { 8, 8 };
-        static int[] MAP_ADDRESS = { 191, 160 };
-        static int[] MAP_SIZE = { 97, 128 };
-        static int[] ARCHIVE_ADDRESS = { 288, 288 };
-        static int[] ARCHIVE_SIZE = { 32480, 32480 };
-        static int[] OP_ENTRY_SIZE = { 9, 12 };
-        static int[] ERROR_ENTRY_SIZE = { 3, 3 };
+        static int[] ENTIRE_DATA_SIZE = { 32588, 32616,  32632};
+        static int[] METADATA_ADDRESS = { 180, 152, 136 };
+        static int[] METADATA_SIZE = { 8, 8, 8 };
+        static int[] MAP_ADDRESS = { 191, 160, 144 };
+        static int[] MAP_SIZE = { 97, 128, 142 };
+        static int[] ARCHIVE_ADDRESS = { 288, 288, 288 };
+        static int[] ARCHIVE_SIZE = { 32480, 32480, 32480 };
+        static int[] OP_ENTRY_SIZE = { 9, 12, 13 };
+        static int[] ERROR_ENTRY_SIZE = { 3, 3, 3 };
 
         static byte[] BACK_COLOR_OP = new byte[3] { 135, 206, 235 };
         static byte[] BACK_COLOR_ERROR = new byte[3] { 255, 165, 119 };
@@ -209,7 +209,8 @@
 			this.modelSelector.FormattingEnabled = true;
 			this.modelSelector.Items.AddRange(new object[] {
             "GWF-A-20/30/40TR",
-            "GWF-A-80TR"});
+            "GWF-A-80TR",
+            "GWF-W-90TR"});
 			this.modelSelector.Location = new System.Drawing.Point(8, 40);
 			this.modelSelector.Margin = new System.Windows.Forms.Padding(2);
 			this.modelSelector.Name = "modelSelector";
@@ -650,6 +651,7 @@
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "MainForm";
 			this.Text = "Archive Reader - Lector de historiales";
+			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

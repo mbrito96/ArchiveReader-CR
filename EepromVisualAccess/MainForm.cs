@@ -46,13 +46,13 @@ public class ArchiveInterpreter
 					archiveViewer.Columns.Add("#", 43);
 					archiveViewer.Columns.Add("Fecha/Hora", 145);
 					archiveViewer.Columns.Add("Codigo", 55);
-					archiveViewer.Columns.Add("Temp Ent/ Parametro", 120);
+					archiveViewer.Columns.Add("Temp Ent / Parametro", 120);
 					archiveViewer.Columns.Add("Temp Sal.", 65);
 					archiveViewer.Columns.Add("Temp Evap.", 70);
 					archiveViewer.Columns.Add("Temp Amb.", 65);
 					archiveViewer.Columns.Add("P. Alta", 60);
 					archiveViewer.Columns.Add("P. Baja", 60);
-					archiveViewer.Columns.Add("P. Dif", 65);
+					archiveViewer.Columns.Add("P. Aceite", 65);
 
 					detailViewer.Columns.Add("Estado", 62);
 					detailViewer.Columns.Add("FS", 30);
@@ -66,16 +66,16 @@ public class ArchiveInterpreter
 					archiveViewer.Columns.Add("#", 43);
 					archiveViewer.Columns.Add("Fecha/Hora", 145);
 					archiveViewer.Columns.Add("Codigo", 55);
-					archiveViewer.Columns.Add("Temp Ent/ Parametro", 120);
+					archiveViewer.Columns.Add("Temp Ent / Parametro", 120);
 					archiveViewer.Columns.Add("Temp Sal.", 65);
 					archiveViewer.Columns.Add("Temp Evap.", 70);
 					archiveViewer.Columns.Add("Temp Amb.", 65);
-					archiveViewer.Columns.Add("P. A Alta", 60);
-					archiveViewer.Columns.Add("P. A Baja", 60);
-					archiveViewer.Columns.Add("P. A Dif", 65);
-					archiveViewer.Columns.Add("P. B Alta", 60);
-					archiveViewer.Columns.Add("P. B Baja", 60);
-					archiveViewer.Columns.Add("P. B Dif", 65);
+					archiveViewer.Columns.Add("P. Alta A", 60);
+					archiveViewer.Columns.Add("P. Baja A", 60);
+					archiveViewer.Columns.Add("P. Aceite A", 65);
+					archiveViewer.Columns.Add("P. Alta B", 60);
+					archiveViewer.Columns.Add("P. Baja B", 60);
+					archiveViewer.Columns.Add("P. Aceite B", 65);
 
 					detailViewer.Columns.Add("Modo", 62);
 					detailViewer.Columns.Add("Estado", 62);
@@ -89,6 +89,33 @@ public class ArchiveInterpreter
 					detailViewer.Columns.Add("V.B2", 38);
 					detailViewer.Columns.Add("V.B3", 38);
 					detailViewer.Columns.Add("Bomba", 50);
+					break;
+			case MacModel.W90TR:
+					archiveViewer.Columns.Add("#", 43);
+					archiveViewer.Columns.Add("Fecha/Hora", 145);
+					archiveViewer.Columns.Add("Codigo", 55);
+					archiveViewer.Columns.Add("Temp Ent / Parametro", 120);
+					archiveViewer.Columns.Add("Temp Sal.", 65);
+					archiveViewer.Columns.Add("Temp Evap.", 70);
+					archiveViewer.Columns.Add("Temp Ent. Cond.", 100);
+					archiveViewer.Columns.Add("P. Alta (T)", 60);
+					archiveViewer.Columns.Add("P. Baja (T)", 65);
+					archiveViewer.Columns.Add("P. Aceite A (T)", 83);
+					archiveViewer.Columns.Add("P. Aceite B (T)", 83);
+					archiveViewer.Columns.Add("P. Alta (S)", 60);
+					archiveViewer.Columns.Add("P. Baja (S)", 65);
+					archiveViewer.Columns.Add("P. Aceite (S)", 83);
+
+					detailViewer.Columns.Add("Modo", 62);
+					detailViewer.Columns.Add("Estado", 62);
+					detailViewer.Columns.Add("FS Evap.", 62);
+					detailViewer.Columns.Add("FS Cond.", 62);
+					detailViewer.Columns.Add("Cmp. T_A", 62);
+					detailViewer.Columns.Add("Cmp. T_B", 62);
+					detailViewer.Columns.Add("Cmp. S", 50);
+					detailViewer.Columns.Add("Vent. Torre", 68);
+					detailViewer.Columns.Add("Bomba Evap.", 80);
+					detailViewer.Columns.Add("Bomba Cond.", 80);
 					break;
 		}
 	}
@@ -550,6 +577,9 @@ public class ArchiveInterpreter
 			case MacModel.A80TR:
 					A80TR_DecodeDigitalCell(item, code);
 					break;
+			case MacModel.W90TR:
+					W90TR_DecodeDigitalCell(item, code);
+					break;
 		}
 
 	}
@@ -665,6 +695,70 @@ public class ArchiveInterpreter
 		item.SubItems.Add(tempStr);  // Vent B3
 
 		item.SubItems.Add( (digitalCell >> 17 & 0x1)==0 ? "0" : "-1" );    // Consumo Bomba agua
+	}
+
+	void W90TR_DecodeDigitalCell(ListViewItem item, Int32 digitalCell)
+	{
+		String text;
+		Byte opMode = (Byte)((digitalCell >> 14) & 0x3);
+		switch(opMode)
+		{
+			case 0x00:
+					text = "90TR";
+					break;
+			case 0x01:
+					text = "45TR-BAL";
+					break;
+			case 0x02:
+					text = "60TR";
+					break;
+			case 0x03:
+					text = "30TR-B";
+					break;
+			default:
+					text = "...";
+					break;
+		}
+		item.Text = text;   // Save machine Operation Mode
+
+		Byte status = (Byte)((digitalCell >> 12) & 0x3);
+		switch (status)
+		{
+			case 0x00:
+					text = "LISTO";
+					break;
+			case 0x01:
+					text = "COOLING";
+					break;
+			case 0x02:
+					text = "OPERANDO";
+					break;
+			case 0x03:
+					text = "POSTOP";
+					break;
+			default:
+					text = "...";
+					break;
+		}
+		item.SubItems.Add(text);    // Save machine status
+		
+		item.SubItems.Add((digitalCell & 0x1).ToString());  // Flowswitch evaporador
+		item.SubItems.Add((digitalCell>>1 & 0x1).ToString());  // Flowswitch condensador
+
+		String tempStr = (digitalCell >> 6 & 0x1) == 0 ? (digitalCell >> 2 & 0x1).ToString() : "-1";   // -1 if Consumo Cmp A = 1, else store Cmp A ON/OFF value
+		item.SubItems.Add(tempStr);  // Compressor Tandem A
+
+		tempStr = (digitalCell >> 7 & 0x1) == 0 ? (digitalCell >> 3 & 0x1).ToString() : "-1";   // -1 if Consumo Cmp B = 1, else store Cmp B ON/OFF value
+		item.SubItems.Add(tempStr);  // Compressor Tandem B
+		
+		tempStr = (digitalCell >> 8 & 0x1) == 0 ? (digitalCell >> 4 & 0x1).ToString() : "-1";   // -1 if Consumo Cmp B = 1, else store Cmp B ON/OFF value
+		item.SubItems.Add(tempStr);  // Compressor Solus
+
+		tempStr = (digitalCell >> 9 & 0x1) == 0 ? (digitalCell >> 5 & 0x1).ToString() : "-1";   // -1 if Consumo Vent A1 = 1, else store Vent A1 ON/OFF value
+		item.SubItems.Add(tempStr);  // Vent Torre
+
+		item.SubItems.Add( (digitalCell >> 10 & 0x1)==0 ? "0" : "-1" );    // Consumo Bomba agua evaporador
+		item.SubItems.Add( (digitalCell >> 11 & 0x1)==0 ? "0" : "-1" );    // Consumo Bomba agua condensador
 	}
 }
 

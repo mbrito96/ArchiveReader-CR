@@ -42,7 +42,8 @@
 			this.modelSelector.FormattingEnabled = true;
 			this.modelSelector.Items.AddRange(new object[] {
             "GWF-A-20/30/40TR",
-            "GWF-A-80TR"});
+            "GWF-A-80TR",
+			"GWF-W-90TR"});
 			this.modelSelector.Location = new System.Drawing.Point(36, 21);
 			this.modelSelector.Margin = new System.Windows.Forms.Padding(2);
 			this.modelSelector.Name = "modelSelector";
