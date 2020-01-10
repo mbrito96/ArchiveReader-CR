@@ -45,8 +45,8 @@
                     return errorEntrySize;
             }
         }
-
-        static string[] PLC_MATCHING_VERSION = { "V2.2.8", "V0.0.3", "V2.1.0" };
+		
+        static string[] PLC_MATCHING_VERSION = { "V2.4.0", "V1.0.0", "V2.1.3" };
         // Defined Archive parameters for: { A40TR, A80TR, W90TR } 
         static int[] ENTIRE_DATA_SIZE = { 32588, 32616,  32632};
         static int[] METADATA_ADDRESS = { 180, 152, 136 };
@@ -650,7 +650,7 @@
 			this.Controls.Add(this.groupBox1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "MainForm";
-			this.Text = "Archive Reader - Lector de historiales";
+			this.Text = "Archive Reader - Lector de historiales - V1.9";
 			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
