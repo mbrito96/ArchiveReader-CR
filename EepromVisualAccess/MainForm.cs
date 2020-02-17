@@ -553,6 +553,207 @@ public class ArchiveInterpreter
 			}
 			#endregion
 		}
+		else if(model == MacModel.W90TR)
+		{
+			#region GWF-90TR ErrorMessages
+			switch (code)
+			{
+				case "00":          //ERR_SENSOR
+				{
+					try
+					{
+						float vinPin = float.Parse(param);
+						errorString += "Valor de sensores no coherentes. Entrada VIN" + vinPin.ToString("f0");
+					}
+					catch(FormatException)
+					{
+						errorString += "Valor de sensores no coherentes. Entrada VIN" + param;
+					}
+					break;
+				}
+				case "01":      // ERR_TEMP_IN_SENSOR
+				{
+					errorString += "Valor improbable en sensor de temperatura de entrada. Valor: " + param + " C";
+					break;
+				}
+				case "02":      // ERR_TEMP_OUT_SENSOR
+				{
+					errorString += "Valor improbable en sensor de temperatura de salida. Valor: " + param + " C";
+					break;
+				}
+				case "03":      // ERR_TEMP_EV_SENSOR
+				{
+					errorString += "Valor improbable en sensor de temperatura del evaporador. Valor: " + param + " C";
+					break;
+				}
+				case "04":      // ERR_TEMP_AMB_SENSOR
+				{
+					errorString += "Valor improbable en sensor de temperatura de entrada del condensador. Valor: " + param + " C";
+					break;
+				}
+				case "05":      // ERR_EEPROM_READ
+				{
+					errorString += "Falla lectura EEPROM. Direccion: " + param;
+					break;
+				}
+				case "06":      // ERR_EEPROM_WRITE
+				{
+					errorString += "Falla escritura EEPROM. Direccion: " + param;
+					break;
+				}
+				case "07":      // ERR_OP_VALUES
+				{
+					errorString += "SetPoint recuperado de memoria no coherente. \n Se configuraron los valores por defecto.";
+					break;
+				}
+				case "08":      // ERR_CREATE_TIMEOUT
+				{
+					errorString += "Error al crear Timeout " + param;
+					break;
+				}
+				case "09":      // ERR_CREATE_TIMER
+				{
+					errorString += "Error al crear Timer " + param;
+					break;
+				}
+				case "0A":      // ERR_SYS_WATCHDOG
+				{
+					errorString += "System Watchdog. Se continuó la operacion normalmente.";
+					break;
+				}
+				case "0B":      // ERR_REG_A_COUNT
+				{
+					errorString += "Error operando el registro A. Chequear conexiones del multiplexor.";
+					break;
+				}
+				case "0C":      // ERR_FATAL_ERROR
+				{
+					errorString += "Excepcion no manejada. Imposible operar.";
+					break;
+				}
+				case "0D":      // ERR_ARCHIVE_INIT
+				{
+					errorString += "Error iniciando historial. Se perdieron los datos pasados.";
+					break;
+				}
+				case "0E":      // ERR_RTC_FAIL
+				{
+					errorString += "Fecha y hora invalida.";
+					break;
+				}
+				case "0F":      // ERR_MAIL_SENDING
+				{
+					errorString += "Error al intentar envío de email. Verifique conexión a internet.";
+					break;
+				}
+				case "10":      // ERR_MAIL_SYSTEM
+				{
+					errorString += "Falla durante el envío de mail.";
+					break;
+				}
+				case "11":      // ERR_FLOW_EV
+				{
+					errorString += "FlowSwitch Evaporador.";
+					break;
+				}
+				case "12":      // ERR_FLOW_CO
+				{
+					errorString += "FlowSwitch Condensador.";
+					break;
+				}
+				case "13":      // ERR_P_HIGH_T
+				{
+					errorString += "Presion alta circuito Tandem fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "14":      // ERR_P_HIGH_S
+				{
+					errorString += "Presion alta circuito Solus fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "15":      // ERR_P_LOW_T
+				{
+					errorString += "Presion baja circuito Tandem fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "16":      // ERR_P_LOW_S
+				{
+					errorString += "Presion baja circuito Solus fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "17":      // ERR_P_DIF_TA
+				{
+					errorString += "Presion diferencial circuito Tandem A fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "18":      // ERR_P_DIF_TB
+				{
+					errorString += "Presion diferencial circuito Tandem B fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "19":      // ERR_P_DIF_S
+				{
+					errorString += "Presion diferencial circuito Solus fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "1A":      // ERR_T_CRIT
+				{
+					errorString += "Temp. evaporador subcritica: " + param + " C";
+					break;
+				}
+				case "1B":      // ERR_T_MAX
+				{
+					errorString += "Temperatura por encima de máxima: " + param + " C";
+					break;
+				}
+				case "1C":      // ERR_COOLDOWN_T
+				{
+					errorString += "Imposible disminuir P. alta del circuito Tandem en etapa de arranque." + Environment.NewLine + "Presion alta: " + param + " PSI";
+					break;
+				}
+				case "1D":      // ERR_COOLDOWN_S
+				{
+					errorString += "Imposible disminuir P. alta del circuito Solus en etapa de arranque." + Environment.NewLine + "Presion alta: " + param + " PSI";
+					break;
+				}
+				case "1E":      // ERR_COMP_OL_TA
+				{
+					errorString += "Consumo compresor Tandem A.";
+					break;
+				}
+				case "1F":      // ERR_COMP_OL_TB
+				{
+					errorString += "Consumo compresor Tandem B.";
+					break;
+				}
+				case "20":      // ERR_COMP_OL_S
+				{
+					errorString += "Consumo compresor Solus.";
+					break;
+				}
+				case "21":      // ERR_CMP_WATCHDOG
+				{
+					errorString += "Compressor Watchdog.";
+					break;
+				}
+				case "22":      // ERR_VENT1_OL
+				{
+					errorString += "Consumo ventilador torre de agua.";
+					break;
+				}
+				case "23":      // ERR_PUMP_EV_OL
+				{
+					errorString += "Consumo bomba de agua del evaporador.";
+					break;
+				}
+				case "24":      // ERR_PUMP_CO_OL
+				{
+					errorString += "Consumo bomba de agua del condensador.";
+					break;
+				}
+			}
+			#endregion
+		}
 		return errorString;
 	}
 	public EntryType GetEntryType(ListViewItem item)
@@ -700,23 +901,32 @@ public class ArchiveInterpreter
 	void W90TR_DecodeDigitalCell(ListViewItem item, Int32 digitalCell)
 	{
 		String text;
-		Byte opMode = (Byte)((digitalCell >> 14) & 0x3);
+		Byte opMode = (Byte)((digitalCell >> 14) & 0x7);
 		switch(opMode)
 		{
-			case 0x00:
-					text = "90TR";
-					break;
 			case 0x01:
-					text = "45TR-BAL";
+					text = "30TR-A";
 					break;
 			case 0x02:
-					text = "60TR";
-					break;
-			case 0x03:
 					text = "30TR-B";
 					break;
+			case 0x03:
+					text = "60TR";
+					break;
+			case 0x04:
+					text = "30TR-S";
+					break;
+			case 0x05:
+					text = "60TR-A";
+					break;
+			case 0x06:
+					text = "60TR-B";
+					break;
+			case 0x07:
+					text = "90TR";
+					break;
 			default:
-					text = "...";
+					text = "-";
 					break;
 		}
 		item.Text = text;   // Save machine Operation Mode
@@ -745,13 +955,13 @@ public class ArchiveInterpreter
 		item.SubItems.Add((digitalCell & 0x1).ToString());  // Flowswitch evaporador
 		item.SubItems.Add((digitalCell>>1 & 0x1).ToString());  // Flowswitch condensador
 
-		String tempStr = (digitalCell >> 6 & 0x1) == 0 ? (digitalCell >> 2 & 0x1).ToString() : "-1";   // -1 if Consumo Cmp A = 1, else store Cmp A ON/OFF value
+		String tempStr = (digitalCell >> 6 & 0x1) == 0 ? (digitalCell >> 2 & 0x1).ToString() : "-1";   // -1 if fit status Cmp A = 1, else store Cmp A ON/OFF value
 		item.SubItems.Add(tempStr);  // Compressor Tandem A
 
-		tempStr = (digitalCell >> 7 & 0x1) == 0 ? (digitalCell >> 3 & 0x1).ToString() : "-1";   // -1 if Consumo Cmp B = 1, else store Cmp B ON/OFF value
+		tempStr = (digitalCell >> 7 & 0x1) == 0 ? (digitalCell >> 3 & 0x1).ToString() : "-1";   // -1 if fit status Cmp B = 1, else store Cmp B ON/OFF value
 		item.SubItems.Add(tempStr);  // Compressor Tandem B
 		
-		tempStr = (digitalCell >> 8 & 0x1) == 0 ? (digitalCell >> 4 & 0x1).ToString() : "-1";   // -1 if Consumo Cmp B = 1, else store Cmp B ON/OFF value
+		tempStr = (digitalCell >> 8 & 0x1) == 0 ? (digitalCell >> 4 & 0x1).ToString() : "-1";   // -1 if fit status Cmp B = 1, else store Cmp B ON/OFF value
 		item.SubItems.Add(tempStr);  // Compressor Solus
 
 		tempStr = (digitalCell >> 9 & 0x1) == 0 ? (digitalCell >> 5 & 0x1).ToString() : "-1";   // -1 if Consumo Vent A1 = 1, else store Vent A1 ON/OFF value
