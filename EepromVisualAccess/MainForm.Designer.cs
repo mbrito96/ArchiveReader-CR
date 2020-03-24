@@ -9,7 +9,7 @@
             NO_DATA,
             ERROR_DATA,
             OP_HISTORY,
-            MSG_DATA
+            EVENT_DATA
         }
         public enum OpStatus : byte
         {
@@ -22,7 +22,8 @@
         {
             A40TR,
             A80TR,
-            W90TR
+            W90TR,
+			A100TR
         }
 
         static class ArchiveInfo
@@ -35,35 +36,36 @@
             regFileAddress,
             regFileSize;
 
-            public static int opEntrySize, errorEntrySize;
+            public static int opEntrySize, errorEntrySize, eventEntrySize;
 
             public static int MaxEntrySize()
             {
-                if (opEntrySize > errorEntrySize)
-                    return opEntrySize;
-                else
-                    return errorEntrySize;
+				return opEntrySize;
             }
         }
 		
-        static string[] PLC_MATCHING_VERSION = { "V2.4.0", "V1.0.0", "V2.2.0" };
-        // Defined Archive parameters for: { A40TR, A80TR, W90TR } 
-        static int[] ENTIRE_DATA_SIZE = { 32588, 32616,  32632};
-        static int[] METADATA_ADDRESS = { 180, 152, 136 };
-        static int[] METADATA_SIZE = { 8, 8, 8 };
-        static int[] MAP_ADDRESS = { 191, 160, 144 };
-        static int[] MAP_SIZE = { 97, 128, 142 };
-        static int[] ARCHIVE_ADDRESS = { 288, 288, 288 };
-        static int[] ARCHIVE_SIZE = { 32480, 32480, 32480 };
-        static int[] OP_ENTRY_SIZE = { 9, 12, 13 };
-        static int[] ERROR_ENTRY_SIZE = { 3, 3, 3 };
+		static string ARCHIVE_VERSION = "V2.1";
+        static string[] PLC_MATCHING_VERSION = { "V2.4.0", "V1.0.0", "V2.2.0", "V0.0.0" };
+        // Defined Archive parameters for: { A40TR, A80TR, W90TR, A100TR } 
+        static int[] ENTIRE_DATA_SIZE = { 32588, 32616,  32632, 32576};
+        static int[] METADATA_ADDRESS = { 180, 152, 136, 192};
+        static int[] METADATA_SIZE = { 8, 8, 8, 8 };
+        static int[] MAP_ADDRESS = { 191, 160, 144, 204 };
+        static int[] MAP_SIZE = { 97, 128, 142, 0 };
+        static int[] ARCHIVE_ADDRESS = { 288, 288, 288, 204 };
+        static int[] ARCHIVE_SIZE = { 32480, 32480, 32480, 32564 };
+        static int[] OP_ENTRY_SIZE = { 9, 12, 13, 15 };
+        static int[] ERROR_ENTRY_SIZE = { 3, 3, 3, 3 };
+        static int[] EVENT_ENTRY_SIZE = { 2, 2, 2, 2 };
 
         static byte[] BACK_COLOR_OP = new byte[3] { 135, 206, 235 };
         static byte[] BACK_COLOR_ERROR = new byte[3] { 255, 165, 119 };
+        static byte[] BACK_COLOR_EVENT = new byte[3] { 255, 220, 23 };
         static byte[] FORE_COLOR_BAD_DATA = new byte[3] { 229, 5, 5 };
 
         private const byte OP_HISTORY_MASK = (0x80);
         private const byte ERROR_MASK = (0x40);
+        private const byte EVENT_MASK = (0xC0);
         // Defines for accessing entry subItems
         private const int NUMBER = 0;
         private const int DATE = 1;
@@ -126,7 +128,6 @@
 			this.butLoadFile = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.deletedEntries = new System.Windows.Forms.ListView();
-			this.ArchiveViewer = new System.Windows.Forms.ListView();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this.MapViewer = new System.Windows.Forms.ListView();
 			this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -134,6 +135,7 @@
 			this.columnHeader13 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader14 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.columnHeader15 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.ArchiveViewer = new System.Windows.Forms.ListView();
 			this.groupBox5 = new System.Windows.Forms.GroupBox();
 			this.DetailViewer = new System.Windows.Forms.ListView();
 			this.ErrorViewer = new System.Windows.Forms.TextBox();
@@ -210,7 +212,8 @@
 			this.modelSelector.Items.AddRange(new object[] {
             "GWF-A-20/30/40TR",
             "GWF-A-80TR",
-            "GWF-W-90TR"});
+            "GWF-W-90TR",
+            "GWF-A-100TR"});
 			this.modelSelector.Location = new System.Drawing.Point(8, 40);
 			this.modelSelector.Margin = new System.Windows.Forms.Padding(2);
 			this.modelSelector.Name = "modelSelector";
@@ -248,8 +251,8 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBox2.Controls.Add(this.deletedEntries);
-			this.groupBox2.Controls.Add(this.ArchiveViewer);
 			this.groupBox2.Controls.Add(this.groupBox3);
+			this.groupBox2.Controls.Add(this.ArchiveViewer);
 			this.groupBox2.Location = new System.Drawing.Point(15, 147);
 			this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
 			this.groupBox2.Name = "groupBox2";
@@ -269,24 +272,6 @@
 			this.deletedEntries.UseCompatibleStateImageBehavior = false;
 			this.deletedEntries.Visible = false;
 			// 
-			// ArchiveViewer
-			// 
-			this.ArchiveViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.ArchiveViewer.AutoArrange = false;
-			this.ArchiveViewer.FullRowSelect = true;
-			this.ArchiveViewer.GridLines = true;
-			this.ArchiveViewer.Location = new System.Drawing.Point(13, 24);
-			this.ArchiveViewer.Margin = new System.Windows.Forms.Padding(2);
-			this.ArchiveViewer.MultiSelect = false;
-			this.ArchiveViewer.Name = "ArchiveViewer";
-			this.ArchiveViewer.Size = new System.Drawing.Size(870, 310);
-			this.ArchiveViewer.TabIndex = 0;
-			this.ArchiveViewer.UseCompatibleStateImageBehavior = false;
-			this.ArchiveViewer.View = System.Windows.Forms.View.Details;
-			this.ArchiveViewer.SelectedIndexChanged += new System.EventHandler(this.ArchiveViewer_SelectedIndexChanged);
-			// 
 			// groupBox3
 			// 
 			this.groupBox3.Controls.Add(this.MapViewer);
@@ -294,7 +279,7 @@
 			this.groupBox3.Margin = new System.Windows.Forms.Padding(2);
 			this.groupBox3.Name = "groupBox3";
 			this.groupBox3.Padding = new System.Windows.Forms.Padding(2);
-			this.groupBox3.Size = new System.Drawing.Size(188, 94);
+			this.groupBox3.Size = new System.Drawing.Size(272, 309);
 			this.groupBox3.TabIndex = 8;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Mapa de memoria";
@@ -311,7 +296,7 @@
 			this.MapViewer.Location = new System.Drawing.Point(4, 28);
 			this.MapViewer.Margin = new System.Windows.Forms.Padding(2);
 			this.MapViewer.Name = "MapViewer";
-			this.MapViewer.Size = new System.Drawing.Size(180, 58);
+			this.MapViewer.Size = new System.Drawing.Size(264, 268);
 			this.MapViewer.TabIndex = 7;
 			this.MapViewer.UseCompatibleStateImageBehavior = false;
 			this.MapViewer.View = System.Windows.Forms.View.Details;
@@ -341,6 +326,24 @@
 			// 
 			this.columnHeader15.Text = "3";
 			this.columnHeader15.Width = 31;
+			// 
+			// ArchiveViewer
+			// 
+			this.ArchiveViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.ArchiveViewer.AutoArrange = false;
+			this.ArchiveViewer.FullRowSelect = true;
+			this.ArchiveViewer.GridLines = true;
+			this.ArchiveViewer.Location = new System.Drawing.Point(13, 24);
+			this.ArchiveViewer.Margin = new System.Windows.Forms.Padding(2);
+			this.ArchiveViewer.MultiSelect = false;
+			this.ArchiveViewer.Name = "ArchiveViewer";
+			this.ArchiveViewer.Size = new System.Drawing.Size(870, 310);
+			this.ArchiveViewer.TabIndex = 0;
+			this.ArchiveViewer.UseCompatibleStateImageBehavior = false;
+			this.ArchiveViewer.View = System.Windows.Forms.View.Details;
+			this.ArchiveViewer.SelectedIndexChanged += new System.EventHandler(this.ArchiveViewer_SelectedIndexChanged);
 			// 
 			// groupBox5
 			// 
@@ -650,7 +653,7 @@
 			this.Controls.Add(this.groupBox1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "MainForm";
-			this.Text = "Archive Reader - Lector de historiales - V1.9";
+			this.Text = "Archive Reader - Lector de historiales - " + ARCHIVE_VERSION;
 			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
