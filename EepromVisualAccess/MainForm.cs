@@ -926,7 +926,7 @@ private void GetEntries(byte[] EepromBytes)
 		else
 		{
 			MessageBox.Show(String.Format("Error reconociendo tipo de entrada. (Indice: {0}).", i), "Error en datos de registro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-			//ReadingAttempt presumedReg = TryMoveForward(EepromBytes, i, 1, (float)-100, (float)600.5);
+			ReadingAttempt presumedReg = TryMoveForward(EepromBytes, i, 1, (float)-100, (float)600.5);
 			done = !presumedReg.success;
 			break;
 		}
