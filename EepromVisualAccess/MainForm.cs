@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections;
@@ -905,7 +906,8 @@ private void GetEntries(byte[] EepromBytes)
 		MessageBox.Show("No hay niguna entrada guardada en el historial.", "Historial vacío", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 	}
 	
-
+	int badEntryCount = 0;
+	EntryType entryAttempt = EntryType.NO_DATA;	// True if the last entry pushed to viewer was an attempt
 	while (done == false)
 	{
 		#region GET ENTRY FROM BUFFER
@@ -924,7 +926,8 @@ private void GetEntries(byte[] EepromBytes)
 		else
 		{
 			MessageBox.Show(String.Format("Error reconociendo tipo de entrada. (Indice: {0}).", i), "Error en datos de registro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-			done = true;
+			//ReadingAttempt presumedReg = TryMoveForward(EepromBytes, i, 1, (float)-100, (float)600.5);
+			done = !presumedReg.success;
 			break;
 		}
 
@@ -941,7 +944,7 @@ private void GetEntries(byte[] EepromBytes)
 			Array.Copy(EepromBytes, 0, entryArray, dataSize1 * 4, dataSize2 * 4);
 		}
 		#endregion GET ENTRY FROM BUFFER
-
+		
 		entry = new ListViewItem("");
 		if (arch1.ProcessEntry(entryArray, type, entry) == false)
 			dataError = true;
@@ -970,7 +973,76 @@ private void GetEntries(byte[] EepromBytes)
 		entry = new ListViewItem("...");
 		ArchiveViewer.Items.Add(entry);
 	}
+}
 
+struct ReadingAttempt{
+	public bool success;	// True if attempt was successfull
+	public List <EntryType> entryList;	// List of entry types recognized
+	public int reachedDepth;	// The depth of recursion necessary to get the result
+
+	public ReadingAttempt(int MAX_DEPTH)
+	{
+		success = false;
+		reachedDepth = 1;
+		entryList = new List<EntryType>(MAX_DEPTH);
+	}
+}
+
+private ReadingAttempt TryMoveForward(byte[] EepromBytes, int startingIndex, int maxDepth, float paramMinValue, float paramMaxValue)
+{
+	ReadingAttempt val = new ReadingAttempt(maxDepth);
+	int[] entrySizes = {ArchiveInfo.errorEntrySize, ArchiveInfo.opEntrySize};	// CAUTION: From smaller to bigger entry size
+	int entrySizeIndex = -1;	// First run will try to read both entry types at startingIndex.
+	int index = startingIndex;
+
+	while(val.success == false && val.reachedDepth <= maxDepth)
+	{
+		byte id = (byte)(EepromBytes[(index * 4 + 7) % EepromBytes.Length] & (0xC0));	// Get entry type
+		if (id == OP_HISTORY_MASK || id == ERROR_MASK)
+		{
+			// Grab next cell (param cell) to check. Param should be float between paramMinValue and paramMaxValue
+			byte[] value = new byte[4];
+			if ((index + 1) <= EepromBytes.Length / 4)   // If entire value available:  
+				Array.Copy(EepromBytes, (index+1)* 4, value, 0, 4);   
+			else // Else, must wrap around buffer:
+			{
+				int dataSize2 = ((index+1)*4 + 4) % EepromBytes.Length;
+				int dataSize1 = 4 - dataSize2;
+				Array.Copy(EepromBytes, (index+1)* 4, value, 0, dataSize1);
+				Array.Copy(EepromBytes, 0, value, dataSize1, dataSize2);
+			}
+			float paramValue = BitConverter.ToSingle(value, 0);	// Convert to float
+			if(paramValue >= paramMinValue && paramValue <= paramMaxValue)
+			{
+				val.success = true;
+				if(id == OP_HISTORY_MASK)
+					val.entryList.Add(EntryType.OP_HISTORY);
+				else if(id == ERROR_MASK)
+					val.entryList.Add(EntryType.ERROR_DATA);
+
+			}
+		}
+		else	// Attempt failed.
+		{
+			if(entrySizeIndex >= 0) 
+				index -= entrySizes[entrySizeIndex];	// Go back the last entry tried
+
+			if(entrySizeIndex < entrySizes.Length-1)	// If possible, try with another entry
+			{
+				entrySizeIndex++;
+				index += entrySizes[entrySizeIndex];	// Go forward with a new entry
+			}
+			else	// Else, try going deeper...
+			{
+				val.reachedDepth++;
+				entrySizeIndex = -1;
+				index += entrySizes[0];	// Advance smallest entry size
+			}
+		}
+	}
+	if(startingIndex == index)
+		val.reachedDepth--;		// Reached depth is offset by +1 when hit on first try
+	return val;
 }
 #endregion
 		  
