@@ -556,20 +556,20 @@ public class ArchiveInterpreter
 	void A40TR_DecodeDigitalCell(ListViewItem item, Int32 digitalCell)
 	{
 		String text;
-		Byte status = (Byte)((digitalCell >> 10) & 0x3);
+		OpStatus status = (OpStatus)((digitalCell >> 10) & 0x3);
 		switch (status)
 		{
-			case 0x00:
+			case OpStatus.IDLE:
 					text = "LISTO";
 					break;
-			case 0x01:
-					text = "COOLING";
-					break;
-			case 0x02:
+			case OpStatus.RUNNING:
 					text = "OPERANDO";
 					break;
-			case 0x03:
+			case OpStatus.POSTOP:
 					text = "POSTOP";
+					break;
+			case OpStatus.DISABLED_STATE:
+					text = "DESHAB.";
 					break;
 			default:
 					text = "...";
