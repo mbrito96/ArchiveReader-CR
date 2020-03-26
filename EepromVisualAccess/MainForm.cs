@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections;
+using System.Collections.Generic;
 using stx8xxx;
 using System.IO;
 
@@ -137,14 +138,14 @@ public class ArchiveInterpreter
 			ValueInteger = BitConverter.ToInt32(entryData, 0);
 			if (ValueInteger < 0)
 			{
-					retVal = false;
-					entry.ForeColor = INVALID_ENTRY_FORECOLOR;
-					entry.SubItems.Add(ValueInteger.ToString());    // Save Timestamp
+				retVal = false;
+				entry.ForeColor = INVALID_ENTRY_FORECOLOR;
+				entry.SubItems.Add(ValueInteger.ToString());    // Save Timestamp
 			}
 			else
 			{
-					DateTime date = new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(ValueInteger);
-					entry.SubItems.Add(date.ToString());        // Save Timestamp
+				DateTime date = new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(ValueInteger);
+				entry.SubItems.Add(date.ToString());        // Save Timestamp
 			}   
 						  
 			// Get Digital Cell
@@ -1183,6 +1184,52 @@ private void GetMemoryMapFromEeprom(byte[] mapBytes)
 	// Add last row 
 	MapViewer.Items.Add(row);
 }
+
+
+struct ReadingAttempt{
+	public bool active;	// True if attempt was successfull
+	public List <EntryType> entryList;	// List of entry types recognized
+	public int minEntriesToFinish;
+	public int startingIndex;
+	public ReadingAttempt(int entriesAcceptedToFinish)
+	{
+		active = false;
+		minEntriesToFinish = entriesAcceptedToFinish;
+		startingIndex = 0;
+		entryList = new List<EntryType>(minEntriesToFinish);
+	}
+	public void RA_Start(int refIndex)
+	{
+		active = true;
+		startingIndex = refIndex;
+	}
+	public void RA_Stop()
+	{
+		active = false;
+		entryList.Clear();
+		startingIndex = 0;
+	}
+	public int RA_Reset()
+	{
+		active = true;
+		entryList.Clear();		
+		return startingIndex;
+	}
+	public EntryType RA_GetFirstEntry()
+	{
+		return entryList[0];
+	}
+	public void RA_ResetArchiveViewer(ListView arcViewer, ArchiveInterpreter archInt)
+	{
+		// Remove the amount of entries added during the attempt.
+		for(int j = 0; j < entryList.Count ; j++)
+		{
+			archInt.entryCount--;
+			arcViewer.Items.RemoveAt(arcViewer.Items.Count-1);
+		}
+	}
+}
+
 private void GetEntries(byte[] EepromBytes)
 {
 	ClearFilter();
@@ -1209,7 +1256,7 @@ private void GetEntries(byte[] EepromBytes)
 		MessageBox.Show("No hay niguna entrada guardada en el historial.", "Historial vacío", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 	}
 	
-
+	ReadingAttempt ra = new ReadingAttempt(5);
 	while (done == false)
 	{
 		#region GET ENTRY FROM BUFFER
@@ -1227,18 +1274,45 @@ private void GetEntries(byte[] EepromBytes)
 		}
 		else
 		{
-			MessageBox.Show(String.Format("Error reconociendo tipo de entrada. (Indice: {0}).", i), "Error en datos de registro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-			done = true;
-			break;
+			//MessageBox.Show(String.Format("Error reconociendo tipo de entrada. (Indice: {0}).", i), "Error en datos de registro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			if(ra.active == false)
+			{
+				DialogResult dialogResult = MessageBox.Show(String.Format("Error reconociendo tipo de entrada. (Indice: {0}).", i) + "Se puede intentar ignorar esta entrada y continuar con las demás. ¿Desea continuar?", "Error en datos de registro", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+				if(dialogResult == DialogResult.Yes)
+				{
+					ra.RA_Start(i);
+					dataSize = ArchiveInfo.errorEntrySize;
+					type = EntryType.ERROR_DATA;
+				}
+				else if (dialogResult == DialogResult.No)
+				{
+					done = true;
+					break;
+				}
+			}
+			else
+			{
+				ra.RA_ResetArchiveViewer(ArchiveViewer, arch1);
+				if(ra.RA_GetFirstEntry() == EntryType.ERROR_DATA)
+				{
+					i = ra.RA_Reset();
+					dataSize = ArchiveInfo.opEntrySize;
+					type = EntryType.OP_HISTORY;
+				}
+				else
+				{
+					ra.RA_Stop();
+					done = true;
+					break;
+				}
+			}
 		}
 
 		// Copy entry to a temporary array to simplify access
-		if ((i + dataSize) <= EepromBytes.Length / 4)  
-			// If entire entry available:
+		if ((i + dataSize) <= EepromBytes.Length / 4)  // If entire entry available:
 			Array.Copy(EepromBytes, i * 4, entryArray, 0, dataSize * 4);    
-		else
+		else // Else, must wrap around buffer:
 		{
-			// Else, must wrap around buffer:
 			int dataSize2 = (i + dataSize) % (EepromBytes.Length / 4);
 			int dataSize1 = dataSize - dataSize2;
 			Array.Copy(EepromBytes, i * 4, entryArray, 0, dataSize1 * 4);
@@ -1249,7 +1323,12 @@ private void GetEntries(byte[] EepromBytes)
 		entry = new ListViewItem("");
 		if (arch1.ProcessEntry(entryArray, type, entry) == false)
 			dataError = true;
-
+		if(ra.active)
+		{
+			entry.Font = new Font(entry.Font, FontStyle.Italic);
+			entry.UseItemStyleForSubItems = true;
+			ArchiveViewer.Items[ArchiveViewer.Items.Count-1].EnsureVisible();
+		}
 		if (DEBUGGING)
 		{
 			entry.SubItems.Add(i.ToString());                   // Save Index
@@ -1260,6 +1339,32 @@ private void GetEntries(byte[] EepromBytes)
 		ArchiveViewer.Items.Add(entry);
 
 		i = (i + dataSize) % (EepromBytes.Length / 4);  // Advance index
+
+		if(ra.active)
+		{
+			ra.entryList.Add(type);
+			if(ra.entryList.Count >= ra.minEntriesToFinish)
+			{
+				DialogResult dialogResult = MessageBox.Show(String.Format("Se avanzaron {0} entradas asumiendo entrada erronea como {1}. Revisar si tiene sentido y apretar Si o No.", ra.minEntriesToFinish, ra.RA_GetFirstEntry().ToString()), "Posible historial", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+				if(dialogResult == DialogResult.Yes)	// Stop reading attempt and continue normally
+					ra.RA_Stop();	
+				else if (dialogResult == DialogResult.No)	// Try attempt starting with another type of register.
+				{
+					if(ra.RA_GetFirstEntry() == EntryType.ERROR_DATA)	// Only tried with error type register. Ask for confirmation...
+						i = ra.startingIndex;
+					else	// Already tried all types of entries and failed. Abort.
+					{
+						i = ra.startingIndex;
+						ra.RA_Stop();
+						ra.RA_ResetArchiveViewer(ArchiveViewer, arch1);
+						done = true;
+						break;
+
+					}
+				}	
+			}			
+		}
+
 		if (arch1.entryCount.ToString() == txtCount.Text)    // Check if done
 			done = true;
 	}
