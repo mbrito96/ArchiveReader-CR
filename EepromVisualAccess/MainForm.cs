@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Collections;
 using stx8xxx;
 using System.IO;
 
@@ -21,13 +20,14 @@ using System.IO;
 
 namespace EepromVisualAccess
 {
+
 public partial class MainForm : Form
 {
 public class ArchiveInterpreter
 {
 	public int entryCount;
+	public Version archiveVersion; // Archive version stored in machine metadata
 	public MacModel model { get; set; }
-
 	static Color ERROR_ENTRY_COLOR = Color.FromArgb(BACK_COLOR_ERROR[0], BACK_COLOR_ERROR[1], BACK_COLOR_ERROR[2]);
 	static Color OP_ENTRY_COLOR = Color.FromArgb(BACK_COLOR_OP[0], BACK_COLOR_OP[1], BACK_COLOR_OP[2]);
 	static Color EVENT_ENTRY_COLOR = Color.FromArgb(BACK_COLOR_EVENT[0], BACK_COLOR_EVENT[1], BACK_COLOR_EVENT[2]);
@@ -1401,7 +1401,8 @@ OpenFileDialog openFileDialog;
 public MainForm()
 {
 	InitializeComponent();
-
+	ARCHIVE_VERSION = new Version(ARCHIVE_VERSION_NUMBER[0], ARCHIVE_VERSION_NUMBER[1], ARCHIVE_VERSION_NUMBER[2]);
+	this.Text += ARCHIVE_VERSION.ToString();
 	// Inicializar objeto PioBoard con dirección IP del PLC.
 	// Recuerde especificar contraseña y tipo de dispositivo.
 	PioBoard = new Stx8xxx("192.168.1.81", 0, Stx8xxxId.STX8091);
@@ -1562,30 +1563,50 @@ void OpenFileFromPath(String path)
 #endregion
 
 #region RAW DATA PROCESSING
-private void ProcessData(byte[] data)
+private bool ProcessData(byte[] data)
 {
+	int baseIndex = ArchiveInfo.metadataAddress;	// Index offset for archive data array without machineId data
+	
+	byte[] macIdBytes = new byte[ArchiveInfo.machineIdSize];
+	if(ArchiveInfo.machineIdSize != 0)
+	{
+		baseIndex = ArchiveInfo.machineIdAddress; // Index offset for archive data array with machineId data
+		Array.Copy(data, 0, macIdBytes, 0, ArchiveInfo.machineIdSize);
+	}
+	macID = new MachineId(macIdBytes);
+	bool machineIdOk = macID.InitOk();
+
+	txtMacModel.Text = macID.model.ToString();
+	txtMacIntern.Text = macID.intern.ToString();
+	txtMacVersion.Text = macID.softwareVersion.ToString();
+	
 	arch1.entryCount = 0;
 	byte[] metadataBytes = new byte[ArchiveInfo.metadataSize];
-	Array.Copy(data, 0, metadataBytes, 0, ArchiveInfo.metadataSize);
+	Array.Copy(data, ArchiveInfo.metadataAddress - baseIndex, metadataBytes, 0, ArchiveInfo.metadataSize);
 	GetMetadataFromEeprom(metadataBytes);
 
 	if(ArchiveInfo.mapSize != 0)
 	{
 		byte[] mapBytes = new byte[ArchiveInfo.mapSize];
-		Array.Copy(data, ArchiveInfo.mapAddress - ArchiveInfo.metadataAddress, mapBytes, 0, ArchiveInfo.mapSize);
+		Array.Copy(data, ArchiveInfo.mapAddress - baseIndex, mapBytes, 0, ArchiveInfo.mapSize);
 		GetMemoryMapFromEeprom(mapBytes);
 	}
 
 	byte[] archiveBytes = new byte[ArchiveInfo.regFileSize];
-	Array.Copy(data,  ArchiveInfo.regFileAddress - ArchiveInfo.metadataAddress, archiveBytes, 0, ArchiveInfo.regFileSize);
+	Array.Copy(data,  ArchiveInfo.regFileAddress - baseIndex, archiveBytes, 0, ArchiveInfo.regFileSize);
 	GetEntries(archiveBytes);
+	return machineIdOk;
 }
 private void GetMetadataFromEeprom(byte[] metadataBytes)
 {
 	UInt32 tail = BitConverter.ToUInt32(metadataBytes, 0);
 	UInt32 head = tail >> 16;
 	tail = tail & 0x0000FFFF;
+
 	UInt32 count = BitConverter.ToUInt32(metadataBytes, 4);
+	UInt32 storedArcV = count >> 12;
+	count = count & 0x00000FFF;
+	arch1.archiveVersion = new Version((storedArcV >> 12)&0xFF, (storedArcV >> 4)&0xFF, (storedArcV)&0xF);
 
 	txtTail.Text = tail.ToString();
 	txtHead.Text = head.ToString();
@@ -1907,6 +1928,8 @@ private void modelSelector_SelectedIndexChanged(object sender, EventArgs e)
 private void LoadMachineModelParameters(MacModel model)
 {
 	ArchiveInfo.archiveSize = ENTIRE_DATA_SIZE[(int)model];
+	ArchiveInfo.machineIdAddress = MACID_ADDRESS[(int)model];
+	ArchiveInfo.machineIdSize = MACID_SIZE[(int)model];
 	ArchiveInfo.metadataAddress = METADATA_ADDRESS[(int)model];
 	ArchiveInfo.metadataSize = METADATA_SIZE[(int)model];
 	ArchiveInfo.mapAddress = MAP_ADDRESS[(int)model];
@@ -1916,7 +1939,6 @@ private void LoadMachineModelParameters(MacModel model)
 	ArchiveInfo.opEntrySize = OP_ENTRY_SIZE[(int)model];
 	ArchiveInfo.errorEntrySize = ERROR_ENTRY_SIZE[(int)model];
 	ArchiveInfo.eventEntrySize = EVENT_ENTRY_SIZE[(int)model];
-	txtboxPlcVersion.Text = PLC_MATCHING_VERSION[(int)model];
 	ArchiveViewer.Clear();
 	DetailViewer.Clear();
 	arch1 = new ArchiveInterpreter(model, ArchiveViewer, DetailViewer, MapViewer);
@@ -2227,8 +2249,7 @@ private bool WaitPlcResponse(out byte[] EepromBytes)
 	// Retorno de método.
 	return ErrorsFound;
 }
+
 		#endregion
-
-
 	}
 }
