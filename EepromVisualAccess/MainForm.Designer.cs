@@ -110,9 +110,9 @@
 
 		static uint[] ARCHIVE_VERSION_NUMBER = {2,1,0};
         // Defined Archive parameters for: { A40TR, A80TR, W90TR, A100TR } 
-        static int[] ENTIRE_DATA_SIZE = { 32588, 32616,  32632, 32580};
-        static int[] MACID_ADDRESS = { 0, 0, 0, 188};
-        static int[] MACID_SIZE = { 0, 0, 0, 4 };
+        static int[] ENTIRE_DATA_SIZE = { 32588, 32616,  32636, 32580};
+        static int[] MACID_ADDRESS = { 0, 0, 132, 188};
+        static int[] MACID_SIZE = { 0, 0, 4, 4 };
         static int[] METADATA_ADDRESS = { 180, 152, 136, 192};
         static int[] METADATA_SIZE = { 8, 8, 8, 8 };
         static int[] MAP_ADDRESS = { 191, 160, 144, 204 };
