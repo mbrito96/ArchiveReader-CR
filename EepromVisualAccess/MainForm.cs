@@ -1312,7 +1312,7 @@ public class ArchiveInterpreter
 		tempStr = (digitalCell >> 7 & 0x1) == 0 ? (digitalCell >> 3 & 0x1).ToString() : "-1";   // -1 if fit status Cmp B = 1, else store Cmp B ON/OFF value
 		item.SubItems.Add(tempStr);  // Compressor Tandem B
 		
-		tempStr = (digitalCell >> 8 & 0x1) == 0 ? (digitalCell >> 4 & 0x1).ToString() : "-1";   // -1 if fit status Cmp B = 1, else store Cmp B ON/OFF value
+		tempStr = (digitalCell >> 8 & 0x1) == 0 ? (digitalCell >> 4 & 0x1).ToString() : "-1";   // -1 if fit status Cmp S = 1, else store Cmp S ON/OFF value
 		item.SubItems.Add(tempStr);  // Compressor Solus
 
 		tempStr = (digitalCell >> 9 & 0x1) == 0 ? (digitalCell >> 5 & 0x1).ToString() : "-1";   // -1 if Consumo Vent A1 = 1, else store Vent A1 ON/OFF value
