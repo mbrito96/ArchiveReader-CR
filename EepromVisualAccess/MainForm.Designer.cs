@@ -653,7 +653,7 @@
 			this.Controls.Add(this.groupBox1);
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "MainForm";
-			this.Text = "Archive Reader - Lector de historiales - V1.9";
+			this.Text = "Archive Reader - Lector de historiales - V2.1";
 			this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
