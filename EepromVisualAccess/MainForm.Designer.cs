@@ -14,9 +14,10 @@
         public enum OpStatus : byte
         {
             IDLE,
+			COOLDOWN,
             RUNNING,
             POSTOP,
-            DISABLED_STATE
+			NONE
         }
         public enum MacModel : byte
         {
@@ -59,6 +60,8 @@
         static int[] ERROR_ENTRY_SIZE = { 3, 3, 3 };
 
         static byte[] BACK_COLOR_OP = new byte[3] { 135, 206, 235 };
+        static byte[] BACK_COLOR_OP_READY = new byte[3] { 145, 236, 244 };
+        static byte[] BACK_COLOR_OP_POSTOP = new byte[3] { 147, 178, 241 };
         static byte[] BACK_COLOR_ERROR = new byte[3] { 255, 165, 119 };
         static byte[] FORE_COLOR_BAD_DATA = new byte[3] { 229, 5, 5 };
 

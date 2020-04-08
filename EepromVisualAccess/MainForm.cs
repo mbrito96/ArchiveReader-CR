@@ -29,7 +29,9 @@ public class ArchiveInterpreter
 	public MacModel model { get; set; }
 
 	static Color ERROR_ENTRY_COLOR = Color.FromArgb(BACK_COLOR_ERROR[0], BACK_COLOR_ERROR[1], BACK_COLOR_ERROR[2]);
-	static Color OP_ENTRY_COLOR = Color.FromArgb(BACK_COLOR_OP[0], BACK_COLOR_OP[1], BACK_COLOR_OP[2]);
+	static Color OP_ENTRY_RUNNING_COLOR = Color.FromArgb(BACK_COLOR_OP[0], BACK_COLOR_OP[1], BACK_COLOR_OP[2]);
+	static Color OP_ENTRY_IDLE_COLOR = Color.FromArgb(BACK_COLOR_OP_READY[0], BACK_COLOR_OP_READY[1], BACK_COLOR_OP_READY[2]);
+	static Color OP_ENTRY_POSTOP_COLOR = Color.FromArgb(BACK_COLOR_OP_POSTOP[0], BACK_COLOR_OP_POSTOP[1], BACK_COLOR_OP_POSTOP[2]);
 	static Color INVALID_ENTRY_FORECOLOR = Color.FromArgb(FORE_COLOR_BAD_DATA[0], FORE_COLOR_BAD_DATA[1], FORE_COLOR_BAD_DATA[2]);
 
 	public ArchiveInterpreter(MacModel model, ListView arcViewer, ListView detViewer, ListView mViewer)
@@ -131,8 +133,6 @@ public class ArchiveInterpreter
 	 
 		if (type == EntryType.OP_HISTORY)
 		{
-			entry.BackColor = OP_ENTRY_COLOR;
-
 			// Get Timestamp
 			ValueInteger = BitConverter.ToInt32(entryData, 0);
 			if (ValueInteger < 0)
@@ -151,6 +151,19 @@ public class ArchiveInterpreter
 			ValueInteger = BitConverter.ToInt32(entryData, 4);
 			ValueInteger &= ~(3 << 30); // Clear mask
 			entry.SubItems.Add(ValueInteger.ToString("X4"));    // Save Digital Cell
+			
+			switch(GetOpStatus(ValueInteger))
+			{
+				case OpStatus.IDLE:
+					entry.BackColor = OP_ENTRY_IDLE_COLOR;
+					break;
+				case OpStatus.POSTOP:
+					entry.BackColor = OP_ENTRY_POSTOP_COLOR;
+					break;
+				default:
+					entry.BackColor = OP_ENTRY_RUNNING_COLOR;
+					break;
+			}
 	 
 			// Get analog values
 			for (int j = 0; j < (ArchiveInfo.opEntrySize - 2); j++)  // Save sensor values
@@ -762,7 +775,7 @@ public class ArchiveInterpreter
 		EntryType retVal = EntryType.NO_DATA;
 		if (item.BackColor == ERROR_ENTRY_COLOR)
 			retVal = EntryType.ERROR_DATA;
-		else if (item.BackColor == OP_ENTRY_COLOR)
+		else if (item.BackColor == OP_ENTRY_RUNNING_COLOR || item.BackColor == OP_ENTRY_IDLE_COLOR || item.BackColor == OP_ENTRY_POSTOP_COLOR)
 			retVal = EntryType.OP_HISTORY;
 
 		return retVal;
@@ -782,7 +795,6 @@ public class ArchiveInterpreter
 					W90TR_DecodeDigitalCell(item, code);
 					break;
 		}
-
 	}
 	void A40TR_DecodeDigitalCell(ListViewItem item, Int32 digitalCell)
 	{
@@ -969,6 +981,44 @@ public class ArchiveInterpreter
 
 		item.SubItems.Add( (digitalCell >> 10 & 0x1)==0 ? "0" : "-1" );    // Consumo Bomba agua evaporador
 		item.SubItems.Add( (digitalCell >> 11 & 0x1)==0 ? "0" : "-1" );    // Consumo Bomba agua condensador
+	}
+
+	OpStatus GetOpStatus(Int32 digitalCell)
+	{
+		OpStatus retVal = OpStatus.NONE;
+		Byte statusByte = 0;
+		switch (model)
+		{
+			case MacModel.A40TR:
+				statusByte = (Byte)((digitalCell >> 10) & 0x3);
+				break;
+			case MacModel.A80TR:
+				statusByte = (Byte)((digitalCell >> 18) & 0x3);
+				break;
+			case MacModel.W90TR:
+				statusByte = (Byte)((digitalCell >> 12) & 0x3);
+				break;
+			default:
+				return retVal;
+		}
+		switch (statusByte)
+		{
+			case 0x00:
+				retVal = OpStatus.IDLE;
+				break;
+			case 0x01:
+				retVal = OpStatus.COOLDOWN;
+				break;
+			case 0x02:
+				retVal = OpStatus.RUNNING;
+				break;
+			case 0x03:
+				retVal = OpStatus.POSTOP;
+				break;
+			default:
+				break;
+		}
+		return retVal;
 	}
 }
 
@@ -1334,7 +1384,6 @@ private void ApplyDateFilter()
 			DeleteEntry(i);
 		}
 	}
-
 }
 private void ClearFilter()
 {
@@ -1788,26 +1837,4 @@ private bool WaitPlcResponse(out byte[] EepromBytes)
 
 
 	}
-/*
-class ListViewItemComparer : IComparer
-{
-		public int CompareDate_LQT(object x, object y)
-		{
-			Int32 entryNumberA = Convert.ToInt32(((ListViewItem)x).SubItems[0].Text);
-			Int32 entryNumberB = Convert.ToInt32(((ListViewItem)y).SubItems[0].Text);
-			if (entryNumberA <= entryNumberB)
-				return -1;
-			else
-				return 1;
-		}
-		public int CompareIndex_LQT(object x, object y)
-		{
-			Int32 entryNumberA = Convert.ToInt32(((ListViewItem)x).SubItems[0].Text);
-			Int32 entryNumberB = Convert.ToInt32(((ListViewItem)y).SubItems[0].Text);
-			if (entryNumberA <= entryNumberB)
-				return -1;
-			else
-				return 1;
-		}
-	}*/
 }
