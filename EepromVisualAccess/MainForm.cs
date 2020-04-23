@@ -107,7 +107,7 @@ public class ArchiveInterpreter
 					archiveViewer.Columns.Add("P. Baja (S)", 65);
 					archiveViewer.Columns.Add("P. Aceite (S)", 83);
 
-					detailViewer.Columns.Add("Modo", 62);
+					detailViewer.Columns.Add("Modo", 67);
 					detailViewer.Columns.Add("Estado", 62);
 					detailViewer.Columns.Add("FS Evap.", 62);
 					detailViewer.Columns.Add("FS Cond.", 62);
@@ -607,6 +607,12 @@ public class ArchiveInterpreter
 				case "25":      // ERR_PUMP_OL
 				{
 					errorString += "Consumo bomba de agua.";
+					break;
+				}
+				case "26":      // ERR_WRONG_VERS
+				{
+				    UInt32 vers = (UInt32)Convert.ToDouble(param);
+					errorString += string.Format("Se detectó una nueva versión del programa. Se reemplazó la versión {0}.{1}.{2}.", vers>>24, (vers>>16)&0xFF, (vers>>8)&0xFF);
 					break;
 				}
 			}
@@ -1262,16 +1268,16 @@ public class ArchiveInterpreter
 					text = "30TR-B";
 					break;
 			case 0x03:
-					text = "60TR";
+					text = "60TR-AB";
 					break;
 			case 0x04:
 					text = "30TR-S";
 					break;
 			case 0x05:
-					text = "60TR-A";
+					text = "60TR-SA";
 					break;
 			case 0x06:
-					text = "60TR-B";
+					text = "60TR-SB";
 					break;
 			case 0x07:
 					text = "90TR";
