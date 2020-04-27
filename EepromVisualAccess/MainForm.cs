@@ -32,6 +32,7 @@ public class ArchiveInterpreter
 	static Color OP_ENTRY_RUNNING_COLOR = Color.FromArgb(BACK_COLOR_OP[0], BACK_COLOR_OP[1], BACK_COLOR_OP[2]);
 	static Color OP_ENTRY_IDLE_COLOR = Color.FromArgb(BACK_COLOR_OP_READY[0], BACK_COLOR_OP_READY[1], BACK_COLOR_OP_READY[2]);
 	static Color OP_ENTRY_POSTOP_COLOR = Color.FromArgb(BACK_COLOR_OP_POSTOP[0], BACK_COLOR_OP_POSTOP[1], BACK_COLOR_OP_POSTOP[2]);
+	static Color EVENT_ENTRY_COLOR = Color.FromArgb(BACK_COLOR_EVENT[0], BACK_COLOR_EVENT[1], BACK_COLOR_EVENT[2]);
 	static Color INVALID_ENTRY_FORECOLOR = Color.FromArgb(FORE_COLOR_BAD_DATA[0], FORE_COLOR_BAD_DATA[1], FORE_COLOR_BAD_DATA[2]);
 
 	public ArchiveInterpreter(MacModel model, ListView arcViewer, ListView detViewer, ListView mViewer)
