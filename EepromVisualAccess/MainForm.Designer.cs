@@ -22,10 +22,12 @@
         }
         public enum MacModel : byte
         {
-            A40TR,
+            A20TR,
             A80TR,
             W90TR,
 			A100TR,
+			A30TR,
+			A40TR,
 			NONE
         }
 
@@ -58,6 +60,19 @@
 				minor = versionMinor;
 				patch = versionPatch;
 			}
+			/// <summary>
+			/// Checks if object version is retrocompatible with parameter version.
+			/// </summary>
+			/// <param name="v">Parameter version to check compotibility with.</param>
+			/// <returns>True if object version is greater and compatible with given version. False otherwise.</returns>
+			public bool IsCompatibleWith(Version v)
+			{
+				bool retVal = false;
+				if(this.major == v.major && this.minor >= v.minor && this.patch >= v.patch)
+					retVal = true;
+
+				return retVal;
+			}
 			public override string ToString() => $"V{major}.{minor}.{patch}";
 		}
 		public struct MachineId{
@@ -74,7 +89,7 @@
 					switch(modelCode)
 					{
 						case 1:
-							this.model = MacModel.A40TR;
+							this.model = MacModel.A20TR;
 							break;
 						case 2:
 							this.model = MacModel.A80TR;
@@ -84,6 +99,12 @@
 							break;
 						case 4:
 							this.model = MacModel.A100TR;
+							break;
+						case 5:
+							this.model = MacModel.A30TR;
+							break;
+						case 6:
+							this.model = MacModel.A40TR;
 							break;
 						default:
 							this.model = MacModel.NONE;
@@ -109,15 +130,15 @@
 		public Version ARCHIVE_VERSION;
 		public MachineId macID;
 
-		static uint[] ARCHIVE_VERSION_NUMBER = {3,0,1};
+		static uint[] ARCHIVE_VERSION_NUMBER = {3,1,0};
         // Defined Archive parameters for: { A40TR, A80TR, W90TR, A100TR } 
-        static int[] ENTIRE_DATA_SIZE = { 32588, 32616,  32492, 32580};
-        static int[] MACID_ADDRESS = { 0, 276, 276, 188};
-        static int[] MACID_SIZE = { 0, 0, 4, 4 };
-        static int[] METADATA_ADDRESS = { 180, 152, 280, 192};
+        static int[] ENTIRE_DATA_SIZE = { 32492, 32616,  32492, 32580};
+        static int[] MACID_ADDRESS = { 276, 276, 276, 188};
+        static int[] MACID_SIZE = { 4, 0, 4, 4 };
+        static int[] METADATA_ADDRESS = { 280, 152, 280, 192};
         static int[] METADATA_SIZE = { 8, 8, 8, 8 };
         static int[] MAP_ADDRESS = { 191, 160, 144, 204 };
-        static int[] MAP_SIZE = { 97, 128, 0, 0 };
+        static int[] MAP_SIZE = { 0, 128, 0, 0 };
         static int[] ARCHIVE_ADDRESS = { 288, 288, 288, 200 };
         static int[] ARCHIVE_SIZE = { 32480, 32480, 32480, 32564 };
         static int[] OP_ENTRY_SIZE = { 9, 12, 13, 15 };

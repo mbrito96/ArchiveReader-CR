@@ -26,14 +26,14 @@ public partial class MainForm : Form
 public class ArchiveInterpreter
 {
 	public int entryCount;
-	public Version archiveVersion; // Archive version stored in machine metadata
+	public Version storedVersion; // Archive version stored in machine metadata
 	public MacModel model { get; set; }
-	static Color ERROR_ENTRY_COLOR = Color.FromArgb(BACK_COLOR_ERROR[0], BACK_COLOR_ERROR[1], BACK_COLOR_ERROR[2]);
-	static Color OP_ENTRY_RUNNING_COLOR = Color.FromArgb(BACK_COLOR_OP[0], BACK_COLOR_OP[1], BACK_COLOR_OP[2]);
-	static Color OP_ENTRY_IDLE_COLOR = Color.FromArgb(BACK_COLOR_OP_READY[0], BACK_COLOR_OP_READY[1], BACK_COLOR_OP_READY[2]);
-	static Color OP_ENTRY_POSTOP_COLOR = Color.FromArgb(BACK_COLOR_OP_POSTOP[0], BACK_COLOR_OP_POSTOP[1], BACK_COLOR_OP_POSTOP[2]);
-	static Color EVENT_ENTRY_COLOR = Color.FromArgb(BACK_COLOR_EVENT[0], BACK_COLOR_EVENT[1], BACK_COLOR_EVENT[2]);
-	static Color INVALID_ENTRY_FORECOLOR = Color.FromArgb(FORE_COLOR_BAD_DATA[0], FORE_COLOR_BAD_DATA[1], FORE_COLOR_BAD_DATA[2]);
+	static readonly Color ERROR_ENTRY_COLOR = Color.FromArgb(BACK_COLOR_ERROR[0], BACK_COLOR_ERROR[1], BACK_COLOR_ERROR[2]);
+	static readonly Color OP_ENTRY_RUNNING_COLOR = Color.FromArgb(BACK_COLOR_OP[0], BACK_COLOR_OP[1], BACK_COLOR_OP[2]);
+	static readonly Color OP_ENTRY_IDLE_COLOR = Color.FromArgb(BACK_COLOR_OP_READY[0], BACK_COLOR_OP_READY[1], BACK_COLOR_OP_READY[2]);
+	static readonly Color OP_ENTRY_POSTOP_COLOR = Color.FromArgb(BACK_COLOR_OP_POSTOP[0], BACK_COLOR_OP_POSTOP[1], BACK_COLOR_OP_POSTOP[2]);
+	static readonly Color EVENT_ENTRY_COLOR = Color.FromArgb(BACK_COLOR_EVENT[0], BACK_COLOR_EVENT[1], BACK_COLOR_EVENT[2]);
+	static readonly Color INVALID_ENTRY_FORECOLOR = Color.FromArgb(FORE_COLOR_BAD_DATA[0], FORE_COLOR_BAD_DATA[1], FORE_COLOR_BAD_DATA[2]);
 
 	public ArchiveInterpreter(MacModel model, ListView arcViewer, ListView detViewer, ListView mViewer)
 	{
@@ -45,7 +45,7 @@ public class ArchiveInterpreter
 	{
 		switch(model)
 		{
-			case MacModel.A40TR:
+			case MacModel.A20TR:
 					archiveViewer.Columns.Add("#", 43);
 					archiveViewer.Columns.Add("Fecha/Hora", 145);
 					archiveViewer.Columns.Add("Codigo", 55);
@@ -205,7 +205,7 @@ public class ArchiveInterpreter
 			for (int j = 0; j < (ArchiveInfo.opEntrySize - 2); j++)  // Save sensor values
 			{
 				ValueFloat = BitConverter.ToSingle(entryData, 8 + j * 4);
-				entry.SubItems.Add(ValueFloat.ToString("F2"));
+				entry.SubItems.Add(ValueFloat.ToString("F1"));
 			}
 		}
 		else if (type == EntryType.ERROR_DATA)
@@ -414,6 +414,12 @@ public class ArchiveInterpreter
 			case "1B":      // ERR_PUMP_OL
 			{
 				errorString += "Consumo bomba de agua.";
+				break;
+			}
+			case "1C":      // ERR_WRONG_VERS
+			{
+			    UInt32 vers = (UInt32)Convert.ToDouble(param);
+				errorString += string.Format("Se detectó una nueva versión del programa. Se reemplazó la versión {0}.{1}.{2}.", vers>>24, (vers>>16)&0xFF, (vers>>8)&0xFF);
 				break;
 			}
 			}
@@ -1650,22 +1656,24 @@ private bool ProcessData(byte[] data)
 	arch1.entryCount = 0;
 	byte[] metadataBytes = new byte[ArchiveInfo.metadataSize];
 	Array.Copy(data, ArchiveInfo.metadataAddress - baseIndex, metadataBytes, 0, ArchiveInfo.metadataSize);
-	GetMetadataFromEeprom(metadataBytes);
-
-	if(ArchiveInfo.mapSize != 0)
+	if(GetMetadataFromEeprom(metadataBytes) == true)	// If metadata is OK, process entries.
 	{
-		byte[] mapBytes = new byte[ArchiveInfo.mapSize];
-		Array.Copy(data, ArchiveInfo.mapAddress - baseIndex, mapBytes, 0, ArchiveInfo.mapSize);
-		GetMemoryMapFromEeprom(mapBytes);
+		if(ArchiveInfo.mapSize != 0)
+		{
+			byte[] mapBytes = new byte[ArchiveInfo.mapSize];
+			Array.Copy(data, ArchiveInfo.mapAddress - baseIndex, mapBytes, 0, ArchiveInfo.mapSize);
+			GetMemoryMapFromEeprom(mapBytes);
+		}
+	
+		byte[] archiveBytes = new byte[ArchiveInfo.regFileSize];
+		Array.Copy(data,  ArchiveInfo.regFileAddress - baseIndex, archiveBytes, 0, ArchiveInfo.regFileSize);
+		GetEntries(archiveBytes);
 	}
-
-	byte[] archiveBytes = new byte[ArchiveInfo.regFileSize];
-	Array.Copy(data,  ArchiveInfo.regFileAddress - baseIndex, archiveBytes, 0, ArchiveInfo.regFileSize);
-	GetEntries(archiveBytes);
 	return machineIdOk;
 }
-private void GetMetadataFromEeprom(byte[] metadataBytes)
+private bool GetMetadataFromEeprom(byte[] metadataBytes)
 {
+	bool retVal = true;
 	UInt32 tail = BitConverter.ToUInt32(metadataBytes, 0);
 	UInt32 head = tail >> 16;
 	tail = tail & 0x0000FFFF;
@@ -1673,11 +1681,20 @@ private void GetMetadataFromEeprom(byte[] metadataBytes)
 	UInt32 count = BitConverter.ToUInt32(metadataBytes, 4);
 	UInt32 storedArcV = count >> 12;
 	count = count & 0x00000FFF;
-	arch1.archiveVersion = new Version((storedArcV >> 12)&0xFF, (storedArcV >> 4)&0xFF, (storedArcV)&0xF);
 
-	txtTail.Text = tail.ToString();
-	txtHead.Text = head.ToString();
-	txtCount.Text = count.ToString();
+	arch1.storedVersion = new Version((storedArcV >> 12)&0xFF, (storedArcV >> 4)&0xFF, (storedArcV)&0xF);
+	if(ARCHIVE_VERSION.IsCompatibleWith(arch1.storedVersion) == false)
+	{
+		MessageBox.Show("La versión actual de Archive Reader no es compatible con el historial cargado.", "Atención", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+		retVal = false;
+	}
+	else
+	{
+		txtTail.Text = tail.ToString();
+		txtHead.Text = head.ToString();
+		txtCount.Text = count.ToString();
+	}
+	return retVal;
 }
 private void GetMemoryMapFromEeprom(byte[] mapBytes)
 {
@@ -1975,7 +1992,7 @@ private void modelSelector_SelectedIndexChanged(object sender, EventArgs e)
 	switch (modelSelector.SelectedItem.ToString())
 	{
 		case "GWF-A-20/30/40TR":
-			model = MacModel.A40TR;
+			model = MacModel.A20TR;
 			break;
 		case "GWF-A-80TR":
 			model = MacModel.A80TR;
