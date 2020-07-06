@@ -1202,20 +1202,20 @@ public class ArchiveInterpreter
 	void A80TR_DecodeDigitalCell(ListViewItem item, Int32 digitalCell)
 	{
 		String text;
-		Byte opMode = (Byte)((digitalCell >> 20) & 0x3);
+		Byte opMode = (Byte)((digitalCell >> 20) & 0x7);
 		switch(opMode)
 		{
-			case 0x00:
-					text = "80TR";
-					break;
 			case 0x01:
-					text = "40TR-BAL";
-					break;
-			case 0x02:
 					text = "40TR-A";
 					break;
-			case 0x03:
+			case 0x02:
 					text = "40TR-B";
+					break;
+			case 0x03:
+					text = "40TR-BAL";
+					break;
+			case 0x07:
+					text = "80TR";
 					break;
 			default:
 					text = "...";
