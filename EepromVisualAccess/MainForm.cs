@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using stx8xxx;
 using System.IO;
+using System.Diagnostics.Eventing.Reader;
 
 /// <summary>
 /// ----------------------------------------------------------------------------------------------
@@ -256,7 +257,12 @@ public class ArchiveInterpreter
 			// Get event code
 			ValueInteger = BitConverter.ToInt32(entryData, 4);
 			ValueInteger &= ~(3 << 30); // Clear mask
-			entry.SubItems.Add(ValueInteger.ToString("X2"));    // Save code
+
+			// Add each field into subitems (ORIGIN ; EVENT ; PARAM_2 ; PARAM_1)
+			entry.SubItems.Add( (ValueInteger>>26 & 0b111).ToString("X2") );	// ORIGIN
+			entry.SubItems.Add( (ValueInteger>>20 & 0b111111).ToString("X2") );	// EVENT
+			entry.SubItems.Add( (ValueInteger>>16 & 0b1111).ToString("X2") );	// PARAM_2
+			entry.SubItems.Add( (ValueInteger & 0xFFFF).ToString("F2"));	// PARAM_1
 		}
 		return retVal;
 	}
@@ -1109,13 +1115,35 @@ public class ArchiveInterpreter
 		return errorString;
 	}
 	
-	public String GetEventString(String code)
+	public String GetEventString(String eventOrigin, String eventCode, String eventParam2, String eventParam1)
 	{
-		String eventString = "Evento: " + code + Environment.NewLine;
-		if (model == MacModel.A100TR)
+		String eventString = "Evento: " + eventCode + " - Origen: " + eventOrigin + Environment.NewLine;
+		String originName = "";
+		/*switch(eventOrigin)
+		{
+			case "00":
+			{
+				originName = "Cond. Particular";
+			}
+		}*/
+
+		if (model == MacModel.W90TR)
+		{
+			#region GWF-90TR EventMessages
+			switch(eventCode)
+			{
+				case "00":
+				{
+					eventString += "MENSAJE DEL EVENTO 00.";
+					break;
+				}
+			}
+			#endregion
+		}
+		else if (model == MacModel.A100TR)
 		{
 			#region GWF-100TR EventMessages
-			switch(code)
+			switch(eventCode)
 			{
 				case "00":
 				{
@@ -1972,9 +2000,12 @@ private void ArchiveViewer_SelectedIndexChanged(object sender, EventArgs e)
 		else if (arch1.GetEntryType(it) == EntryType.EVENT_DATA)   // If entry type ERROR
 		{
 			ErrorViewer.BringToFront();
-			String eventCode = it.SubItems[CODE].Text;
-
-			ErrorViewer.Text = arch1.GetEventString(eventCode);
+			String eventOrigin = it.SubItems[CODE].Text;
+			String eventCode = it.SubItems[CODE+1].Text;
+			String eventParam2 = it.SubItems[CODE+2].Text;
+			String eventParam1 = it.SubItems[CODE+3].Text;
+			
+			ErrorViewer.Text = arch1.GetEventString(eventOrigin, eventCode, eventParam2, eventParam1);
 			ErrorViewer.Visible = true;
 		}
 	}
