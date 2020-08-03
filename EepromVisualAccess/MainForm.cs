@@ -263,7 +263,7 @@ public class ArchiveInterpreter
 	public String GetErrorString(String code, String param)
 	{
 		String errorString = "Codigo: " + code + Environment.NewLine;
-		if (model == MacModel.A40TR)
+		if (model == MacModel.A20TR || model == MacModel.A30TR || model == MacModel.A40TR)
 		{
 			#region GWF-40TR ErrorMessages
 			switch (code)
@@ -1145,6 +1145,8 @@ public class ArchiveInterpreter
 	{
 		switch (model)
 		{
+			case MacModel.A20TR:
+			case MacModel.A30TR:
 			case MacModel.A40TR:
 					A40TR_DecodeDigitalCell(item, code);
 					break;

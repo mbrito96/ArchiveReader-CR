@@ -130,7 +130,7 @@
 		public Version ARCHIVE_VERSION;
 		public MachineId macID;
 
-		static uint[] ARCHIVE_VERSION_NUMBER = {3,1,0};
+		static uint[] ARCHIVE_VERSION_NUMBER = {3,1,1};
         // Defined Archive parameters for: { A40TR, A80TR, W90TR, A100TR } 
         static int[] ENTIRE_DATA_SIZE = { 32492, 32492,  32492, 32580};
         static int[] MACID_ADDRESS = { 276, 276, 276, 188};
