@@ -254,7 +254,7 @@ public class ArchiveInterpreter
 				entry.SubItems.Add(date.ToString());        // Save Timestamp
 			}
 	 
-			// Get event code
+			// Get event code: PLC stores ->  ( ( (origin&0b111)<<26 ) | ( (eventId&0b111111)<<20 ) | ( (param2&0b1111)<<16 ) |  (param1 & 0xFFFF) )
 			ValueInteger = BitConverter.ToInt32(entryData, 4);
 			ValueInteger &= ~(3 << 30); // Clear mask
 
@@ -349,12 +349,14 @@ public class ArchiveInterpreter
 			}
 			case "0D":      // ERR_MAIL_SENDING
 			{
-				errorString += "Error al intentar envío de email. Verifique conexión a internet.";
+				errorString += "Error de envío de email. Se avanza al siguiente de la bandeja de salida.";
 				break;
 			}
 			case "0E":      // ERR_MAIL_SYSTEM
 			{
-				errorString += "Falla durante el envío de mail.";
+				errorString += "Falla del servicio de mails. Verificar parámetro adicional:" + Environment.NewLine;
+				errorString += "-21 a -1: Error servidor Smtp ; 0 se deshabilitó el servicio ; 1 a 2: Falla de inicialización" + Environment.NewLine;
+				errorString += "3: Bandeja de salida llena ; 4: Error configurando nombre del remitente.";
 				break;
 			}
 			case "0F":      // ERR_FLOW
@@ -521,12 +523,14 @@ public class ArchiveInterpreter
 				}
 				case "0F":      // ERR_MAIL_SENDING
 				{
-					errorString += "Error al intentar envío de email. Verifique conexión a internet.";
+					errorString += "Error de envío de email. Se avanza al siguiente de la bandeja de salida.";
 					break;
 				}
 				case "10":      // ERR_MAIL_SYSTEM
 				{
-					errorString += "Falla durante el envío de mail.";
+					errorString += "Falla del servicio de mails. Verificar parámetro adicional:" + Environment.NewLine;
+					errorString += "-21 a -1: Error servidor Smtp ; 0 se deshabilitó el servicio ; 1 a 2: Falla de inicialización" + Environment.NewLine;
+					errorString += "3: Bandeja de salida llena ; 4: Error configurando nombre del remitente.";
 					break;
 				}
 				case "11":      // ERR_FLOW
@@ -733,12 +737,14 @@ public class ArchiveInterpreter
 				}
 				case "0F":      // ERR_MAIL_SENDING
 				{
-					errorString += "Error al intentar envío de email. Verifique conexión a internet.";
+					errorString += "Error de envío de email. Se avanza al siguiente de la bandeja de salida.";
 					break;
 				}
 				case "10":      // ERR_MAIL_SYSTEM
 				{
-					errorString += "Falla durante el envío de mail.";
+					errorString += "Falla del servicio de mails. Verificar parámetro adicional:" + Environment.NewLine;
+					errorString += "-21 a -1: Error servidor Smtp ; 0 se deshabilitó el servicio ; 1 a 2: Falla de inicialización" + Environment.NewLine;
+					errorString += "3: Bandeja de salida llena ; 4: Error configurando nombre del remitente.";
 					break;
 				}
 				case "11":      // ERR_FLOW_EV
@@ -955,12 +961,14 @@ public class ArchiveInterpreter
 				}
 				case "12":      // ERR_MAIL_SENDING
 				{
-					errorString += "Error al intentar envío de email. Verifique conexión a internet.";
+					errorString += "Error de envío de email. Se avanza al siguiente de la bandeja de salida.";
 					break;
 				}
 				case "13":      // ERR_MAIL_SYSTEM
 				{
-					errorString += "Falla durante el envío de mail.";
+					errorString += "Falla del servicio de mails. Verificar parámetro adicional:" + Environment.NewLine;
+					errorString += "-21 a -1: Error servidor Smtp ; 0 se deshabilitó el servicio ; 1 a 2: Falla de inicialización" + Environment.NewLine;
+					errorString += "3: Bandeja de salida llena ; 4: Error configurando nombre del remitente.";
 					break;
 				}
 				case "14":      // ERR_FLOW_EV_A
@@ -1116,16 +1124,9 @@ public class ArchiveInterpreter
 	}
 	
 	public String GetEventString(String eventOrigin, String eventCode, String eventParam2, String eventParam1)
-	{
+	{ 
 		String eventString = "Evento: " + eventCode + " - Origen: " + eventOrigin + Environment.NewLine;
 		String originName = "";
-		/*switch(eventOrigin)
-		{
-			case "00":
-			{
-				originName = "Cond. Particular";
-			}
-		}*/
 
 		if (model == MacModel.W90TR)
 		{
@@ -1134,7 +1135,13 @@ public class ArchiveInterpreter
 			{
 				case "00":
 				{
-					eventString += "MENSAJE DEL EVENTO 00.";
+					eventString += "Se detectó una falla en la conexión a internet. Si está configurado para hacerlo, se reseteará el router." + Environment.NewLine;
+					eventString +=  "Intentos consecutivos = " + eventParam1 + "Resolver code = " + eventParam2;
+					break;
+				}
+				case "01":
+				{
+					eventString += "Conexión a internet estable.";
 					break;
 				}
 			}
@@ -1147,7 +1154,8 @@ public class ArchiveInterpreter
 			{
 				case "00":
 				{
-					eventString += "MENSAJE DEL EVENTO 00.";
+					eventString += "Se detectó una falla en la conexión a internet. Si está configurado para hacerlo, se reseteará el router." + Environment.NewLine;
+					eventString +=  "Intentos consecutivos = " + eventParam1 + "Resolver code = " + eventParam2;
 					break;
 				}
 			}
@@ -1822,7 +1830,10 @@ private void GetEntries(byte[] EepromBytes)
 		}
 
 		// Push entry to list viewer
-		ArchiveViewer.Items.Add(entry);
+		if(FilterEntryTypePass(type) == true)
+			ArchiveViewer.Items.Add(entry);
+		else
+			deletedEntries.Items.Add(entry);
 
 		i = (i + dataSize) % (EepromBytes.Length / 4);  // Advance index
 		if (arch1.entryCount.ToString() == txtCount.Text)    // Check if done
@@ -1856,22 +1867,29 @@ private void Debug_AddColumns()
 }
 
 #region FILTER METHODS
+
+// Returns true if EntryType t passed through the type filter configured.
+// False if entry doesn't pass filter.
+private bool FilterEntryTypePass(EntryType t)
+{
+	bool passed = false;
+	if (t == EntryType.NO_DATA && showInvalidEntries == true)
+		passed = true;
+	else if (t == EntryType.ERROR_DATA && showErrorEntries == true)
+		passed = true;
+	else if (t == EntryType.OP_HISTORY && showOpEntries == true)
+		passed = true;
+	else if (t == EntryType.EVENT_DATA && showEventEntries == true)
+		passed = true;
+	return passed;
+}
 private void ApplyTypeFilter()
 {
-	bool deleteItem = false;
-
 	foreach (ListViewItem i in ArchiveViewer.Items)
 	{
-		deleteItem = false;
 		EntryType type = arch1.GetEntryType(i);
-		if (type == EntryType.NO_DATA && showInvalidEntries == false)
-			deleteItem = true;
-		else if (type == EntryType.ERROR_DATA && showErrorEntries == false)
-			deleteItem = true;
-		else if (type == EntryType.OP_HISTORY && showOpEntries == false)
-			deleteItem = true;
 
-		if (deleteItem == true)
+		if (FilterEntryTypePass(type) == false)
 		{
 			DeleteEntry(i);
 		}
@@ -1937,6 +1955,7 @@ private void SetDefaultFilterInput()
 	chkboxShowErrors.Checked = true;
 	chkboxShowOp.Checked = true;
 	chkboxShowInvalid.Checked = true;
+	chkboxShowEvents.Checked = false;
 	UpdateDateFilterInput();
 }
 private void UpdateDateFilterInput()
@@ -2043,6 +2062,7 @@ private void modelSelector_SelectedIndexChanged(object sender, EventArgs e)
 }
 private void LoadMachineModelParameters(MacModel model)
 {
+	SetDefaultFilterInput();
 	ArchiveInfo.archiveSize = ENTIRE_DATA_SIZE[(int)model];
 	ArchiveInfo.machineIdAddress = MACID_ADDRESS[(int)model];
 	ArchiveInfo.machineIdSize = MACID_SIZE[(int)model];
@@ -2233,6 +2253,11 @@ private void chkboxShowErrors_CheckedChanged(object sender, EventArgs e)
 {
 	showErrorEntries = chkboxShowErrors.Checked;
 }
+private void chkboxShowEvents_CheckedChanged(object sender, EventArgs e)
+{
+	showEventEntries = chkboxShowEvents.Checked;
+}
+
 #endregion
 
 
@@ -2367,5 +2392,6 @@ private bool WaitPlcResponse(out byte[] EepromBytes)
 }
 
 		#endregion
+
 	}
 }

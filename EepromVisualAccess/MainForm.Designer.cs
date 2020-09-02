@@ -130,7 +130,7 @@
 		public Version ARCHIVE_VERSION;
 		public MachineId macID;
 
-		static uint[] ARCHIVE_VERSION_NUMBER = {3,1,1};
+		static uint[] ARCHIVE_VERSION_NUMBER = {3,2,0};
         // Defined Archive parameters for: { A40TR, A80TR, W90TR, A100TR } 
         static int[] ENTIRE_DATA_SIZE = { 32492, 32492,  32492, 32580};
         static int[] MACID_ADDRESS = { 276, 276, 276, 188};
@@ -180,6 +180,7 @@
         private bool showInvalidEntries = true;
         private bool showOpEntries = true;
         private bool showErrorEntries = true;
+        private bool showEventEntries = false;
 
 
         /// <summary>
@@ -235,6 +236,7 @@
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.dateFilterStart = new System.Windows.Forms.DateTimePicker();
 			this.groupBox6 = new System.Windows.Forms.GroupBox();
+			this.chkboxShowEvents = new System.Windows.Forms.CheckBox();
 			this.butExport2numCSV = new System.Windows.Forms.Button();
 			this.butExport2CSV = new System.Windows.Forms.Button();
 			this.chkboxShowOp = new System.Windows.Forms.CheckBox();
@@ -342,6 +344,7 @@
 			this.ArchiveViewer.AutoArrange = false;
 			this.ArchiveViewer.FullRowSelect = true;
 			this.ArchiveViewer.GridLines = true;
+			this.ArchiveViewer.HideSelection = false;
 			this.ArchiveViewer.Location = new System.Drawing.Point(13, 24);
 			this.ArchiveViewer.Margin = new System.Windows.Forms.Padding(2);
 			this.ArchiveViewer.MultiSelect = false;
@@ -373,6 +376,7 @@
             this.columnHeader13,
             this.columnHeader14,
             this.columnHeader15});
+			this.MapViewer.HideSelection = false;
 			this.MapViewer.Location = new System.Drawing.Point(4, 28);
 			this.MapViewer.Margin = new System.Windows.Forms.Padding(2);
 			this.MapViewer.Name = "MapViewer";
@@ -409,6 +413,7 @@
 			// 
 			// deletedEntries
 			// 
+			this.deletedEntries.HideSelection = false;
 			this.deletedEntries.Location = new System.Drawing.Point(730, 26);
 			this.deletedEntries.Margin = new System.Windows.Forms.Padding(2);
 			this.deletedEntries.Name = "deletedEntries";
@@ -438,6 +443,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.DetailViewer.BackColor = System.Drawing.SystemColors.Window;
 			this.DetailViewer.ForeColor = System.Drawing.SystemColors.WindowText;
+			this.DetailViewer.HideSelection = false;
 			this.DetailViewer.Location = new System.Drawing.Point(4, 17);
 			this.DetailViewer.Margin = new System.Windows.Forms.Padding(2);
 			this.DetailViewer.MultiSelect = false;
@@ -549,6 +555,7 @@
 			// 
 			this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox6.Controls.Add(this.chkboxShowEvents);
 			this.groupBox6.Controls.Add(this.butExport2numCSV);
 			this.groupBox6.Controls.Add(this.butExport2CSV);
 			this.groupBox6.Controls.Add(this.chkboxShowOp);
@@ -569,11 +576,24 @@
 			this.groupBox6.TabStop = false;
 			this.groupBox6.Text = "Filtros";
 			// 
+			// chkboxShowEvents
+			// 
+			this.chkboxShowEvents.AutoSize = true;
+			this.chkboxShowEvents.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.chkboxShowEvents.Location = new System.Drawing.Point(10, 194);
+			this.chkboxShowEvents.Margin = new System.Windows.Forms.Padding(2);
+			this.chkboxShowEvents.Name = "chkboxShowEvents";
+			this.chkboxShowEvents.Size = new System.Drawing.Size(129, 21);
+			this.chkboxShowEvents.TabIndex = 21;
+			this.chkboxShowEvents.Text = "Mostrar eventos";
+			this.chkboxShowEvents.UseVisualStyleBackColor = true;
+			this.chkboxShowEvents.CheckedChanged += new System.EventHandler(this.chkboxShowEvents_CheckedChanged);
+			// 
 			// butExport2numCSV
 			// 
 			this.butExport2numCSV.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.butExport2numCSV.Location = new System.Drawing.Point(10, 368);
+			this.butExport2numCSV.Location = new System.Drawing.Point(10, 376);
 			this.butExport2numCSV.Margin = new System.Windows.Forms.Padding(2);
 			this.butExport2numCSV.Name = "butExport2numCSV";
 			this.butExport2numCSV.Size = new System.Drawing.Size(134, 34);
@@ -643,7 +663,7 @@
 			// butClearFilter
 			// 
 			this.butClearFilter.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.butClearFilter.Location = new System.Drawing.Point(20, 263);
+			this.butClearFilter.Location = new System.Drawing.Point(26, 293);
 			this.butClearFilter.Margin = new System.Windows.Forms.Padding(2);
 			this.butClearFilter.Name = "butClearFilter";
 			this.butClearFilter.Size = new System.Drawing.Size(109, 34);
@@ -655,7 +675,7 @@
 			// butSetFilter
 			// 
 			this.butSetFilter.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.butSetFilter.Location = new System.Drawing.Point(20, 212);
+			this.butSetFilter.Location = new System.Drawing.Point(26, 242);
 			this.butSetFilter.Margin = new System.Windows.Forms.Padding(2);
 			this.butSetFilter.Name = "butSetFilter";
 			this.butSetFilter.Size = new System.Drawing.Size(109, 34);
@@ -867,6 +887,7 @@
 		private System.Windows.Forms.Label label7;
 		private System.Windows.Forms.TextBox txtMacModel;
 		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.CheckBox chkboxShowEvents;
 	}
 }
 
