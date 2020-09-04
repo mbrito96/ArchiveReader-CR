@@ -1127,8 +1127,46 @@ public class ArchiveInterpreter
 	{ 
 		String eventString = "Evento: " + eventCode + " - Origen: " + eventOrigin + Environment.NewLine;
 		String originName = "";
-
-		if (model == MacModel.W90TR)
+		
+		if(model == MacModel.A20TR || model == MacModel.A30TR || model == MacModel.A40TR)
+		{
+			#region GWF-20/30/40TR EventMessages
+			switch(eventCode)
+			{
+				case "00":
+				{
+					eventString += "Se detectó una falla en la conexión a internet. Si está configurado para hacerlo, se reseteará el router." + Environment.NewLine;
+					eventString +=  "Intentos consecutivos = " + eventParam1 + " - Resolver code = " + eventParam2;
+					break;
+				}
+				case "01":
+				{
+					eventString += "Conexión a internet estable.";
+					break;
+				}
+			}
+			#endregion
+		}
+		else if (model == MacModel.A80TR)
+		{
+			#region GWF-80TR EventMessages
+			switch(eventCode)
+			{
+				case "00":
+				{
+					eventString += "Se detectó una falla en la conexión a internet. Si está configurado para hacerlo, se reseteará el router." + Environment.NewLine;
+					eventString +=  "Intentos consecutivos = " + eventParam1 + " - Resolver code = " + eventParam2;
+					break;
+				}
+				case "01":
+				{
+					eventString += "Conexión a internet estable.";
+					break;
+				}
+			}
+			#endregion
+		}
+		else if (model == MacModel.W90TR)
 		{
 			#region GWF-90TR EventMessages
 			switch(eventCode)
@@ -1136,7 +1174,7 @@ public class ArchiveInterpreter
 				case "00":
 				{
 					eventString += "Se detectó una falla en la conexión a internet. Si está configurado para hacerlo, se reseteará el router." + Environment.NewLine;
-					eventString +=  "Intentos consecutivos = " + eventParam1 + "Resolver code = " + eventParam2;
+					eventString +=  "Intentos consecutivos = " + eventParam1 + " - Resolver code = " + eventParam2;
 					break;
 				}
 				case "01":
@@ -1155,7 +1193,7 @@ public class ArchiveInterpreter
 				case "00":
 				{
 					eventString += "Se detectó una falla en la conexión a internet. Si está configurado para hacerlo, se reseteará el router." + Environment.NewLine;
-					eventString +=  "Intentos consecutivos = " + eventParam1 + "Resolver code = " + eventParam2;
+					eventString +=  "Intentos consecutivos = " + eventParam1 + " - Resolver code = " + eventParam2;
 					break;
 				}
 			}
