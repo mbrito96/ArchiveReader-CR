@@ -1558,16 +1558,39 @@ public MainForm()
 	String[] arguments = Environment.GetCommandLineArgs();
 	if(arguments.GetLength(0) > 1)
 	{
-		AskModelPopup askForModel = new AskModelPopup();
-		if(askForModel.ShowDialog() == DialogResult.OK)
+		modelSelected = false;
+		ArchiveInfo.machineIdSize = MACID_SIZE[0];
+		Stream fileStream = OpenFileFromPath(arguments[1]);
+		if(AttemptMachineIdentification(fileStream) == false)
 		{
-			modelSelected = true;
-			MacModel myModel = (MacModel) askForModel.selectedModel;
-			modelSelector.Text = modelSelector.Items[askForModel.selectedModel].ToString();
-			LoadMachineModelParameters(myModel);
-			OpenFileFromPath(arguments[1]);	
+			AskModelPopup askForModel = new AskModelPopup();
+			if(askForModel.ShowDialog() == DialogResult.OK)
+			{
+				MacModel myModel = (MacModel) askForModel.selectedModel;
+				modelSelector.Text = modelSelector.Items[askForModel.selectedModel].ToString();	// This forces a complete reload of app parameters and set the correct values
+				LoadMachineModelParameters(myModel);
+			}
+			else
+				this.Close();
+			askForModel.Dispose();
 		}
-		askForModel.Dispose();
+		else
+			modelSelector.Text = modelSelector.Items[(int)macID.model].ToString(); 	// This forces a complete reload of app parameters and set the correct values
+
+		if(modelSelected == true)
+		{
+			if(fileStream.Length == ArchiveInfo.archiveSize)
+			{
+				byte[] archiveData = new byte[ArchiveInfo.archiveSize];
+				fileStream.Read(archiveData, 0, ArchiveInfo.archiveSize);
+				ProcessData(archiveData);
+			}
+			else
+				MessageBox.Show("Error en el tamaño de archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+		}
+		fileStream.Close();
+		
+
 		
 	}
 //	MessageBox.Show("argc= " + arguments.GetLength(0) + Environment.NewLine + "GetCommandLineArgs: " + String.Join(" - ", arguments));
@@ -1660,11 +1683,12 @@ private void butReadEeprom_Click(object sender, EventArgs e)
 }
 private void butLoadFile_Click(object sender, EventArgs e)
 {
+/*
 	if (modelSelected == false)
 	{
 		MessageBox.Show("Por favor, seleccione un modelo de máquina.", "Atencion", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 		return;
-	}
+	}*/
 	var fileContent = string.Empty;
 	var filePath = string.Empty;
 
@@ -1675,15 +1699,34 @@ private void butLoadFile_Click(object sender, EventArgs e)
 		openFileDialog.FilterIndex = 1;
 		//openFileDialog.RestoreDirectory = true;
 
-		if (openFileDialog.ShowDialog() == DialogResult.OK)
+		if(openFileDialog.ShowDialog() == DialogResult.OK)
 		{
-			OpenFileFromPath(openFileDialog.FileName);
+			Stream fileStream = OpenFileFromPath(openFileDialog.FileName);
+			bool identified = AttemptMachineIdentification(fileStream);
+
+			if(identified == true)
+				modelSelector.Text = modelSelector.Items[(int)macID.model].ToString(); 	// This forces a complete reload of app parameters and set the correct values
+			else
+			{
+				MessageBox.Show("No se pudo identificar modelo de máquina. Asegurese que sea correcto.", "Atencion", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+			}
+			
 			//Stream fileStream = openFileDialog.OpenFile();
+			if(fileStream.Length == ArchiveInfo.archiveSize)
+			{
+				byte[] archiveData = new byte[ArchiveInfo.archiveSize];
+				fileStream.Read(archiveData, 0, ArchiveInfo.archiveSize);
+				ProcessData(archiveData);
+			}
+			else
+				MessageBox.Show("Error en el tamaño de archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+			fileStream.Close();
 		}
 	}
 }
 
-void OpenFileFromPath(String path)
+Stream OpenFileFromPath(String path)
 {
 	//Get the path of specified file
 	statStripDataPath.Text = path;
@@ -1698,37 +1741,31 @@ void OpenFileFromPath(String path)
 	
 	//Read the contents of the file into a stream
 	Stream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read);
-
-	if (fileStream.Length == ArchiveInfo.archiveSize)
-	{
-		byte[] fileData = new byte[ArchiveInfo.archiveSize];
-		fileStream.Read(fileData, 0, ArchiveInfo.archiveSize);
-		ProcessData(fileData);
-	}
-	else
-		MessageBox.Show("Error en el tamaño de archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-	fileStream.Close();
+	return fileStream;
 }
 #endregion
 
 #region RAW DATA PROCESSING
-private bool ProcessData(byte[] data)
-{
-	int baseIndex = ArchiveInfo.metadataAddress;	// Index offset for archive data array without machineId data
-	
-	byte[] macIdBytes = new byte[ArchiveInfo.machineIdSize];
-	if(ArchiveInfo.machineIdSize != 0)
-	{
-		baseIndex = ArchiveInfo.machineIdAddress; // Index offset for archive data array with machineId data
-		Array.Copy(data, 0, macIdBytes, 0, ArchiveInfo.machineIdSize);
-	}
-	macID = new MachineId(macIdBytes);
-	bool machineIdOk = macID.InitOk();
 
+private bool AttemptMachineIdentification(Stream data)
+{
+	// Try to recover machine ID from data header bytes
+	byte[] macIdBytes = new byte[MACID_SIZE[0]];
+	data.Read(macIdBytes, 0, macIdBytes.Length);
+
+	macID = new MachineId(macIdBytes);
+	data.Position = 0;	// Reset stream
+	return macID.InitOk();
+}
+private void ProcessData(byte[] data)
+{
+	int baseIndex = ArchiveInfo.machineIdAddress;	// Index offset for archive data array
+	
+	// If identification ok, procceed loading the file
 	txtMacModel.Text = macID.model.ToString();
 	txtMacIntern.Text = macID.intern.ToString();
 	txtMacVersion.Text = macID.softwareVersion.ToString();
-	
+		
 	arch1.entryCount = 0;
 	byte[] metadataBytes = new byte[ArchiveInfo.metadataSize];
 	Array.Copy(data, ArchiveInfo.metadataAddress - baseIndex, metadataBytes, 0, ArchiveInfo.metadataSize);
@@ -1740,12 +1777,11 @@ private bool ProcessData(byte[] data)
 			Array.Copy(data, ArchiveInfo.mapAddress - baseIndex, mapBytes, 0, ArchiveInfo.mapSize);
 			GetMemoryMapFromEeprom(mapBytes);
 		}
-	
+		
 		byte[] archiveBytes = new byte[ArchiveInfo.regFileSize];
 		Array.Copy(data,  ArchiveInfo.regFileAddress - baseIndex, archiveBytes, 0, ArchiveInfo.regFileSize);
 		GetEntries(archiveBytes);
 	}
-	return machineIdOk;
 }
 private bool GetMetadataFromEeprom(byte[] metadataBytes)
 {
@@ -1791,8 +1827,9 @@ private void GetMemoryMapFromEeprom(byte[] mapBytes)
 }
 private void GetEntries(byte[] EepromBytes)
 {
-	ClearFilter();
 	ArchiveViewer.Items.Clear();
+	deletedEntries.Items.Clear();
+	ClearFilter();
 
 	if (DEBUGGING)
 		Debug_AddColumns();
