@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace EepromVisualAccess
+namespace ArchiveReader
 {
     public partial class HelpVisor : Form
     {
