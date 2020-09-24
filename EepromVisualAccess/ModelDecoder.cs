@@ -15,12 +15,15 @@ namespace ArchiveReader
 		public virtual bool GetFlag(int digVar, int bitfield) {		return ( ( (digVar >> bitfield) & 0x1) == 1? true : false);		}
 		public virtual OpStatus GetOpStatus(int digVar, int opModePos, int opModeSize) {	return (OpStatus)((digVar >> opModePos) & 0x3);		}
 		public virtual int GetCoolingPower(int digVar){return 0;}
+
 	}
 	public class GWF_TEMPERATURE_FIELD
 	{
 		public int[] COLUMN_LUT;
 		public string[] COLUMN_NAME;
 		public int[] COLUMN_SIZE;
+		public virtual int GetTempOut(int param = 0){return 1;} // typycal case. Override if needed. Parameter is for accessing multiple temperatures
+		public virtual int GetTempIn(){return 0;} // typycal case. Override if needed. Parameter is for accessing multiple temperatures
 	}
 	public class GWF_PRESSURE_FIELD
 	{

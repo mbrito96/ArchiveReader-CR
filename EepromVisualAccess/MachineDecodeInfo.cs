@@ -56,7 +56,7 @@ namespace ArchiveReader
 		public const int TEMP_AMB = 3;
 		public GWF80TR_TEMP_FIELDS()
 		{
-			COLUMN_LUT = new int[]{};
+			COLUMN_LUT = new int[]{TEMP_IN, TEMP_OUT, TEMP_EVAP, TEMP_AMB};		// represents the id associated with each column
 			COLUMN_NAME = new string[]{ "Temp Ent.", "Temp Sal.", "Temp Evap.", "Temp Amb."};
 			COLUMN_SIZE = new int[] {120, 65, 70, 65};
 		}
@@ -68,10 +68,10 @@ namespace ArchiveReader
 		public const int P_OIL_A = 2;
 		public const int P_HIGH_B = 3;
 		public const int P_LOW_B = 4;
-		public const int P_OIL_ = 5;
+		public const int P_OIL_B = 5;
 		public GWF80TR_PRESSURE_FIELDS()
 		{
-			COLUMN_LUT = new int[]{};
+			COLUMN_LUT = new int[]{P_HIGH_A, P_LOW_A, P_OIL_A, P_HIGH_B, P_LOW_B, P_OIL_B};
 			COLUMN_NAME = new string[]{"P. Alta A", "P. Baja A", "P. Aceite A", "P. Alta B", "P. Baja B", "P. Aceite B"};
 			COLUMN_SIZE = new int[] {60, 60, 65, 60, 60, 65};
 		}
@@ -125,7 +125,7 @@ namespace ArchiveReader
 		public const int TEMP_COND = 3;
 		public GWF90TR_TEMP_FIELDS()
 		{
-			COLUMN_LUT = new int[]{};
+			COLUMN_LUT = new int[]{TEMP_IN, TEMP_OUT, TEMP_EVAP, TEMP_COND};	// represents the id associated with each column
 			COLUMN_NAME = new string[] {"Temp Ent.", "Temp Sal.", "Temp Evap.", "Temp Ent. Cond."};
 			COLUMN_SIZE = new int[] {120, 65, 70, 100};
 		}
@@ -142,7 +142,7 @@ namespace ArchiveReader
 		public const int P_OIL_S = 6;
 		public GWF90TR_PRESSURE_FIELDS()
 		{
-			COLUMN_LUT = new int[]{};
+			COLUMN_LUT = new int[]{P_HIGH_TA, P_LOW_TA, P_OIL_TA, P_OIL_TB, P_HIGH_S, P_LOW_S, P_OIL_S};
 			COLUMN_NAME = new string[] {"P. Alta (T)", "P. Baja (T)", "P. Aceite A (T)", "P. Aceite B (T)", "P. Alta (S)", "P. Baja (S)", "P. Aceite (S)"};
 			COLUMN_SIZE = new int[] {60, 65, 83, 83, 60, 65, 83};
 		}

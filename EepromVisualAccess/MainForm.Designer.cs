@@ -133,7 +133,7 @@
 		public Version ARCHIVE_VERSION;
 		public MachineId macID;
 
-		static uint[] ARCHIVE_VERSION_NUMBER = { 3, 3, 0 };
+		static uint[] ARCHIVE_VERSION_NUMBER = { 3, 4, 0 };
 		// Defined Archive parameters for: { A40TR, A80TR, W90TR, A100TR } 
 		static int[] ENTIRE_DATA_SIZE = { 32492, 32492, 32492, 32580 };
 		static int[] MACID_ADDRESS = { 276, 276, 276, 188 };
@@ -239,6 +239,7 @@
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.dateFilterStart = new System.Windows.Forms.DateTimePicker();
 			this.groupBox6 = new System.Windows.Forms.GroupBox();
+			this.butPlotter = new System.Windows.Forms.Button();
 			this.chkboxShowEvents = new System.Windows.Forms.CheckBox();
 			this.butExport2numCSV = new System.Windows.Forms.Button();
 			this.butExport2CSV = new System.Windows.Forms.Button();
@@ -259,7 +260,6 @@
 			this.label7 = new System.Windows.Forms.Label();
 			this.txtMacModel = new System.Windows.Forms.TextBox();
 			this.label2 = new System.Windows.Forms.Label();
-			this.butPlotter = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			this.groupBox2.SuspendLayout();
@@ -288,10 +288,10 @@
 			this.modelSelector.CausesValidation = false;
 			this.modelSelector.FormattingEnabled = true;
 			this.modelSelector.Items.AddRange(new object[] {
-			"GWF-A-20/30/40TR",
-			"GWF-A-80TR",
-			"GWF-W-90TR",
-			"GWF-A-100TR"});
+            "GWF-A-20/30/40TR",
+            "GWF-A-80TR",
+            "GWF-W-90TR",
+            "GWF-A-100TR"});
 			this.modelSelector.Location = new System.Drawing.Point(5, 31);
 			this.modelSelector.Margin = new System.Windows.Forms.Padding(2);
 			this.modelSelector.Name = "modelSelector";
@@ -325,9 +325,9 @@
 			// 
 			// groupBox2
 			// 
-			this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-			| System.Windows.Forms.AnchorStyles.Left)
-			| System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBox2.Controls.Add(this.ArchiveViewer);
 			this.groupBox2.Controls.Add(this.groupBox3);
 			this.groupBox2.Controls.Add(this.deletedEntries);
@@ -342,9 +342,9 @@
 			// 
 			// ArchiveViewer
 			// 
-			this.ArchiveViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-			| System.Windows.Forms.AnchorStyles.Left)
-			| System.Windows.Forms.AnchorStyles.Right)));
+			this.ArchiveViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.ArchiveViewer.AutoArrange = false;
 			this.ArchiveViewer.FullRowSelect = true;
 			this.ArchiveViewer.GridLines = true;
@@ -375,11 +375,11 @@
 			// MapViewer
 			// 
 			this.MapViewer.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-			this.columnHeader11,
-			this.columnHeader12,
-			this.columnHeader13,
-			this.columnHeader14,
-			this.columnHeader15});
+            this.columnHeader11,
+            this.columnHeader12,
+            this.columnHeader13,
+            this.columnHeader14,
+            this.columnHeader15});
 			this.MapViewer.HideSelection = false;
 			this.MapViewer.Location = new System.Drawing.Point(4, 28);
 			this.MapViewer.Margin = new System.Windows.Forms.Padding(2);
@@ -428,8 +428,8 @@
 			// 
 			// groupBox5
 			// 
-			this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-			| System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBox5.Controls.Add(this.DetailViewer);
 			this.groupBox5.Controls.Add(this.ErrorViewer);
 			this.groupBox5.Location = new System.Drawing.Point(372, 67);
@@ -443,8 +443,8 @@
 			// 
 			// DetailViewer
 			// 
-			this.DetailViewer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-			| System.Windows.Forms.AnchorStyles.Right)));
+			this.DetailViewer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.DetailViewer.BackColor = System.Drawing.SystemColors.Window;
 			this.DetailViewer.ForeColor = System.Drawing.SystemColors.WindowText;
 			this.DetailViewer.HideSelection = false;
@@ -460,8 +460,8 @@
 			// 
 			// ErrorViewer
 			// 
-			this.ErrorViewer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-			| System.Windows.Forms.AnchorStyles.Right)));
+			this.ErrorViewer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.ErrorViewer.BackColor = System.Drawing.SystemColors.Window;
 			this.ErrorViewer.Location = new System.Drawing.Point(4, 17);
 			this.ErrorViewer.Margin = new System.Windows.Forms.Padding(2);
@@ -557,8 +557,8 @@
 			// 
 			// groupBox6
 			// 
-			this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-			| System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBox6.Controls.Add(this.butPlotter);
 			this.groupBox6.Controls.Add(this.chkboxShowEvents);
 			this.groupBox6.Controls.Add(this.butExport2numCSV);
@@ -581,6 +581,19 @@
 			this.groupBox6.TabStop = false;
 			this.groupBox6.Text = "Filtros";
 			// 
+			// butPlotter
+			// 
+			this.butPlotter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.butPlotter.Location = new System.Drawing.Point(10, 345);
+			this.butPlotter.Margin = new System.Windows.Forms.Padding(2);
+			this.butPlotter.Name = "butPlotter";
+			this.butPlotter.Size = new System.Drawing.Size(134, 34);
+			this.butPlotter.TabIndex = 22;
+			this.butPlotter.Text = "Graficar datos";
+			this.butPlotter.UseVisualStyleBackColor = true;
+			this.butPlotter.Click += new System.EventHandler(this.butPlotter_Click);
+			// 
 			// chkboxShowEvents
 			// 
 			this.chkboxShowEvents.AutoSize = true;
@@ -596,8 +609,8 @@
 			// 
 			// butExport2numCSV
 			// 
-			this.butExport2numCSV.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-			| System.Windows.Forms.AnchorStyles.Right)));
+			this.butExport2numCSV.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.butExport2numCSV.Location = new System.Drawing.Point(10, 390);
 			this.butExport2numCSV.Margin = new System.Windows.Forms.Padding(2);
 			this.butExport2numCSV.Name = "butExport2numCSV";
@@ -609,8 +622,8 @@
 			// 
 			// butExport2CSV
 			// 
-			this.butExport2CSV.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-			| System.Windows.Forms.AnchorStyles.Right)));
+			this.butExport2CSV.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.butExport2CSV.Location = new System.Drawing.Point(10, 436);
 			this.butExport2CSV.Margin = new System.Windows.Forms.Padding(2);
 			this.butExport2CSV.Name = "butExport2CSV";
@@ -724,7 +737,7 @@
 			// 
 			this.statstrFilePath.ImageScalingSize = new System.Drawing.Size(20, 20);
 			this.statstrFilePath.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			this.statStripDataPath});
+            this.statStripDataPath});
 			this.statstrFilePath.Location = new System.Drawing.Point(0, 483);
 			this.statstrFilePath.Name = "statstrFilePath";
 			this.statstrFilePath.Padding = new System.Windows.Forms.Padding(1, 0, 10, 0);
@@ -808,19 +821,6 @@
 			this.label2.Size = new System.Drawing.Size(42, 13);
 			this.label2.TabIndex = 4;
 			this.label2.Text = "Modelo";
-			// 
-			// butPlotter
-			// 
-			this.butPlotter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-			| System.Windows.Forms.AnchorStyles.Right)));
-			this.butPlotter.Location = new System.Drawing.Point(10, 345);
-			this.butPlotter.Margin = new System.Windows.Forms.Padding(2);
-			this.butPlotter.Name = "butPlotter";
-			this.butPlotter.Size = new System.Drawing.Size(134, 34);
-			this.butPlotter.TabIndex = 22;
-			this.butPlotter.Text = "Plotter";
-			this.butPlotter.UseVisualStyleBackColor = true;
-			this.butPlotter.Click += new System.EventHandler(this.butPlotter_Click);
 			// 
 			// MainForm
 			// 

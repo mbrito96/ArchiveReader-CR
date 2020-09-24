@@ -17,14 +17,16 @@ namespace ArchiveReader
 		public class TempData
 		{
 			public string name;
+			public int id;
 			public List<double> values;
 			public bool plot;	// Plot data in graph or not
 			public ScottPlot.PlottableSignalXY signalName;
 			public Color? color;
 			public TEMP_STATISTICS stats;
-			public TempData(string n, bool plt, Color? colorVal = null)
+			public TempData(int id, string name, bool plt, Color? colorVal = null)
 			{
-				this.name = n;
+				this.id = id;
+				this.name = name;
 				this.plot = plt;
 				this.color = colorVal;
 				this.values = new List<double>();
@@ -33,14 +35,16 @@ namespace ArchiveReader
 		public class PressureData
 		{
 			public string name;
+			public int id;
 			public List<double> values;
 			public bool plot;	// Plot data in graph or not
 			public ScottPlot.PlottableSignalXY signalName;
 			public Color? color;
 			public PRESS_STATISTICS stats;
 
-			public PressureData(string n, bool plt, Color? colorVal = null)
+			public PressureData(int id, string n, bool plt, Color? colorVal = null)
 			{
+				this.id = id;
 				this.name = n;
 				this.plot = plt;
 				this.color = colorVal;
@@ -66,11 +70,14 @@ namespace ArchiveReader
 			public bool rendered;
 		};
 
+		Version plotterVersion;
 		ArchiveSeries seriesData;
 		ListView source;
 		FormWindowState? LastWindowState = null;
 		static linkXaxis_st linkXaxis;
 		GWF_DECODER decoder;
+		bool showThermalJump = false;
+		PlottablePolygon thermalJumpPolygon;
 
 		public ArchivePlotter(ListView srcListView, MainForm.MachineId macId)
 		{
@@ -79,6 +86,9 @@ namespace ArchiveReader
 			this.WindowState = FormWindowState.Maximized;
 
 			source = srcListView;
+			
+			plotterVersion = new Version(PLOTTER_VERSION_NUMBER[0], PLOTTER_VERSION_NUMBER[1], PLOTTER_VERSION_NUMBER[2]);
+			this.Text += " - V" + plotterVersion.ToString();
 			
 			seriesData = new ArchiveSeries();
 			LoadDataFromMainForm(seriesData, macId);
@@ -109,11 +119,9 @@ namespace ArchiveReader
 			plotter_Temps.plt.YLabel("Temperatura (°C)");
 			plotter_Temps.plt.Legend(location: legendLocation.upperRight, fontSize:10);
 
-
-			
 			plotter_Temps.plt.Axis(x1: xLim_1, x2: xLim_2, y1: yLim_1, y2: yLim_2);
 			plotter_Temps.plt.Grid(ySpacing: 1);
-
+			UpdateThermalJumpFill();
 			plotter_Temps.Render();
 		}
 
@@ -168,7 +176,9 @@ namespace ArchiveReader
 			foreach(PressureData i in serie.pressures)
 				chkListBox_Press.Items.Add(i.name);
 			#endregion 
-			 linkXaxis.linked = btnLinkXaxis.Checked;
+			
+			linkXaxis.linked = btnLinkXaxis.Checked;
+			showThermalJump = false;
 		}
 
 		/// <summary>
@@ -191,11 +201,11 @@ namespace ArchiveReader
 			
 			// Instantiate one element in list per temperature signal
 			for(int i = 0 ; i < decoder.temperatures.COLUMN_NAME.Length ; i++)
-				serie.temps.Add(new TempData(decoder.temperatures.COLUMN_NAME[i], true, plotter_Temps.plt.Colorset().GetColor(i)));
+				serie.temps.Add(new TempData( decoder.temperatures.COLUMN_LUT[i], decoder.temperatures.COLUMN_NAME[i], true, plotter_Temps.plt.Colorset().GetColor(i)));
 
 			// Instantiate one element in list per pressure signal
 			for(int i = 0 ; i < decoder.pressures.COLUMN_NAME.Length ; i++)
-				serie.pressures.Add(new PressureData(decoder.pressures.COLUMN_NAME[i], true, plotter_Temps.plt.Colorset().GetColor(i)));
+				serie.pressures.Add(new PressureData( decoder.pressures.COLUMN_LUT[i], decoder.pressures.COLUMN_NAME[i], true, plotter_Temps.plt.Colorset().GetColor(i)));
 			
 			InitStatisticsFields(serie);
 
@@ -229,6 +239,15 @@ namespace ArchiveReader
 			{
 				serie.xs[j] = serie.time[j].ToOADate();
 			}
+
+			// Compute statistic data
+			CalculateTempStat();
+			CalculatePressStat();
+			foreach(PressureData x in serie.pressures)
+			{
+				if(x.stats.onRatio == 0)
+					x.plot = false;
+			}
 		}
 
 		void InitStatisticsFields(ArchiveSeries serie)
@@ -236,18 +255,51 @@ namespace ArchiveReader
 			switch(decoder.model)
 			{
 				case MacModel.A80TR:
-					seriesData.temps[GWF80TR_TEMP_FIELDS.TEMP_OUT].stats = new TEMP_STATISTICS(Clbk_MeanTempOut, Clbk_StdTempOut, Clbk_InRangeTempOut, Clbk_RangeTempOut, Clbk_DeltaTempOut);
+					seriesData.temps[GWF80TR_TEMP_FIELDS.TEMP_OUT].stats = new TEMP_STATISTICS(GWF80TR_TEMP_FIELDS.TEMP_OUT, meanRange:KpiTempOut_GetMeanRanges(), performanceRange:KpiTempOut_GetPerformanceRanges());
 					selBox_Temps_Stats.Items.Add(seriesData.temps[GWF80TR_TEMP_FIELDS.TEMP_OUT].name);
 
-					seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_HIGH_A].stats = new PRESS_STATISTICS(GWF80TR_PRESSURE_FIELDS.P_HIGH_A);
+					seriesData.temps[GWF80TR_TEMP_FIELDS.TEMP_IN].stats = new TEMP_STATISTICS(GWF80TR_TEMP_FIELDS.TEMP_IN);
+					selBox_Temps_Stats.Items.Add(seriesData.temps[GWF80TR_TEMP_FIELDS.TEMP_IN].name);
+
+					seriesData.temps[GWF80TR_TEMP_FIELDS.TEMP_EVAP].stats = new TEMP_STATISTICS(GWF80TR_TEMP_FIELDS.TEMP_EVAP);
+					selBox_Temps_Stats.Items.Add(seriesData.temps[GWF80TR_TEMP_FIELDS.TEMP_EVAP].name);
+
+					seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_HIGH_A].stats = new PRESS_STATISTICS(GWF80TR_PRESSURE_FIELDS.P_HIGH_A, meanOnRange:KpiPresHigh_GetMeanOnRanges(), minOnRange:KpiPresHigh_GetMinOnRanges(), maxOnRange:KpiPresHigh_GetMaxOnRanges());
 					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_HIGH_A].name);
+
+					seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_HIGH_B].stats = new PRESS_STATISTICS(GWF80TR_PRESSURE_FIELDS.P_HIGH_B, meanOnRange:KpiPresHigh_GetMeanOnRanges(), minOnRange:KpiPresHigh_GetMinOnRanges(), maxOnRange:KpiPresHigh_GetMaxOnRanges());
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_HIGH_B].name);
 					break;
 				case MacModel.W90TR:
-					seriesData.temps[GWF90TR_TEMP_FIELDS.TEMP_OUT].stats = new TEMP_STATISTICS(Clbk_MeanTempOut, Clbk_MeanTempOut, Clbk_InRangeTempOut, Clbk_RangeTempOut, Clbk_DeltaTempOut);
+					seriesData.temps[GWF90TR_TEMP_FIELDS.TEMP_OUT].stats = new TEMP_STATISTICS(GWF90TR_TEMP_FIELDS.TEMP_OUT, meanRange:KpiTempOut_GetMeanRanges(), performanceRange:KpiTempOut_GetPerformanceRanges());
 					selBox_Temps_Stats.Items.Add(seriesData.temps[GWF90TR_TEMP_FIELDS.TEMP_OUT].name);
 
-					seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_HIGH_TA].stats = new PRESS_STATISTICS(GWF90TR_PRESSURE_FIELDS.P_HIGH_TA);
+					seriesData.temps[GWF90TR_TEMP_FIELDS.TEMP_IN].stats = new TEMP_STATISTICS(GWF90TR_TEMP_FIELDS.TEMP_IN);
+					selBox_Temps_Stats.Items.Add(seriesData.temps[GWF90TR_TEMP_FIELDS.TEMP_IN].name);
+
+					seriesData.temps[GWF90TR_TEMP_FIELDS.TEMP_EVAP].stats = new TEMP_STATISTICS(GWF90TR_TEMP_FIELDS.TEMP_EVAP);
+					selBox_Temps_Stats.Items.Add(seriesData.temps[GWF90TR_TEMP_FIELDS.TEMP_EVAP].name);
+
+					seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_HIGH_TA].stats = new PRESS_STATISTICS(GWF90TR_PRESSURE_FIELDS.P_HIGH_TA, meanOnRange:KpiPresHigh_GetMeanOnRanges(), minOnRange:KpiPresHigh_GetMinOnRanges(), maxOnRange:KpiPresHigh_GetMaxOnRanges());
 					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_HIGH_TA].name);
+
+					seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_LOW_TA].stats = new PRESS_STATISTICS(GWF90TR_PRESSURE_FIELDS.P_LOW_TA, meanOnRange:KpiPresLow_GetMeanOnRanges(), minOnRange:KpiPresLow_GetMinOnRanges(), maxOnRange:KpiPresLow_GetMaxOnRanges());
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_LOW_TA].name);
+
+					seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_OIL_TA].stats = new PRESS_STATISTICS(GWF90TR_PRESSURE_FIELDS.P_OIL_TA);
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_OIL_TA].name);
+
+					seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_OIL_TB].stats = new PRESS_STATISTICS(GWF90TR_PRESSURE_FIELDS.P_OIL_TB);
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_OIL_TB].name);
+
+					seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_HIGH_S].stats = new PRESS_STATISTICS(GWF90TR_PRESSURE_FIELDS.P_HIGH_S, meanOnRange:KpiPresHigh_GetMeanOnRanges(), minOnRange:KpiPresHigh_GetMinOnRanges(), maxOnRange:KpiPresHigh_GetMaxOnRanges());
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_HIGH_S].name);
+
+					seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_LOW_S].stats = new PRESS_STATISTICS(GWF90TR_PRESSURE_FIELDS.P_LOW_S, meanOnRange:KpiPresLow_GetMeanOnRanges(), minOnRange:KpiPresLow_GetMinOnRanges(), maxOnRange:KpiPresLow_GetMaxOnRanges());
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_LOW_S].name);
+
+					seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_OIL_S].stats = new PRESS_STATISTICS(GWF90TR_PRESSURE_FIELDS.P_OIL_S);
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF90TR_PRESSURE_FIELDS.P_OIL_S].name);
 					break;
 			}
 		}
@@ -329,11 +381,13 @@ namespace ArchiveReader
 			if(linkXaxis.linked == true && linkXaxis.rendered == false)
 				Refresh_xAxesLink((ScottPlot.FormsPlot)sender);
 		}
+		ScottPlot.FormsPlot lastPlotUsed;
 		/// <summary>
 		/// Links x axis limits if linkXaxis is true.
 		/// </summary>
 		void plotters_AxesChanged(object sender, EventArgs e)
 		{
+			lastPlotUsed = (ScottPlot.FormsPlot) sender;
 			if(linkXaxis.linked == true)
 			{
 				ScottPlot.FormsPlot activePlot = (ScottPlot.FormsPlot) sender;
@@ -359,9 +413,15 @@ namespace ArchiveReader
 		{
 			linkXaxis.linked = btnLinkXaxis.Checked;
 			linkXaxis.rendered = false;
-			// Update all plotters according to temp axes.
-			plotter_Press.plt.MatchAxis(plotter_Temps.plt, horizontal: true, vertical: false);
-			Refresh_xAxesLink(plotter_Temps);	
+			// Update all plotters according to last used plot.
+			ScottPlot.FormsPlot otherPlot;
+			if(lastPlotUsed.Name == plotter_Temps.Name)
+				otherPlot = plotter_Press;
+			else
+				otherPlot = plotter_Temps;	
+
+			otherPlot.plt.MatchAxis(lastPlotUsed.plt, horizontal: true, vertical: false);
+			otherPlot.Render();
 		}
 		#endregion
 
@@ -383,9 +443,9 @@ namespace ArchiveReader
 			else
 			{
 				// remove cmp curves
-				plotter_Temps.plt.Clear(seriesData.coolingPlotTemps);
+				plotter_Temps.plt.Remove(seriesData.coolingPlotTemps);
 				plotter_Temps.Render();
-				plotter_Press.plt.Clear(seriesData.coolingPlotPress);
+				plotter_Press.plt.Remove(seriesData.coolingPlotPress);
 				plotter_Press.Render();
 			}
 			
@@ -430,60 +490,19 @@ namespace ArchiveReader
 			}
 			return filePath;
 		}
-		#endregion
-		
-		private void selBox_Temps_Stats_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			ComboBox selector = (ComboBox) sender;
-			TempData selectedTemp = null;
+		#endregion	
 
-			// Determine temperature that was selected
-			foreach(TempData x in seriesData.temps)
-			{
-				if(selector.Text.Equals(x.name))
-				{
-					selectedTemp = x;
-					break;
-				}
-			}
-			if(selectedTemp != null)
-			{
-				selectedTemp.stats.CalculateStats(seriesData.xs.ToList(), selectedTemp.values);
-				DisplayTempNumericStats(selectedTemp);
-			}
-		}
-		private void selBox_Press_Stats_SelectedIndexChanged(object sender, EventArgs e)
+		private void but_FillTempDif_Click(object sender, EventArgs e)
 		{
-			ComboBox selector = (ComboBox) sender;
-			PressureData selectedPressure = null;
-
-			// Determine temperature that was selected
-			foreach(PressureData x in seriesData.pressures)
-			{
-				if(selector.Text.Equals(x.name))
-				{
-					selectedPressure = x;
-					break;
-				}
-			}
-			if(selectedPressure != null)
-			{
-				selectedPressure.stats.CalculateStats(seriesData.xs.ToList(), selectedPressure.values, seriesData.digital, decoder);
-				DisplayPressNumericStats(selectedPressure);
-			}
+			showThermalJump = !showThermalJump;
+			UpdateThermalJumpFill();
+			plotter_Temps.Render();
 		}
-		private void DisplayTempNumericStats(TempData selectedTemp)
+		private void UpdateThermalJumpFill()
 		{
-			txt_StatsTempsMean.Text = (selectedTemp.stats.mean != null) ? selectedTemp.stats.mean.value.ToString("N3") : "";
-			txt_StatsTempsSTD.Text = (selectedTemp.stats.std != null) ? selectedTemp.stats.std.value.ToString("N3") : "";
-			txt_StatsTempsPerf.Text = (selectedTemp.stats.timeInRange != null) ? (selectedTemp.stats.timeInRange.value / selectedTemp.stats.timeRange.value * 100).ToString("N3") + "%" : "";
-		}
-		private void DisplayPressNumericStats(PressureData selectedPressure)
-		{
-			txt_StatsPresssMeanOff.Text = selectedPressure.stats.meanOff.ToString("N3");
-			txt_StatsPresssMeanOn.Text = selectedPressure.stats.meanOn.ToString("N3");
-			/*txt_StatsTempsSTD.Text = (selectedTemp.stats.std != null) ? selectedTemp.stats.std.value.ToString("N3") : "";
-			txt_StatsTempsPerf.Text = (selectedTemp.stats.timeInRange != null) ? (selectedTemp.stats.timeInRange.value / selectedTemp.stats.timeRange.value * 100).ToString("N3") + "%" : "";*/
+			plotter_Temps.plt.Remove(thermalJumpPolygon);
+			if(showThermalJump)
+				thermalJumpPolygon = plotter_Temps.plt.PlotFill(seriesData.xs, seriesData.temps[decoder.temperatures.GetTempOut()].values.ToArray(), seriesData.xs, seriesData.temps[decoder.temperatures.GetTempIn()].values.ToArray(), fillAlpha: .3, fillColor: Color.Green);
 		}
 
 	}

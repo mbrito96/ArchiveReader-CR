@@ -2,6 +2,7 @@
 {
 	partial class ArchivePlotter
 	{
+		static int[] PLOTTER_VERSION_NUMBER = { 1, 0, 0 };
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -29,6 +30,7 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ArchivePlotter));
 			this.tabControl3 = new System.Windows.Forms.TabControl();
 			this.tabPage5 = new System.Windows.Forms.TabPage();
 			this.btnShowCursorValue = new System.Windows.Forms.CheckBox();
@@ -46,15 +48,19 @@
 			this.tabs_Press = new System.Windows.Forms.TabControl();
 			this.tab_Press_Stats = new System.Windows.Forms.TabPage();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this.label14 = new System.Windows.Forms.Label();
+			this.txt_StatsPressMaxOn = new System.Windows.Forms.TextBox();
+			this.label12 = new System.Windows.Forms.Label();
+			this.txt_StatsPressMinOn = new System.Windows.Forms.TextBox();
 			this.label9 = new System.Windows.Forms.Label();
-			this.textBox1 = new System.Windows.Forms.TextBox();
-			this.txt_StatsPresssMeanOn = new System.Windows.Forms.TextBox();
-			this.label10 = new System.Windows.Forms.Label();
+			this.txt_StatsPressMeanOn = new System.Windows.Forms.TextBox();
 			this.label11 = new System.Windows.Forms.Label();
-			this.textBox3 = new System.Windows.Forms.TextBox();
+			this.txt_StatsPressStdOn = new System.Windows.Forms.TextBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.selBox_Press_Stats = new System.Windows.Forms.ComboBox();
-			this.tab_Press_Ref = new System.Windows.Forms.TabPage();
+			this.tab_Press_Config = new System.Windows.Forms.TabPage();
+			this.label5 = new System.Windows.Forms.Label();
+			this.selBox_Press_Configs = new System.Windows.Forms.ComboBox();
 			this.chkListBox_Press = new System.Windows.Forms.CheckedListBox();
 			this.plotter_Press = new ScottPlot.FormsPlot();
 			this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
@@ -65,26 +71,24 @@
 			this.tabs_Temps = new System.Windows.Forms.TabControl();
 			this.tab_Temps_Stats = new System.Windows.Forms.TabPage();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.txt_StatsTempsMax = new System.Windows.Forms.TextBox();
+			this.label13 = new System.Windows.Forms.Label();
 			this.label6 = new System.Windows.Forms.Label();
 			this.txt_StatsTempsPerf = new System.Windows.Forms.TextBox();
 			this.txt_StatsTempsMean = new System.Windows.Forms.TextBox();
 			this.label8 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
 			this.txt_StatsTempsSTD = new System.Windows.Forms.TextBox();
-			this.numUpDown_maxTemp = new System.Windows.Forms.NumericUpDown();
-			this.label5 = new System.Windows.Forms.Label();
 			this.numUpDown_setpointError = new System.Windows.Forms.NumericUpDown();
 			this.numUpDown_setpoint = new System.Windows.Forms.NumericUpDown();
 			this.label3 = new System.Windows.Forms.Label();
-			this.btn_StatsTempsExpand = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
 			this.selBox_Temps_Stats = new System.Windows.Forms.ComboBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.tab_Temps_Ref = new System.Windows.Forms.TabPage();
+			this.but_FillTempDif = new System.Windows.Forms.Button();
 			this.chkListBox_Temps = new System.Windows.Forms.CheckedListBox();
 			this.plotter_Temps = new ScottPlot.FormsPlot();
-			this.label12 = new System.Windows.Forms.Label();
-			this.txt_StatsPresssMeanOff = new System.Windows.Forms.TextBox();
 			this.tabControl3.SuspendLayout();
 			this.tabPage5.SuspendLayout();
 			this.tabPage6.SuspendLayout();
@@ -94,15 +98,16 @@
 			this.tabs_Press.SuspendLayout();
 			this.tab_Press_Stats.SuspendLayout();
 			this.groupBox3.SuspendLayout();
+			this.tab_Press_Config.SuspendLayout();
 			this.flowLayoutPanel1.SuspendLayout();
 			this.grpboxTemps.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.tabs_Temps.SuspendLayout();
 			this.tab_Temps_Stats.SuspendLayout();
 			this.groupBox2.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.numUpDown_maxTemp)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numUpDown_setpointError)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numUpDown_setpoint)).BeginInit();
+			this.tab_Temps_Ref.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// tabControl3
@@ -285,7 +290,7 @@
 			this.tabs_Press.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.tabs_Press.Controls.Add(this.tab_Press_Stats);
-			this.tabs_Press.Controls.Add(this.tab_Press_Ref);
+			this.tabs_Press.Controls.Add(this.tab_Press_Config);
 			this.tabs_Press.Location = new System.Drawing.Point(1112, 19);
 			this.tabs_Press.Name = "tabs_Press";
 			this.tabs_Press.SelectedIndex = 0;
@@ -294,6 +299,7 @@
 			// 
 			// tab_Press_Stats
 			// 
+			this.tab_Press_Stats.AutoScroll = true;
 			this.tab_Press_Stats.Controls.Add(this.groupBox3);
 			this.tab_Press_Stats.Controls.Add(this.label2);
 			this.tab_Press_Stats.Controls.Add(this.selBox_Press_Stats);
@@ -307,19 +313,57 @@
 			// 
 			// groupBox3
 			// 
+			this.groupBox3.Controls.Add(this.label14);
+			this.groupBox3.Controls.Add(this.txt_StatsPressMaxOn);
 			this.groupBox3.Controls.Add(this.label12);
-			this.groupBox3.Controls.Add(this.txt_StatsPresssMeanOff);
+			this.groupBox3.Controls.Add(this.txt_StatsPressMinOn);
 			this.groupBox3.Controls.Add(this.label9);
-			this.groupBox3.Controls.Add(this.textBox1);
-			this.groupBox3.Controls.Add(this.txt_StatsPresssMeanOn);
-			this.groupBox3.Controls.Add(this.label10);
+			this.groupBox3.Controls.Add(this.txt_StatsPressMeanOn);
 			this.groupBox3.Controls.Add(this.label11);
-			this.groupBox3.Controls.Add(this.textBox3);
+			this.groupBox3.Controls.Add(this.txt_StatsPressStdOn);
 			this.groupBox3.Location = new System.Drawing.Point(17, 44);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(189, 111);
+			this.groupBox3.Size = new System.Drawing.Size(189, 143);
 			this.groupBox3.TabIndex = 16;
 			this.groupBox3.TabStop = false;
+			// 
+			// label14
+			// 
+			this.label14.AutoSize = true;
+			this.label14.Location = new System.Drawing.Point(5, 67);
+			this.label14.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+			this.label14.Name = "label14";
+			this.label14.Size = new System.Drawing.Size(71, 13);
+			this.label14.TabIndex = 17;
+			this.label14.Text = "Máximo ON =";
+			// 
+			// txt_StatsPressMaxOn
+			// 
+			this.txt_StatsPressMaxOn.Location = new System.Drawing.Point(84, 64);
+			this.txt_StatsPressMaxOn.Margin = new System.Windows.Forms.Padding(2);
+			this.txt_StatsPressMaxOn.Name = "txt_StatsPressMaxOn";
+			this.txt_StatsPressMaxOn.ReadOnly = true;
+			this.txt_StatsPressMaxOn.Size = new System.Drawing.Size(76, 20);
+			this.txt_StatsPressMaxOn.TabIndex = 18;
+			// 
+			// label12
+			// 
+			this.label12.AutoSize = true;
+			this.label12.Location = new System.Drawing.Point(5, 43);
+			this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+			this.label12.Name = "label12";
+			this.label12.Size = new System.Drawing.Size(70, 13);
+			this.label12.TabIndex = 15;
+			this.label12.Text = "Mínimo ON =";
+			// 
+			// txt_StatsPressMinOn
+			// 
+			this.txt_StatsPressMinOn.Location = new System.Drawing.Point(84, 40);
+			this.txt_StatsPressMinOn.Margin = new System.Windows.Forms.Padding(2);
+			this.txt_StatsPressMinOn.Name = "txt_StatsPressMinOn";
+			this.txt_StatsPressMinOn.ReadOnly = true;
+			this.txt_StatsPressMinOn.Size = new System.Drawing.Size(76, 20);
+			this.txt_StatsPressMinOn.TabIndex = 16;
 			// 
 			// label9
 			// 
@@ -327,56 +371,37 @@
 			this.label9.Location = new System.Drawing.Point(5, 19);
 			this.label9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.label9.Name = "label9";
-			this.label9.Size = new System.Drawing.Size(77, 13);
+			this.label9.Size = new System.Drawing.Size(79, 13);
 			this.label9.TabIndex = 9;
-			this.label9.Text = "Promedio On =";
+			this.label9.Text = "Promedio ON =";
 			// 
-			// textBox1
+			// txt_StatsPressMeanOn
 			// 
-			this.textBox1.Location = new System.Drawing.Point(84, 88);
-			this.textBox1.Margin = new System.Windows.Forms.Padding(2);
-			this.textBox1.Name = "textBox1";
-			this.textBox1.ReadOnly = true;
-			this.textBox1.Size = new System.Drawing.Size(76, 20);
-			this.textBox1.TabIndex = 14;
-			// 
-			// txt_StatsPresssMeanOn
-			// 
-			this.txt_StatsPresssMeanOn.Location = new System.Drawing.Point(84, 16);
-			this.txt_StatsPresssMeanOn.Margin = new System.Windows.Forms.Padding(2);
-			this.txt_StatsPresssMeanOn.Name = "txt_StatsPresssMeanOn";
-			this.txt_StatsPresssMeanOn.ReadOnly = true;
-			this.txt_StatsPresssMeanOn.Size = new System.Drawing.Size(76, 20);
-			this.txt_StatsPresssMeanOn.TabIndex = 10;
-			// 
-			// label10
-			// 
-			this.label10.AutoSize = true;
-			this.label10.Location = new System.Drawing.Point(5, 91);
-			this.label10.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-			this.label10.Name = "label10";
-			this.label10.Size = new System.Drawing.Size(76, 13);
-			this.label10.TabIndex = 13;
-			this.label10.Text = "Performance =";
+			this.txt_StatsPressMeanOn.Location = new System.Drawing.Point(84, 16);
+			this.txt_StatsPressMeanOn.Margin = new System.Windows.Forms.Padding(2);
+			this.txt_StatsPressMeanOn.Name = "txt_StatsPressMeanOn";
+			this.txt_StatsPressMeanOn.ReadOnly = true;
+			this.txt_StatsPressMeanOn.Size = new System.Drawing.Size(76, 20);
+			this.txt_StatsPressMeanOn.TabIndex = 10;
 			// 
 			// label11
 			// 
 			this.label11.AutoSize = true;
-			this.label11.Location = new System.Drawing.Point(5, 67);
+			this.label11.Location = new System.Drawing.Point(5, 91);
 			this.label11.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.label11.Name = "label11";
-			this.label11.Size = new System.Drawing.Size(51, 13);
+			this.label11.Size = new System.Drawing.Size(57, 13);
 			this.label11.TabIndex = 11;
-			this.label11.Text = "Desvío =";
+			this.label11.Text = "STD ON =";
 			// 
-			// textBox3
+			// txt_StatsPressStdOn
 			// 
-			this.textBox3.Location = new System.Drawing.Point(84, 64);
-			this.textBox3.Margin = new System.Windows.Forms.Padding(2);
-			this.textBox3.Name = "textBox3";
-			this.textBox3.ReadOnly = true;
-			this.textBox3.Size = new System.Drawing.Size(76, 20);
-			this.textBox3.TabIndex = 12;
+			this.txt_StatsPressStdOn.Location = new System.Drawing.Point(84, 88);
+			this.txt_StatsPressStdOn.Margin = new System.Windows.Forms.Padding(2);
+			this.txt_StatsPressStdOn.Name = "txt_StatsPressStdOn";
+			this.txt_StatsPressStdOn.ReadOnly = true;
+			this.txt_StatsPressStdOn.Size = new System.Drawing.Size(76, 20);
+			this.txt_StatsPressStdOn.TabIndex = 12;
 			// 
 			// label2
 			// 
@@ -397,15 +422,38 @@
 			this.selBox_Press_Stats.TabIndex = 0;
 			this.selBox_Press_Stats.SelectedIndexChanged += new System.EventHandler(this.selBox_Press_Stats_SelectedIndexChanged);
 			// 
-			// tab_Press_Ref
+			// tab_Press_Config
 			// 
-			this.tab_Press_Ref.Location = new System.Drawing.Point(4, 22);
-			this.tab_Press_Ref.Name = "tab_Press_Ref";
-			this.tab_Press_Ref.Padding = new System.Windows.Forms.Padding(3);
-			this.tab_Press_Ref.Size = new System.Drawing.Size(217, 249);
-			this.tab_Press_Ref.TabIndex = 0;
-			this.tab_Press_Ref.Text = "Referencias";
-			this.tab_Press_Ref.UseVisualStyleBackColor = true;
+			this.tab_Press_Config.Controls.Add(this.label5);
+			this.tab_Press_Config.Controls.Add(this.selBox_Press_Configs);
+			this.tab_Press_Config.Location = new System.Drawing.Point(4, 22);
+			this.tab_Press_Config.Name = "tab_Press_Config";
+			this.tab_Press_Config.Size = new System.Drawing.Size(217, 249);
+			this.tab_Press_Config.TabIndex = 2;
+			this.tab_Press_Config.Text = "Configuracion";
+			this.tab_Press_Config.UseVisualStyleBackColor = true;
+			// 
+			// label5
+			// 
+			this.label5.AutoSize = true;
+			this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.label5.Location = new System.Drawing.Point(10, 13);
+			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(198, 16);
+			this.label5.TabIndex = 5;
+			this.label5.Text = "Configuracion de rango colores:";
+			// 
+			// selBox_Press_Configs
+			// 
+			this.selBox_Press_Configs.FormattingEnabled = true;
+			this.selBox_Press_Configs.Items.AddRange(new object[] {
+            "Rangos normales"});
+			this.selBox_Press_Configs.Location = new System.Drawing.Point(81, 34);
+			this.selBox_Press_Configs.Name = "selBox_Press_Configs";
+			this.selBox_Press_Configs.Size = new System.Drawing.Size(125, 21);
+			this.selBox_Press_Configs.TabIndex = 4;
+			this.selBox_Press_Configs.Text = "Rangos normales";
+			this.selBox_Press_Configs.SelectedIndexChanged += new System.EventHandler(this.selBox_Press_Configs_SelectedIndexChanged);
 			// 
 			// chkListBox_Press
 			// 
@@ -513,12 +561,9 @@
 			// 
 			this.tab_Temps_Stats.AutoScroll = true;
 			this.tab_Temps_Stats.Controls.Add(this.groupBox2);
-			this.tab_Temps_Stats.Controls.Add(this.numUpDown_maxTemp);
-			this.tab_Temps_Stats.Controls.Add(this.label5);
 			this.tab_Temps_Stats.Controls.Add(this.numUpDown_setpointError);
 			this.tab_Temps_Stats.Controls.Add(this.numUpDown_setpoint);
 			this.tab_Temps_Stats.Controls.Add(this.label3);
-			this.tab_Temps_Stats.Controls.Add(this.btn_StatsTempsExpand);
 			this.tab_Temps_Stats.Controls.Add(this.label1);
 			this.tab_Temps_Stats.Controls.Add(this.selBox_Temps_Stats);
 			this.tab_Temps_Stats.Controls.Add(this.label4);
@@ -532,17 +577,38 @@
 			// 
 			// groupBox2
 			// 
+			this.groupBox2.Controls.Add(this.txt_StatsTempsMax);
+			this.groupBox2.Controls.Add(this.label13);
 			this.groupBox2.Controls.Add(this.label6);
 			this.groupBox2.Controls.Add(this.txt_StatsTempsPerf);
 			this.groupBox2.Controls.Add(this.txt_StatsTempsMean);
 			this.groupBox2.Controls.Add(this.label8);
 			this.groupBox2.Controls.Add(this.label7);
 			this.groupBox2.Controls.Add(this.txt_StatsTempsSTD);
-			this.groupBox2.Location = new System.Drawing.Point(8, 107);
+			this.groupBox2.Location = new System.Drawing.Point(8, 73);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(189, 95);
+			this.groupBox2.Size = new System.Drawing.Size(189, 123);
 			this.groupBox2.TabIndex = 15;
 			this.groupBox2.TabStop = false;
+			// 
+			// txt_StatsTempsMax
+			// 
+			this.txt_StatsTempsMax.Location = new System.Drawing.Point(84, 40);
+			this.txt_StatsTempsMax.Margin = new System.Windows.Forms.Padding(2);
+			this.txt_StatsTempsMax.Name = "txt_StatsTempsMax";
+			this.txt_StatsTempsMax.ReadOnly = true;
+			this.txt_StatsTempsMax.Size = new System.Drawing.Size(76, 20);
+			this.txt_StatsTempsMax.TabIndex = 16;
+			// 
+			// label13
+			// 
+			this.label13.AutoSize = true;
+			this.label13.Location = new System.Drawing.Point(5, 43);
+			this.label13.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+			this.label13.Name = "label13";
+			this.label13.Size = new System.Drawing.Size(55, 13);
+			this.label13.TabIndex = 15;
+			this.label13.Text = "Máximo = ";
 			// 
 			// label6
 			// 
@@ -556,7 +622,7 @@
 			// 
 			// txt_StatsTempsPerf
 			// 
-			this.txt_StatsTempsPerf.Location = new System.Drawing.Point(84, 64);
+			this.txt_StatsTempsPerf.Location = new System.Drawing.Point(84, 88);
 			this.txt_StatsTempsPerf.Margin = new System.Windows.Forms.Padding(2);
 			this.txt_StatsTempsPerf.Name = "txt_StatsTempsPerf";
 			this.txt_StatsTempsPerf.ReadOnly = true;
@@ -575,76 +641,37 @@
 			// label8
 			// 
 			this.label8.AutoSize = true;
-			this.label8.Location = new System.Drawing.Point(5, 67);
+			this.label8.Location = new System.Drawing.Point(5, 91);
 			this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.label8.Name = "label8";
-			this.label8.Size = new System.Drawing.Size(76, 13);
+			this.label8.Size = new System.Drawing.Size(75, 13);
 			this.label8.TabIndex = 13;
-			this.label8.Text = "Performance =";
+			this.label8.Text = "Rendimiento =";
 			// 
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(5, 43);
+			this.label7.Location = new System.Drawing.Point(5, 67);
 			this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.label7.Name = "label7";
-			this.label7.Size = new System.Drawing.Size(51, 13);
+			this.label7.Size = new System.Drawing.Size(38, 13);
 			this.label7.TabIndex = 11;
-			this.label7.Text = "Desvío =";
+			this.label7.Text = "STD =";
 			// 
 			// txt_StatsTempsSTD
 			// 
-			this.txt_StatsTempsSTD.Location = new System.Drawing.Point(84, 40);
+			this.txt_StatsTempsSTD.Location = new System.Drawing.Point(84, 64);
 			this.txt_StatsTempsSTD.Margin = new System.Windows.Forms.Padding(2);
 			this.txt_StatsTempsSTD.Name = "txt_StatsTempsSTD";
 			this.txt_StatsTempsSTD.ReadOnly = true;
 			this.txt_StatsTempsSTD.Size = new System.Drawing.Size(76, 20);
 			this.txt_StatsTempsSTD.TabIndex = 12;
 			// 
-			// numUpDown_maxTemp
-			// 
-			this.numUpDown_maxTemp.DecimalPlaces = 1;
-			this.numUpDown_maxTemp.Increment = new decimal(new int[] {
-            5,
-            0,
-            0,
-            65536});
-			this.numUpDown_maxTemp.Location = new System.Drawing.Point(68, 46);
-			this.numUpDown_maxTemp.Maximum = new decimal(new int[] {
-            60,
-            0,
-            0,
-            0});
-			this.numUpDown_maxTemp.Minimum = new decimal(new int[] {
-            10,
-            0,
-            0,
-            -2147483648});
-			this.numUpDown_maxTemp.Name = "numUpDown_maxTemp";
-			this.numUpDown_maxTemp.Size = new System.Drawing.Size(56, 20);
-			this.numUpDown_maxTemp.TabIndex = 8;
-			this.numUpDown_maxTemp.UpDownAlign = System.Windows.Forms.LeftRightAlignment.Left;
-			this.numUpDown_maxTemp.Value = new decimal(new int[] {
-            12,
-            0,
-            0,
-            0});
-			// 
-			// label5
-			// 
-			this.label5.AutoSize = true;
-			this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label5.Location = new System.Drawing.Point(6, 46);
-			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(62, 15);
-			this.label5.TabIndex = 7;
-			this.label5.Text = "Máxima =";
-			// 
 			// numUpDown_setpointError
 			// 
 			this.numUpDown_setpointError.DecimalPlaces = 1;
 			this.numUpDown_setpointError.Increment = new decimal(new int[] {
-            5,
+            1,
             0,
             0,
             65536});
@@ -667,12 +694,13 @@
             0,
             0,
             0});
+			this.numUpDown_setpointError.ValueChanged += new System.EventHandler(this.numUpDown_setpoint_ValueChanged);
 			// 
 			// numUpDown_setpoint
 			// 
 			this.numUpDown_setpoint.DecimalPlaces = 1;
 			this.numUpDown_setpoint.Increment = new decimal(new int[] {
-            5,
+            1,
             0,
             0,
             65536});
@@ -696,6 +724,7 @@
             0,
             0,
             0});
+			this.numUpDown_setpoint.ValueChanged += new System.EventHandler(this.numUpDown_setpoint_ValueChanged);
 			// 
 			// label3
 			// 
@@ -707,23 +736,11 @@
 			this.label3.TabIndex = 3;
 			this.label3.Text = "Setpoint =";
 			// 
-			// btn_StatsTempsExpand
-			// 
-			this.btn_StatsTempsExpand.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.btn_StatsTempsExpand.Enabled = false;
-			this.btn_StatsTempsExpand.Location = new System.Drawing.Point(9, 208);
-			this.btn_StatsTempsExpand.Name = "btn_StatsTempsExpand";
-			this.btn_StatsTempsExpand.Size = new System.Drawing.Size(188, 29);
-			this.btn_StatsTempsExpand.TabIndex = 2;
-			this.btn_StatsTempsExpand.Text = "Ampliar";
-			this.btn_StatsTempsExpand.UseVisualStyleBackColor = true;
-			// 
 			// label1
 			// 
 			this.label1.AutoSize = true;
 			this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label1.Location = new System.Drawing.Point(6, 81);
+			this.label1.Location = new System.Drawing.Point(6, 47);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(62, 16);
 			this.label1.TabIndex = 1;
@@ -732,7 +749,7 @@
 			// selBox_Temps_Stats
 			// 
 			this.selBox_Temps_Stats.FormattingEnabled = true;
-			this.selBox_Temps_Stats.Location = new System.Drawing.Point(71, 80);
+			this.selBox_Temps_Stats.Location = new System.Drawing.Point(71, 46);
 			this.selBox_Temps_Stats.Name = "selBox_Temps_Stats";
 			this.selBox_Temps_Stats.Size = new System.Drawing.Size(126, 21);
 			this.selBox_Temps_Stats.TabIndex = 0;
@@ -750,6 +767,7 @@
 			// 
 			// tab_Temps_Ref
 			// 
+			this.tab_Temps_Ref.Controls.Add(this.but_FillTempDif);
 			this.tab_Temps_Ref.Location = new System.Drawing.Point(4, 22);
 			this.tab_Temps_Ref.Name = "tab_Temps_Ref";
 			this.tab_Temps_Ref.Padding = new System.Windows.Forms.Padding(3);
@@ -757,6 +775,18 @@
 			this.tab_Temps_Ref.TabIndex = 0;
 			this.tab_Temps_Ref.Text = "Referencias";
 			this.tab_Temps_Ref.UseVisualStyleBackColor = true;
+			// 
+			// but_FillTempDif
+			// 
+			this.but_FillTempDif.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.but_FillTempDif.Location = new System.Drawing.Point(9, 15);
+			this.but_FillTempDif.Name = "but_FillTempDif";
+			this.but_FillTempDif.Size = new System.Drawing.Size(197, 37);
+			this.but_FillTempDif.TabIndex = 0;
+			this.but_FillTempDif.Text = "Ver salto térmico";
+			this.but_FillTempDif.UseVisualStyleBackColor = true;
+			this.but_FillTempDif.Click += new System.EventHandler(this.but_FillTempDif_Click);
 			// 
 			// chkListBox_Temps
 			// 
@@ -783,31 +813,13 @@
 			this.plotter_Temps.MouseUp += new System.Windows.Forms.MouseEventHandler(this.plotters_MouseUp);
 			this.plotter_Temps.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.plotters_MouseWheel);
 			// 
-			// label12
-			// 
-			this.label12.AutoSize = true;
-			this.label12.Location = new System.Drawing.Point(5, 43);
-			this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-			this.label12.Name = "label12";
-			this.label12.Size = new System.Drawing.Size(77, 13);
-			this.label12.TabIndex = 15;
-			this.label12.Text = "Promedio Off =";
-			// 
-			// txt_StatsPresssMeanOff
-			// 
-			this.txt_StatsPresssMeanOff.Location = new System.Drawing.Point(84, 40);
-			this.txt_StatsPresssMeanOff.Margin = new System.Windows.Forms.Padding(2);
-			this.txt_StatsPresssMeanOff.Name = "txt_StatsPresssMeanOff";
-			this.txt_StatsPresssMeanOff.ReadOnly = true;
-			this.txt_StatsPresssMeanOff.Size = new System.Drawing.Size(76, 20);
-			this.txt_StatsPresssMeanOff.TabIndex = 16;
-			// 
 			// ArchivePlotter
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1370, 749);
 			this.Controls.Add(this.flowLayoutPanel1);
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Name = "ArchivePlotter";
 			this.Text = "ArchivePlotter";
 			this.Resize += new System.EventHandler(this.ArchivePlotter_Resize);
@@ -823,6 +835,8 @@
 			this.tab_Press_Stats.PerformLayout();
 			this.groupBox3.ResumeLayout(false);
 			this.groupBox3.PerformLayout();
+			this.tab_Press_Config.ResumeLayout(false);
+			this.tab_Press_Config.PerformLayout();
 			this.flowLayoutPanel1.ResumeLayout(false);
 			this.grpboxTemps.ResumeLayout(false);
 			this.groupBox1.ResumeLayout(false);
@@ -832,9 +846,9 @@
 			this.tab_Temps_Stats.PerformLayout();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this.numUpDown_maxTemp)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numUpDown_setpointError)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numUpDown_setpoint)).EndInit();
+			this.tab_Temps_Ref.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -853,7 +867,6 @@
 		private System.Windows.Forms.CheckBox chkbox_Press_ScrollH;
 		private System.Windows.Forms.CheckBox chkbox_Press_ScrollV;
 		private System.Windows.Forms.TabControl tabs_Press;
-		private System.Windows.Forms.TabPage tab_Press_Ref;
 		private System.Windows.Forms.TabPage tab_Press_Stats;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.ComboBox selBox_Press_Stats;
@@ -873,9 +886,6 @@
 		private ScottPlot.FormsPlot plotter_Temps;
 		private System.Windows.Forms.Button btn_SaveImgPress;
 		private System.Windows.Forms.Button btn_SaveImgTemps;
-		private System.Windows.Forms.Button btn_StatsTempsExpand;
-		private System.Windows.Forms.NumericUpDown numUpDown_maxTemp;
-		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.NumericUpDown numUpDown_setpointError;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.NumericUpDown numUpDown_setpoint;
@@ -889,12 +899,18 @@
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.GroupBox groupBox3;
 		private System.Windows.Forms.Label label9;
-		private System.Windows.Forms.TextBox textBox1;
-		private System.Windows.Forms.TextBox txt_StatsPresssMeanOn;
-		private System.Windows.Forms.Label label10;
+		private System.Windows.Forms.TextBox txt_StatsPressMeanOn;
 		private System.Windows.Forms.Label label11;
-		private System.Windows.Forms.TextBox textBox3;
+		private System.Windows.Forms.TextBox txt_StatsPressStdOn;
 		private System.Windows.Forms.Label label12;
-		private System.Windows.Forms.TextBox txt_StatsPresssMeanOff;
+		private System.Windows.Forms.TextBox txt_StatsPressMinOn;
+		private System.Windows.Forms.Button but_FillTempDif;
+		private System.Windows.Forms.TextBox txt_StatsTempsMax;
+		private System.Windows.Forms.Label label13;
+		private System.Windows.Forms.Label label14;
+		private System.Windows.Forms.TextBox txt_StatsPressMaxOn;
+		private System.Windows.Forms.TabPage tab_Press_Config;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.ComboBox selBox_Press_Configs;
 	}
 }

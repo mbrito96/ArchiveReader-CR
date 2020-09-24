@@ -1594,9 +1594,6 @@ public MainForm()
 				MessageBox.Show("Error en el tamaño de archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 		}
 		fileStream.Close();
-		
-
-		
 	}
 //	MessageBox.Show("argc= " + arguments.GetLength(0) + Environment.NewLine + "GetCommandLineArgs: " + String.Join(" - ", arguments));
 }
@@ -1924,8 +1921,6 @@ private void GetEntries(byte[] EepromBytes)
 		//entry = new ListViewItem("...");
 	//	ArchiveViewer.Items.Add(entry);
 	}
-	butPlotter_Click(this, null);	// FOR DEBUGGING!! ERASE!
-
 }
 #endregion
 		  
