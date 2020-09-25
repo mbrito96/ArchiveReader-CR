@@ -1,56 +1,57 @@
-﻿namespace EepromVisualAccess
+﻿namespace ArchiveReader
 {
 	using System;
-    partial class MainForm
-    {
-        const bool DEBUGGING = false;
+	public enum EntryType : byte
+	{
+		NO_DATA,
+		ERROR_DATA,
+		OP_HISTORY,
+		EVENT_DATA
+	}
+	public enum OpStatus : byte
+	{
+		IDLE,
+		COOLDOWN,
+		RUNNING,
+		POSTOP,
+		NONE
+	}
+	public enum MacModel : byte
+	{
+		A20TR,
+		A80TR,
+		W90TR,
+		A100TR,
+		A30TR,
+		A40TR,
+		NONE
+	}
+	public partial class MainForm
+	{
+		const bool DEBUGGING = false;
 
-        public enum EntryType : byte
-        {
-            NO_DATA,
-            ERROR_DATA,
-            OP_HISTORY,
-            EVENT_DATA
-        }
-        public enum OpStatus : byte
-        {
-            IDLE,
-			COOLDOWN,
-            RUNNING,
-            POSTOP,
-			NONE
-        }
-        public enum MacModel : byte
-        {
-            A20TR,
-            A80TR,
-            W90TR,
-			A100TR,
-			A30TR,
-			A40TR,
-			NONE
-        }
 
-        static class ArchiveInfo
-        {
-            public static int archiveSize,
+		static class ArchiveInfo
+		{
+			public static int archiveSize,
 			machineIdAddress,
 			machineIdSize,
-            metadataAddress,
-            metadataSize,
-            mapAddress,
-            mapSize,
-            regFileAddress,
-            regFileSize;
+			metadataAddress,
+			metadataSize,
+			mapAddress,
+			mapSize,
+			regFileAddress,
+			regFileSize;
 
-            public static int opEntrySize, errorEntrySize, eventEntrySize;
+			public static int opEntrySize, errorEntrySize, eventEntrySize;
 
-            public static int MaxEntrySize()
-            {
+			public static int MaxEntrySize()
+			{
 				return opEntrySize;
-            }
-        }
-		public struct Version{
+			}
+		}
+		public struct Version
+		{
 			public uint major;
 			public uint minor;
 			public uint patch;
@@ -68,25 +69,26 @@
 			public bool IsCompatibleWith(Version v)
 			{
 				bool retVal = false;
-				if(this.major == v.major && this.minor >= v.minor && this.patch >= v.patch)
+				if (this.major == v.major && this.minor >= v.minor && this.patch >= v.patch)
 					retVal = true;
 
 				return retVal;
 			}
 			public override string ToString() => $"V{major}.{minor}.{patch}";
 		}
-		public struct MachineId{
+		public struct MachineId
+		{
 			public uint ID;
 			public MacModel model;
 			public uint intern;
 			public Version softwareVersion;
 			public MachineId(byte[] storedId)
 			{
-				if(storedId.Length == 4)
+				if (storedId.Length == 4)
 				{
 					this.ID = BitConverter.ToUInt32(storedId, 0);
-					uint modelCode = (ID >>4)&0xF;
-					switch(modelCode)
+					uint modelCode = (ID >> 4) & 0xF;
+					switch (modelCode)
 					{
 						case 1:
 							this.model = MacModel.A20TR;
@@ -108,107 +110,108 @@
 							break;
 						default:
 							this.model = MacModel.NONE;
-							this.ID = 0;			// ID = 0 means an error. 
+							this.ID = 0;            // ID = 0 means an error. 
 							break;
 					}
-					this.softwareVersion = new Version((ID >>24)&0xFF, (ID >>16)&0xFF, (ID >>8)&0xF);
-					this.intern = (ID)&0xF;
+					this.softwareVersion = new Version((ID >> 24) & 0xFF, (ID >> 16) & 0xFF, (ID >> 8) & 0xF);
+					this.intern = (ID) & 0xF;
 				}
 				else
 				{
 					this.ID = 0;
 					this.model = MacModel.NONE;
 					this.intern = 0;
-					this.softwareVersion = new Version(0,0,0);
+					this.softwareVersion = new Version(0, 0, 0);
 				}
 			}
-			public bool InitOk(){
-				return (this.ID == 0? false : true);
+			public bool InitOk()
+			{
+				return (this.ID == 0 ? false : true);
 			}
 		}
 		
 		public Version ARCHIVE_VERSION;
 		public MachineId macID;
 
-		static uint[] ARCHIVE_VERSION_NUMBER = {3,3,0};
-        // Defined Archive parameters for: { A40TR, A80TR, W90TR, A100TR } 
-        static int[] ENTIRE_DATA_SIZE = { 32492, 32492,  32492, 32580};
-        static int[] MACID_ADDRESS = { 276, 276, 276, 188};
-        static int[] MACID_SIZE = { 4, 4, 4, 4 };		// All sizes should be equal to the first value.
-        static int[] METADATA_ADDRESS = { 280, 280, 280, 192};
-        static int[] METADATA_SIZE = { 8, 8, 8, 8 };
-        static int[] MAP_ADDRESS = { 191, 160, 144, 204 };
-        static int[] MAP_SIZE = { 0, 0, 0, 0 };
-        static int[] ARCHIVE_ADDRESS = { 288, 288, 288, 200 };
-        static int[] ARCHIVE_SIZE = { 32480, 32480, 32480, 32564 };
-        static int[] OP_ENTRY_SIZE = { 9, 12, 13, 15 };
-        static int[] ERROR_ENTRY_SIZE = { 3, 3, 3, 3 };
-        static int[] EVENT_ENTRY_SIZE = { 2, 2, 2, 2 };
+		static uint[] ARCHIVE_VERSION_NUMBER = { 3, 4, 0 };
+		// Defined Archive parameters for: { A40TR, A80TR, W90TR, A100TR } 
+		static int[] ENTIRE_DATA_SIZE = { 32492, 32492, 32492, 32580 };
+		static int[] MACID_ADDRESS = { 276, 276, 276, 188 };
+		static int[] MACID_SIZE = { 4, 4, 4, 4 };       // All sizes should be equal to the first value.
+		static int[] METADATA_ADDRESS = { 280, 280, 280, 192 };
+		static int[] METADATA_SIZE = { 8, 8, 8, 8 };
+		static int[] MAP_ADDRESS = { 191, 160, 144, 204 };
+		static int[] MAP_SIZE = { 0, 0, 0, 0 };
+		static int[] ARCHIVE_ADDRESS = { 288, 288, 288, 200 };
+		static int[] ARCHIVE_SIZE = { 32480, 32480, 32480, 32564 };
+		static int[] OP_ENTRY_SIZE = { 9, 12, 13, 15 };
+		static int[] ERROR_ENTRY_SIZE = { 3, 3, 3, 3 };
+		static int[] EVENT_ENTRY_SIZE = { 2, 2, 2, 2 };
 
-        static byte[] BACK_COLOR_OP = new byte[3] { 135, 206, 235 };
-        static byte[] BACK_COLOR_OP_READY = new byte[3] { 145, 236, 244 };
-        static byte[] BACK_COLOR_OP_POSTOP = new byte[3] { 147, 178, 241 };
-        static byte[] BACK_COLOR_ERROR = new byte[3] { 255, 165, 119 };
-        static byte[] BACK_COLOR_EVENT = new byte[3] { 255, 220, 23 };
-        static byte[] FORE_COLOR_BAD_DATA = new byte[3] { 229, 5, 5 };
+		static byte[] BACK_COLOR_OP = new byte[3] { 135, 206, 235 };
+		static byte[] BACK_COLOR_OP_READY = new byte[3] { 145, 236, 244 };
+		static byte[] BACK_COLOR_OP_POSTOP = new byte[3] { 147, 178, 241 };
+		static byte[] BACK_COLOR_ERROR = new byte[3] { 255, 165, 119 };
+		static byte[] BACK_COLOR_EVENT = new byte[3] { 255, 220, 23 };
+		static byte[] FORE_COLOR_BAD_DATA = new byte[3] { 229, 5, 5 };
 
-        private const byte OP_HISTORY_MASK = (0x80);
-        private const byte ERROR_MASK = (0x40);
-        private const byte EVENT_MASK = (0xC0);
-        // Defines for accessing entry subItems
-        private const int NUMBER = 0;
-        private const int DATE = 1;
-        private const int CODE = 2;
-        private const int TEMPIN = 3;
-        private const int TEMPOUT = 4;
-        private const int TEMPEV = 5;
-        private const int TEMPAMB = 6;
-        private const int PHIGH = 7;
-        private const int PLOW = 8;
-        private const int PDIF = 9;
-        private const int INDEX = 10;
-        private const int ADDRESS = 11;
+		private const byte OP_HISTORY_MASK = (0x80);
+		private const byte ERROR_MASK = (0x40);
+		private const byte EVENT_MASK = (0xC0);
+		// Defines for accessing entry subItems
+		private const int NUMBER = 0;
+		private const int DATE = 1;
+		private const int CODE = 2;
+		private const int TEMPIN = 3;
+		private const int TEMPOUT = 4;
+		private const int TEMPEV = 5;
+		private const int TEMPAMB = 6;
+		private const int PHIGH = 7;
+		private const int PLOW = 8;
+		private const int PDIF = 9;
+		private const int INDEX = 10;
+		private const int ADDRESS = 11;
 
 
-        private string workingPath = "C:\\Users\\mdevo\\Desktop";
+		public static string workingPath = "C:\\Users\\mdevo\\Desktop";
 		private string workingFileName = null;
 		private string csvPath = null;
 		private string numCsvPath = null;
 
-        
-        private bool modelSelected = false;
-        private bool showInvalidEntries = true;
-        private bool showOpEntries = true;
-        private bool showErrorEntries = true;
-        private bool showEventEntries = false;
+
+		private bool modelSelected = false;
+		private bool showInvalidEntries = true;
+		private bool showOpEntries = true;
+		private bool showErrorEntries = true;
+		private bool showEventEntries = false;
 
 
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
+		/// <summary>
+		/// Required designer variable.
+		/// </summary>
+		private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+		/// <summary>
+		/// Clean up any resources being used.
+		/// </summary>
+		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && (components != null))
+			{
+				components.Dispose();
+			}
+			base.Dispose(disposing);
+		}
 
-        #region Windows Form Designer generated code
+		#region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
+		/// <summary>
+		/// Required method for Designer support - do not modify
+		/// the contents of this method with the code editor.
+		/// </summary>
+		private void InitializeComponent()
+		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.modelSelector = new System.Windows.Forms.ComboBox();
@@ -236,6 +239,7 @@
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this.dateFilterStart = new System.Windows.Forms.DateTimePicker();
 			this.groupBox6 = new System.Windows.Forms.GroupBox();
+			this.butPlotter = new System.Windows.Forms.Button();
 			this.chkboxShowEvents = new System.Windows.Forms.CheckBox();
 			this.butExport2numCSV = new System.Windows.Forms.Button();
 			this.butExport2CSV = new System.Windows.Forms.Button();
@@ -555,6 +559,7 @@
 			// 
 			this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox6.Controls.Add(this.butPlotter);
 			this.groupBox6.Controls.Add(this.chkboxShowEvents);
 			this.groupBox6.Controls.Add(this.butExport2numCSV);
 			this.groupBox6.Controls.Add(this.butExport2CSV);
@@ -576,6 +581,19 @@
 			this.groupBox6.TabStop = false;
 			this.groupBox6.Text = "Filtros";
 			// 
+			// butPlotter
+			// 
+			this.butPlotter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.butPlotter.Location = new System.Drawing.Point(10, 345);
+			this.butPlotter.Margin = new System.Windows.Forms.Padding(2);
+			this.butPlotter.Name = "butPlotter";
+			this.butPlotter.Size = new System.Drawing.Size(134, 34);
+			this.butPlotter.TabIndex = 22;
+			this.butPlotter.Text = "Graficar datos";
+			this.butPlotter.UseVisualStyleBackColor = true;
+			this.butPlotter.Click += new System.EventHandler(this.butPlotter_Click);
+			// 
 			// chkboxShowEvents
 			// 
 			this.chkboxShowEvents.AutoSize = true;
@@ -593,7 +611,7 @@
 			// 
 			this.butExport2numCSV.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.butExport2numCSV.Location = new System.Drawing.Point(10, 376);
+			this.butExport2numCSV.Location = new System.Drawing.Point(10, 390);
 			this.butExport2numCSV.Margin = new System.Windows.Forms.Padding(2);
 			this.butExport2numCSV.Name = "butExport2numCSV";
 			this.butExport2numCSV.Size = new System.Drawing.Size(134, 34);
@@ -606,7 +624,7 @@
 			// 
 			this.butExport2CSV.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.butExport2CSV.Location = new System.Drawing.Point(10, 422);
+			this.butExport2CSV.Location = new System.Drawing.Point(10, 436);
 			this.butExport2CSV.Margin = new System.Windows.Forms.Padding(2);
 			this.butExport2CSV.Name = "butExport2CSV";
 			this.butExport2CSV.Size = new System.Drawing.Size(134, 34);
@@ -837,48 +855,48 @@
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
-        }
+		}
 
-        #endregion
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.ListView ArchiveViewer;
-        private System.Windows.Forms.ListView MapViewer;
-        private System.Windows.Forms.ColumnHeader columnHeader11;
-        private System.Windows.Forms.ColumnHeader columnHeader12;
-        private System.Windows.Forms.ColumnHeader columnHeader13;
-        private System.Windows.Forms.ColumnHeader columnHeader14;
-        private System.Windows.Forms.ColumnHeader columnHeader15;
-        private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.ColumnHeader columnHeaderDebug2;
-        private System.Windows.Forms.ColumnHeader columnHeaderDebug1;
-        private System.Windows.Forms.Button butLoadFile;
-        private System.Windows.Forms.GroupBox groupBox5;
-        private System.Windows.Forms.ListView DetailViewer;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.TextBox ErrorViewer;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox txtCount;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox txtTail;
-        private System.Windows.Forms.TextBox txtHead;
-        private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.ComboBox modelSelector;
-        private System.Windows.Forms.DateTimePicker dateFilterStart;
-        private System.Windows.Forms.GroupBox groupBox6;
-        private System.Windows.Forms.Button butClearFilter;
-        private System.Windows.Forms.Button butSetFilter;
-        private System.Windows.Forms.DateTimePicker dateFilterEnd;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ListView deletedEntries;
-        private System.Windows.Forms.CheckBox chkboxShowInvalid;
-        private System.Windows.Forms.CheckBox chkboxShowOp;
-        private System.Windows.Forms.CheckBox chkboxShowErrors;
-        private System.Windows.Forms.Button butExport2CSV;
-        private System.Windows.Forms.StatusStrip statstrFilePath;
-        private System.Windows.Forms.ToolStripStatusLabel statStripDataPath;
+		#endregion
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.GroupBox groupBox2;
+		public System.Windows.Forms.ListView ArchiveViewer; // Public so as to access it from plotter
+		private System.Windows.Forms.ListView MapViewer;
+		private System.Windows.Forms.ColumnHeader columnHeader11;
+		private System.Windows.Forms.ColumnHeader columnHeader12;
+		private System.Windows.Forms.ColumnHeader columnHeader13;
+		private System.Windows.Forms.ColumnHeader columnHeader14;
+		private System.Windows.Forms.ColumnHeader columnHeader15;
+		private System.Windows.Forms.GroupBox groupBox3;
+		private System.Windows.Forms.ColumnHeader columnHeaderDebug2;
+		private System.Windows.Forms.ColumnHeader columnHeaderDebug1;
+		private System.Windows.Forms.Button butLoadFile;
+		private System.Windows.Forms.GroupBox groupBox5;
+		private System.Windows.Forms.ListView DetailViewer;
+		private System.Windows.Forms.PictureBox pictureBox1;
+		private System.Windows.Forms.TextBox ErrorViewer;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.TextBox txtCount;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.TextBox txtTail;
+		private System.Windows.Forms.TextBox txtHead;
+		private System.Windows.Forms.GroupBox groupBox4;
+		private System.Windows.Forms.ComboBox modelSelector;
+		public System.Windows.Forms.DateTimePicker dateFilterStart;
+		private System.Windows.Forms.GroupBox groupBox6;
+		private System.Windows.Forms.Button butClearFilter;
+		private System.Windows.Forms.Button butSetFilter;
+		public System.Windows.Forms.DateTimePicker dateFilterEnd;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.ListView deletedEntries;
+		private System.Windows.Forms.CheckBox chkboxShowInvalid;
+		private System.Windows.Forms.CheckBox chkboxShowOp;
+		private System.Windows.Forms.CheckBox chkboxShowErrors;
+		private System.Windows.Forms.Button butExport2CSV;
+		private System.Windows.Forms.StatusStrip statstrFilePath;
+		private System.Windows.Forms.ToolStripStatusLabel statStripDataPath;
 		private System.Windows.Forms.Button butExport2numCSV;
 		private System.Windows.Forms.GroupBox groupBox7;
 		private System.Windows.Forms.TextBox txtMacVersion;
@@ -888,6 +906,7 @@
 		private System.Windows.Forms.TextBox txtMacModel;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.CheckBox chkboxShowEvents;
+		private System.Windows.Forms.Button butPlotter;
 	}
 }
 

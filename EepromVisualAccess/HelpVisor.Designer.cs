@@ -1,4 +1,4 @@
-﻿namespace EepromVisualAccess
+﻿namespace ArchiveReader
 {
     partial class HelpVisor
     {

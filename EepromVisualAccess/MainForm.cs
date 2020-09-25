@@ -19,7 +19,7 @@ using System.Diagnostics.Eventing.Reader;
 /// </summary>
 
 
-namespace EepromVisualAccess
+namespace ArchiveReader
 {
 
 public partial class MainForm : Form
@@ -1214,6 +1214,10 @@ public class ArchiveInterpreter
 
 		return retVal;
 	}
+	public bool EntryIsInvalid(ListViewItem item)
+	{
+		return (item.ForeColor == INVALID_ENTRY_FORECOLOR);
+	}
 				
 	public void DecodeDigitalCell(ListViewItem item, Int32 code)
 	{
@@ -1541,10 +1545,11 @@ public class ArchiveInterpreter
 		}
 		return retVal;
 	}
+	
 }
 
 public Stx8xxx PioBoard;
-public ArchiveInterpreter arch1;
+public static ArchiveInterpreter arch1;
 OpenFileDialog openFileDialog;
 
 public MainForm()
@@ -1589,9 +1594,6 @@ public MainForm()
 				MessageBox.Show("Error en el tamaño de archivo.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 		}
 		fileStream.Close();
-		
-
-		
 	}
 //	MessageBox.Show("argc= " + arguments.GetLength(0) + Environment.NewLine + "GetCommandLineArgs: " + String.Join(" - ", arguments));
 }
@@ -1683,12 +1685,6 @@ private void butReadEeprom_Click(object sender, EventArgs e)
 }
 private void butLoadFile_Click(object sender, EventArgs e)
 {
-/*
-	if (modelSelected == false)
-	{
-		MessageBox.Show("Por favor, seleccione un modelo de máquina.", "Atencion", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-		return;
-	}*/
 	var fileContent = string.Empty;
 	var filePath = string.Empty;
 
@@ -1925,7 +1921,6 @@ private void GetEntries(byte[] EepromBytes)
 		//entry = new ListViewItem("...");
 	//	ArchiveViewer.Items.Add(entry);
 	}
-
 }
 #endregion
 		  
@@ -2335,7 +2330,6 @@ private void chkboxShowEvents_CheckedChanged(object sender, EventArgs e)
 
 #endregion
 
-
 #region PLC COMMS
 /// <summary>
 /// Envia una petición por UDP al PLC para leer la memoria EEPROM.
@@ -2467,6 +2461,20 @@ private bool WaitPlcResponse(out byte[] EepromBytes)
 }
 
 		#endregion
+
+private void butPlotter_Click(object sender, EventArgs e)
+{
+	if(ArchiveViewer.Items.Count > 0)
+	{
+		try
+		{
+			ArchivePlotter plotter = new ArchivePlotter(ArchiveViewer, macID);
+			plotter.Show();	
+		}
+		catch {};
+	}
+}
+
 
 	}
 }
