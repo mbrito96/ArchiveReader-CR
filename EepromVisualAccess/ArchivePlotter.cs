@@ -81,21 +81,27 @@ namespace ArchiveReader
 
 		public ArchivePlotter(ListView srcListView, MainForm.MachineId macId)
 		{
-			InitializeComponent();
+			if( macId.model == MacModel.A20TR || macId.model == MacModel.A30TR || macId.model == MacModel.A40TR || macId.model == MacModel.A80TR || macId.model == MacModel.W90TR)
+			{
+				InitializeComponent();
 
-			this.WindowState = FormWindowState.Maximized;
+				this.WindowState = FormWindowState.Maximized;
 
-			source = srcListView;
+				source = srcListView;
 			
-			plotterVersion = new Version(PLOTTER_VERSION_NUMBER[0], PLOTTER_VERSION_NUMBER[1], PLOTTER_VERSION_NUMBER[2]);
-			this.Text += " - V" + plotterVersion.ToString();
+				plotterVersion = new Version(PLOTTER_VERSION_NUMBER[0], PLOTTER_VERSION_NUMBER[1], PLOTTER_VERSION_NUMBER[2]);
+				this.Text += " - V" + plotterVersion.ToString();
 			
-			seriesData = new ArchiveSeries();
-			LoadDataFromMainForm(seriesData, macId);
-			InitArchivePlotterForm(seriesData, macId);
+				seriesData = new ArchiveSeries();
+				LoadDataFromMainForm(seriesData, macId);
+				InitArchivePlotterForm(seriesData, macId);
 
-			DrawTemperatures(seriesData);
-			DrawPressures(seriesData);
+				DrawTemperatures(seriesData);
+				DrawPressures(seriesData);
+			}
+			else
+				this.Dispose();
+			
 		}
 
 		#region DRAW SIGNALS
@@ -254,6 +260,27 @@ namespace ArchiveReader
 		{
 			switch(decoder.model)
 			{
+				case MacModel.A20TR:
+				case MacModel.A30TR:
+				case MacModel.A40TR:
+					seriesData.temps[GWF20TR_TEMP_FIELDS.TEMP_OUT].stats = new TEMP_STATISTICS(GWF20TR_TEMP_FIELDS.TEMP_OUT, meanRange:KpiTempOut_GetMeanRanges(), performanceRange:KpiTempOut_GetPerformanceRanges());
+					selBox_Temps_Stats.Items.Add(seriesData.temps[GWF20TR_TEMP_FIELDS.TEMP_OUT].name);
+
+					seriesData.temps[GWF20TR_TEMP_FIELDS.TEMP_IN].stats = new TEMP_STATISTICS(GWF20TR_TEMP_FIELDS.TEMP_IN);
+					selBox_Temps_Stats.Items.Add(seriesData.temps[GWF20TR_TEMP_FIELDS.TEMP_IN].name);
+
+					seriesData.temps[GWF20TR_TEMP_FIELDS.TEMP_EVAP].stats = new TEMP_STATISTICS(GWF20TR_TEMP_FIELDS.TEMP_EVAP);
+					selBox_Temps_Stats.Items.Add(seriesData.temps[GWF20TR_TEMP_FIELDS.TEMP_EVAP].name);
+
+					seriesData.pressures[GWF20TR_PRESSURE_FIELDS.P_HIGH].stats = new PRESS_STATISTICS(GWF20TR_PRESSURE_FIELDS.P_HIGH, meanOnRange:KpiPresHigh_GetMeanOnRanges(), minOnRange:KpiPresHigh_GetMinOnRanges(), maxOnRange:KpiPresHigh_GetMaxOnRanges());
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF20TR_PRESSURE_FIELDS.P_HIGH].name);
+
+					seriesData.pressures[GWF20TR_PRESSURE_FIELDS.P_LOW].stats = new PRESS_STATISTICS(GWF20TR_PRESSURE_FIELDS.P_LOW, meanOnRange:KpiPresLow_GetMeanOnRanges(), minOnRange:KpiPresLow_GetMinOnRanges(), maxOnRange:KpiPresLow_GetMaxOnRanges());
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF20TR_PRESSURE_FIELDS.P_LOW].name);
+
+					seriesData.pressures[GWF20TR_PRESSURE_FIELDS.P_OIL].stats = new PRESS_STATISTICS(GWF20TR_PRESSURE_FIELDS.P_OIL, meanOnRange:KpiPresLow_GetMeanOnRanges(), minOnRange:KpiPresLow_GetMinOnRanges(), maxOnRange:KpiPresLow_GetMaxOnRanges());
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF20TR_PRESSURE_FIELDS.P_OIL].name);
+					break;
 				case MacModel.A80TR:
 					seriesData.temps[GWF80TR_TEMP_FIELDS.TEMP_OUT].stats = new TEMP_STATISTICS(GWF80TR_TEMP_FIELDS.TEMP_OUT, meanRange:KpiTempOut_GetMeanRanges(), performanceRange:KpiTempOut_GetPerformanceRanges());
 					selBox_Temps_Stats.Items.Add(seriesData.temps[GWF80TR_TEMP_FIELDS.TEMP_OUT].name);
@@ -269,6 +296,18 @@ namespace ArchiveReader
 
 					seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_HIGH_B].stats = new PRESS_STATISTICS(GWF80TR_PRESSURE_FIELDS.P_HIGH_B, meanOnRange:KpiPresHigh_GetMeanOnRanges(), minOnRange:KpiPresHigh_GetMinOnRanges(), maxOnRange:KpiPresHigh_GetMaxOnRanges());
 					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_HIGH_B].name);
+
+					seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_LOW_A].stats = new PRESS_STATISTICS(GWF80TR_PRESSURE_FIELDS.P_LOW_A, meanOnRange:KpiPresLow_GetMeanOnRanges(), minOnRange:KpiPresLow_GetMinOnRanges(), maxOnRange:KpiPresLow_GetMaxOnRanges());
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_LOW_A].name);
+
+					seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_LOW_B].stats = new PRESS_STATISTICS(GWF80TR_PRESSURE_FIELDS.P_LOW_B, meanOnRange:KpiPresLow_GetMeanOnRanges(), minOnRange:KpiPresLow_GetMinOnRanges(), maxOnRange:KpiPresLow_GetMaxOnRanges());
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_LOW_B].name);
+
+					seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_OIL_A].stats = new PRESS_STATISTICS(GWF80TR_PRESSURE_FIELDS.P_OIL_A, meanOnRange:KpiPresLow_GetMeanOnRanges(), minOnRange:KpiPresLow_GetMinOnRanges(), maxOnRange:KpiPresLow_GetMaxOnRanges());
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_OIL_A].name);
+
+					seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_OIL_B].stats = new PRESS_STATISTICS(GWF80TR_PRESSURE_FIELDS.P_OIL_B, meanOnRange:KpiPresLow_GetMeanOnRanges(), minOnRange:KpiPresLow_GetMinOnRanges(), maxOnRange:KpiPresLow_GetMaxOnRanges());
+					selBox_Press_Stats.Items.Add(seriesData.pressures[GWF80TR_PRESSURE_FIELDS.P_OIL_B].name);
 					break;
 				case MacModel.W90TR:
 					seriesData.temps[GWF90TR_TEMP_FIELDS.TEMP_OUT].stats = new TEMP_STATISTICS(GWF90TR_TEMP_FIELDS.TEMP_OUT, meanRange:KpiTempOut_GetMeanRanges(), performanceRange:KpiTempOut_GetPerformanceRanges());

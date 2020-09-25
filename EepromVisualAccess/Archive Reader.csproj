@@ -162,6 +162,7 @@
   <ItemGroup>
     <Content Include="snoflake_icon.ico" />
     <Content Include="snoflake_icon2.ico" />
+    <Content Include="stx8xxx.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

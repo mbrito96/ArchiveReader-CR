@@ -15,6 +15,7 @@ namespace ArchiveReader
 		public virtual bool GetFlag(int digVar, int bitfield) {		return ( ( (digVar >> bitfield) & 0x1) == 1? true : false);		}
 		public virtual OpStatus GetOpStatus(int digVar, int opModePos, int opModeSize) {	return (OpStatus)((digVar >> opModePos) & 0x3);		}
 		public virtual int GetCoolingPower(int digVar){return 0;}
+		public virtual int GetCmpToWatchFromPressureId(int pressureID){return 0;}
 
 	}
 	public class GWF_TEMPERATURE_FIELD
@@ -43,6 +44,13 @@ namespace ArchiveReader
 			this.model = m;
 			switch(m)
 			{
+				case MacModel.A20TR:
+				case MacModel.A30TR:
+				case MacModel.A40TR:
+					digital = new GWF20TR_DIG_BITFIELD();
+					temperatures = new GWF20TR_TEMP_FIELDS();
+					pressures = new GWF20TR_PRESSURE_FIELDS();
+					break;
 				case MacModel.A80TR:
 					digital = new GWF80TR_DIG_BITFIELD();
 					temperatures = new GWF80TR_TEMP_FIELDS();

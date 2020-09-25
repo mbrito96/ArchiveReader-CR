@@ -2330,7 +2330,6 @@ private void chkboxShowEvents_CheckedChanged(object sender, EventArgs e)
 
 #endregion
 
-
 #region PLC COMMS
 /// <summary>
 /// Envia una petición por UDP al PLC para leer la memoria EEPROM.
@@ -2463,10 +2462,19 @@ private bool WaitPlcResponse(out byte[] EepromBytes)
 
 		#endregion
 
-		private void butPlotter_Click(object sender, EventArgs e)
+private void butPlotter_Click(object sender, EventArgs e)
+{
+	if(ArchiveViewer.Items.Count > 0)
+	{
+		try
 		{
 			ArchivePlotter plotter = new ArchivePlotter(ArchiveViewer, macID);
-			plotter.Show();
+			plotter.Show();	
 		}
+		catch {};
+	}
+}
+
+
 	}
 }

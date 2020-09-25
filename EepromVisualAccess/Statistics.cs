@@ -200,7 +200,7 @@ namespace ArchiveReader
 			List<double> timeOn = new List<double>();
 			List<double> dataOff = new List<double>();
 
-			int cmpToWatch = GetCmpToWatchFromPressureId(decoder);
+			int cmpToWatch = decoder.digital.GetCmpToWatchFromPressureId(pressureID);
 			// Separate data frames
 			for(int i = 0 ; i < xs.Count ; i++)
 			{
@@ -220,51 +220,6 @@ namespace ArchiveReader
 				maxOn.value = dataOn.Max();
 			}
 			onRatio = (data.Count > 0 ? (double)dataOn.Count / (double)data.Count : 0);
-		}
-		private int GetCmpToWatchFromPressureId(GWF_DECODER decoder)
-		{
-			int cmpToWatch = 0;
-			switch(decoder.model)
-			{
-				case MacModel.A80TR:
-					switch(pressureID)
-					{
-						case GWF80TR_PRESSURE_FIELDS.P_HIGH_A:
-						case GWF80TR_PRESSURE_FIELDS.P_LOW_A:
-						case GWF80TR_PRESSURE_FIELDS.P_OIL_A:
-							cmpToWatch = GWF80TR_DIG_BITFIELD.CMP_A;
-							break;
-						case GWF80TR_PRESSURE_FIELDS.P_HIGH_B:
-						case GWF80TR_PRESSURE_FIELDS.P_LOW_B:
-						case GWF80TR_PRESSURE_FIELDS.P_OIL_B:
-							cmpToWatch = GWF80TR_DIG_BITFIELD.CMP_B;
-							break;
-						default:
-							return -1;
-					}
-					break;
-				case MacModel.W90TR:
-					switch(pressureID)
-					{
-						case GWF90TR_PRESSURE_FIELDS.P_HIGH_TA:
-						case GWF90TR_PRESSURE_FIELDS.P_LOW_TA:
-						case GWF90TR_PRESSURE_FIELDS.P_OIL_TA:
-						case GWF90TR_PRESSURE_FIELDS.P_OIL_TB:
-							cmpToWatch = GWF90TR_DIG_BITFIELD.CMP_TA;
-							break;
-						case GWF90TR_PRESSURE_FIELDS.P_HIGH_S:
-						case GWF90TR_PRESSURE_FIELDS.P_LOW_S:
-						case GWF90TR_PRESSURE_FIELDS.P_OIL_S:
-							cmpToWatch = GWF90TR_DIG_BITFIELD.CMP_S;
-							break;
-						default:
-							return -1;
-					}
-					break;
-				default:
-					return -1;
-			}
-			return cmpToWatch;
 		}
 		public double PressStdOn(List<double> values, List<int> digital, GWF_DECODER decoder)
 		{
@@ -369,7 +324,7 @@ namespace ArchiveReader
 		}
 		private void DisplayPressNumericStats(PressureData selectedPressure)
 		{
-			txt_StatsPressMeanOn.Text = selectedPressure.stats.meanOn.value.ToString("N3");
+			txt_StatsPressMeanOn.Text = selectedPressure.stats.meanOn.value.ToString("N1");
 			txt_StatsPressMeanOn.BackColor = selectedPressure.stats.meanOn.GetKpiColor();
 
 			txt_StatsPressMinOn.Text = selectedPressure.stats.minOn.value.ToString("N1");
@@ -378,7 +333,7 @@ namespace ArchiveReader
 			txt_StatsPressMaxOn.Text = selectedPressure.stats.maxOn.value.ToString("N1");
 			txt_StatsPressMaxOn.BackColor = selectedPressure.stats.maxOn.GetKpiColor();
 
-			txt_StatsPressStdOn.Text = selectedPressure.stats.stdOn.value.ToString("N3");
+			txt_StatsPressStdOn.Text = selectedPressure.stats.stdOn.value.ToString("N1");
 			txt_StatsPressStdOn.BackColor = selectedPressure.stats.stdOn.GetKpiColor();
 		}
 
