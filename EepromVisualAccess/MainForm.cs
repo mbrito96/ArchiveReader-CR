@@ -1572,7 +1572,7 @@ public MainForm()
 			if(askForModel.ShowDialog() == DialogResult.OK)
 			{
 				MacModel myModel = (MacModel) askForModel.selectedModel;
-				modelSelector.Text = modelSelector.Items[askForModel.selectedModel].ToString();	// This forces a complete reload of app parameters and set the correct values
+				modelSelector.Text = modelSelector.Items[Model2Selector_LUT(myModel)].ToString();	// This forces a complete reload of app parameters and set the correct values
 				LoadMachineModelParameters(myModel);
 			}
 			else
@@ -1580,7 +1580,7 @@ public MainForm()
 			askForModel.Dispose();
 		}
 		else
-			modelSelector.Text = modelSelector.Items[(int)macID.model].ToString(); 	// This forces a complete reload of app parameters and set the correct values
+			modelSelector.Text = modelSelector.Items[Model2Selector_LUT(macID.model)].ToString(); 	// This forces a complete reload of app parameters and set the correct values
 
 		if(modelSelected == true)
 		{
@@ -1701,7 +1701,7 @@ private void butLoadFile_Click(object sender, EventArgs e)
 			bool identified = AttemptMachineIdentification(fileStream);
 
 			if(identified == true)
-				modelSelector.Text = modelSelector.Items[(int)macID.model].ToString(); 	// This forces a complete reload of app parameters and set the correct values
+				modelSelector.Text = modelSelector.Items[Model2Selector_LUT(macID.model)].ToString(); 	// This forces a complete reload of app parameters and set the correct values
 			else
 			{
 				MessageBox.Show("No se pudo identificar modelo de máquina. Asegurese que sea correcto.", "Atencion", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -1721,7 +1721,13 @@ private void butLoadFile_Click(object sender, EventArgs e)
 		}
 	}
 }
-
+int Model2Selector_LUT(MacModel m)
+{
+	int retval = (int)m;
+	if(m == MacModel.A30TR || m == MacModel.A40TR)
+		retval = (int) MacModel.A20TR;
+	return retval;
+}
 Stream OpenFileFromPath(String path)
 {
 	//Get the path of specified file
