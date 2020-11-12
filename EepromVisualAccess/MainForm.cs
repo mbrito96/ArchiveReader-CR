@@ -156,9 +156,33 @@ public class ArchiveInterpreter
 					detailViewer.Columns.Add("Bomba 1", 55);
 					detailViewer.Columns.Add("Bomba 2", 55);
 					break;
+			case MacModel.GAF20TR:
+			case MacModel.GAF30TR:
+					archiveViewer.Columns.Add("#", 43);
+					archiveViewer.Columns.Add("Fecha/Hora", 145);
+					archiveViewer.Columns.Add("Codigo", 55);
+					archiveViewer.Columns.Add("Temp Ent.", 120);
+					archiveViewer.Columns.Add("Temp Sal.", 65);
+					archiveViewer.Columns.Add("P. Alta A", 60);
+					archiveViewer.Columns.Add("P. Baja A", 60);
+					if(model == MacModel.GAF30TR)
+						archiveViewer.Columns.Add("P. Aceite A", 65);
+					archiveViewer.Columns.Add("P. Alta B", 60);
+					archiveViewer.Columns.Add("P. Baja B", 60);
+					if(model == MacModel.GAF30TR)
+						archiveViewer.Columns.Add("P. Aceite B", 65);
+
+					detailViewer.Columns.Add("Modo", 62);
+					detailViewer.Columns.Add("Estado", 62);
+					detailViewer.Columns.Add("Cmp.A", 45);
+					detailViewer.Columns.Add("Cmp.B", 45);
+					detailViewer.Columns.Add("V.EV", 38);
+					detailViewer.Columns.Add("V.CO", 38);
+					detailViewer.Columns.Add("Frio", 45);
+					detailViewer.Columns.Add("Retorno", 65);
+					break;
 		}
 	}
-
 				
 	public bool ProcessEntry(byte[] entryData, EntryType type, ListViewItem entry)
 	{
@@ -1120,6 +1144,165 @@ public class ArchiveInterpreter
 			}
 			#endregion
 		}
+		else if(model == MacModel.GAF20TR || model == MacModel.GAF30TR)
+		{
+			#region GAF-20TR/30TR ErrorMessages
+			switch (code)
+			{
+				case "00":          //ERR_SENSOR
+				{
+					try
+					{
+						float vinPin = float.Parse(param);
+						errorString += "Valor de sensores no coherentes. Entrada VIN" + vinPin.ToString("f0");
+					}
+					catch(FormatException)
+					{
+						errorString += "Valor de sensores no coherentes. Entrada VIN" + param;
+					}
+					break;
+				}
+				case "01":      // ERR_TEMP_IN_SENSOR
+				{
+					errorString += "Valor improbable en sensor de temperatura de entrada. Valor: " + param + " C";
+					break;
+				}
+				case "02":      // ERR_TEMP_OUT_SENSOR
+				{
+					errorString += "Valor improbable en sensor de temperatura de salida. Valor: " + param + " C";
+					break;
+				}
+				case "03":      // ERR_EEPROM_READ
+				{
+					errorString += "Falla lectura EEPROM. Direccion: " + param;
+					break;
+				}
+				case "04":      // ERR_EEPROM_WRITE
+				{
+					errorString += "Falla escritura EEPROM. Direccion: " + param;
+					break;
+				}
+				case "05":      // ERR_OP_VALUES
+				{
+					errorString += "SetPoint recuperado de memoria no coherente. \n Se configuraron los valores por defecto.";
+					break;
+				}
+				case "06":      // ERR_CREATE_TIMEOUT
+				{
+					errorString += "Error al crear Timeout " + param;
+					break;
+				}
+				case "07":      // ERR_SYS_WATCHDOG
+				{
+					errorString += "System Watchdog. Se continuó la operacion normalmente.";
+					break;
+				}
+				case "08":      // ERR_FATAL_ERROR
+				{
+					errorString += "Excepcion no manejada. Imposible operar.";
+					break;
+				}
+				case "09":      // ERR_ARCHIVE_INIT
+				{
+					errorString += "Error iniciando historial. Se perdieron los datos pasados.";
+					break;
+				}
+				case "0A":      // ERR_RTC_FAIL
+				{
+					errorString += "Fecha y hora invalida.";
+					break;
+				}
+				case "0B":      // ERR_MAIL_SENDING
+				{
+					errorString += "Error de envío de email. Se avanza al siguiente de la bandeja de salida.";
+					break;
+				}
+				case "0C":      // ERR_MAIL_SYSTEM
+				{
+					errorString += "Falla del servicio de mails. Verificar parámetro adicional:" + Environment.NewLine;
+					errorString += "-21 a -1: Error servidor Smtp ; 0 se deshabilitó el servicio ; 1 a 2: Falla de inicialización" + Environment.NewLine;
+					errorString += "3: Bandeja de salida llena ; 4: Error configurando nombre del remitente.";
+					break;
+				}
+				case "0D":      // ERR_P_HIGH_A
+				{
+					errorString += "Presion alta circuito A fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "0E":      // ERR_P_HIGH_B
+				{
+					errorString += "Presion alta circuito B fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "0F":      // ERR_P_LOW_A
+				{
+					errorString += "Presion baja circuito A fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "10":      // ERR_P_LOW_B
+				{
+					errorString += "Presion baja circuito B fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "11":      // ERR_P_DIF_A
+				{
+					errorString += "Presion diferencial circuito A fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "12":      // ERR_P_DIF_B
+				{
+					errorString += "Presion diferencial circuito B fuera de rango: " + param + " PSI";
+					break;
+				}
+				case "13":      // ERR_T_MAX
+				{
+					errorString += "Temperatura por encima de máxima: " + param + " C";
+					break;
+				}
+				case "14":      // ERR_COOLDOWN_A
+				{
+					errorString += "Imposible disminuir P. alta del circuito A en etapa de arranque." + Environment.NewLine + "Presion alta: " + param + " PSI";
+					break;
+				}
+				case "15":      // ERR_COOLDOWN_B
+				{
+					errorString += "Imposible disminuir P. alta del circuito B en etapa de arranque." + Environment.NewLine + "Presion alta: " + param + " PSI";
+					break;
+				}
+				case "16":      // ERR_COMP_OL_A
+				{
+					errorString += "Consumo compresor A.";
+					break;
+				}
+				case "17":      // ERR_COMP_OL_B
+				{
+					errorString += "Consumo compresor B.";
+					break;
+				}
+				case "18":      // ERR_CMP_WATCHDOG
+				{
+					errorString += "Compressor Watchdog.";
+					break;
+				}
+				case "19":      // ERR_FAN_EV_OL
+				{
+					errorString += "Consumo ventilador Evaporador.";
+					break;
+				}
+				case "1A":      // ERR_FAN_CO_OL
+				{
+					errorString += "Consumo ventilador Condensador.";
+					break;
+				}
+				case "1B":      // ERR_WRONG_VERS
+				{
+				    UInt32 vers = (UInt32)Convert.ToDouble(param);
+					errorString += string.Format("Se detectó una nueva versión del programa. Se reemplazó la versión {0}.{1}.{2}.", vers>>24, (vers>>16)&0xFF, (vers>>8)&0xFF);
+					break;
+				}
+			}
+			#endregion
+		}
 		return errorString;
 	}
 	
@@ -1199,6 +1382,25 @@ public class ArchiveInterpreter
 			}
 			#endregion
 		}
+		else if (model == MacModel.GAF20TR || model == MacModel.GAF30TR)
+		{
+			#region GAF-20TR & 30TR EventMessages
+			switch(eventCode)
+			{
+				case "00":
+				{
+					eventString += "Se detectó una falla en la conexión a internet. Si está configurado para hacerlo, se reseteará el router." + Environment.NewLine;
+					eventString +=  "Intentos consecutivos = " + eventParam1 + " - Resolver code = " + eventParam2;
+					break;
+				}
+				case "01":
+				{
+					eventString += "Conexión a internet estable.";
+					break;
+				}
+			}
+			#endregion
+		}
 		return eventString;
 	}
 	public EntryType GetEntryType(ListViewItem item)
@@ -1236,6 +1438,12 @@ public class ArchiveInterpreter
 					break;
 			case MacModel.A100TR:
 					A100TR_DecodeDigitalCell(item, code);
+					break;
+			case MacModel.GAF20TR:
+					GAF20TR_DecodeDigitalCell(item, code);
+					break;
+			case MacModel.GAF30TR:
+					GAF20TR_DecodeDigitalCell(item, code);
 					break;
 		}
 	}
@@ -1508,12 +1716,77 @@ public class ArchiveInterpreter
 
 		item.SubItems.Add( (digitalCell >> 23 & 0x1)==0 ? "0" : "-1" );    // Consumo Bomba agua B
 	}
+
+	void GAF20TR_DecodeDigitalCell(ListViewItem item, Int32 digitalCell)
+	{
+		String text;
+		Byte opMode = (Byte)((digitalCell >> 20) & 0x7);
+		switch(opMode)
+		{
+			case 0x01:
+					text = "10TR-A";
+					break;
+			case 0x02:
+					text = "10TR-B";
+					break;
+			case 0x03:
+					text = "10TR-BAL";
+					break;
+			case 0x07:
+					text = "20TR";
+					break;
+			default:
+					text = "...";
+					break;
+		}
+		item.Text = text;   // Save machine Operation Mode
+
+		Byte status = (Byte)((digitalCell >> 18) & 0x3);
+		switch (status)
+		{
+			case 0x00:
+					text = "LISTO";
+					break;
+			case 0x01:
+					text = "COOLDOWN";
+					break;
+			case 0x02:
+					text = "OPERANDO";
+					break;
+			case 0x03:
+					text = "POSTOP";
+					break;
+			default:
+					text = "...";
+					break;
+		}
+		item.SubItems.Add(text);    // Save machine status
+
+		String tempStr = (digitalCell >> 4 & 0x1) == 0 ? (digitalCell >> 0 & 0x1).ToString() : "-1";   // -1 if Consumo Cmp A = 1, else store Cmp A ON/OFF value
+		item.SubItems.Add(tempStr);  // Compressor A
+
+		tempStr = (digitalCell >> 5 & 0x1) == 0 ? (digitalCell >> 1 & 0x1).ToString() : "-1";   // -1 if Consumo Cmp B = 1, else store Cmp B ON/OFF value
+		item.SubItems.Add(tempStr);  // Compressor B
+
+		tempStr = (digitalCell >> 6 & 0x1) == 0 ? (digitalCell >> 2 & 0x1).ToString() : "-1";   // -1 if Consumo Vent A1 = 1, else store Vent A1 ON/OFF value
+		item.SubItems.Add(tempStr);  // Vent Evaporador
+
+		tempStr = (digitalCell >> 7 & 0x1) == 0 ? (digitalCell >> 3 & 0x1).ToString() : "-1";   // -1 if Consumo Vent A2 = 1, else store Vent A2 ON/OFF value
+		item.SubItems.Add(tempStr);  // Vent Condensador
+
+		item.SubItems.Add( (digitalCell >> 13 & 0x1) == 0 ? "1" : "0" );    // Modo frio (variable ventOnly) 
+
+		item.SubItems.Add( (digitalCell >> 14 & 0x1) == 0 ? "0" : "1" );    // Retorno instalado
+	}
+
 	OpStatus GetOpStatus(Int32 digitalCell)
 	{
 		OpStatus retVal = OpStatus.NONE;
 		Byte statusByte = 0;
 		switch (model)
 		{
+			case MacModel.A20TR:
+			case MacModel.A30TR:
 			case MacModel.A40TR:
 				statusByte = (Byte)((digitalCell >> 10) & 0x3);
 				break;
@@ -1522,6 +1795,10 @@ public class ArchiveInterpreter
 				break;
 			case MacModel.W90TR:
 				statusByte = (Byte)((digitalCell >> 12) & 0x3);
+				break;
+			case MacModel.GAF20TR:
+			case MacModel.GAF30TR:
+				statusByte = (Byte)((digitalCell >> 8) & 0x3);
 				break;
 			default:
 				return retVal;
@@ -1726,6 +2003,8 @@ int Model2Selector_LUT(MacModel m)
 	int retval = (int)m;
 	if(m == MacModel.A30TR || m == MacModel.A40TR)
 		retval = (int) MacModel.A20TR;
+	else if(m == MacModel.GAF20TR || m == MacModel.GAF30TR)
+		retval = (int)m - 2;
 	return retval;
 }
 Stream OpenFileFromPath(String path)
@@ -1833,9 +2112,6 @@ private void GetEntries(byte[] EepromBytes)
 	deletedEntries.Items.Clear();
 	ClearFilter();
 
-	if (DEBUGGING)
-		Debug_AddColumns();
-
 	if ((EepromBytes.Length % 4) != 0)
 	{
 		MessageBox.Show("La cantidad de bytes recibidos deben ser múltiplo de 4. Modifique valor.", "Error en bytes recibidos", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -1900,11 +2176,8 @@ private void GetEntries(byte[] EepromBytes)
 		if (arch1.ProcessEntry(entryArray, type, entry) == false)
 			dataError = true;
 
-		if (DEBUGGING)
-		{
-			entry.SubItems.Add(i.ToString());                   // Save Index
-			entry.SubItems.Add((ArchiveInfo.regFileAddress + i * 4).ToString());    // Save Address
-		}
+//		entry.SubItems.Add(i.ToString());                   // Save Index. FOR DEBUGGING ONLY
+//		entry.SubItems.Add((ArchiveInfo.regFileAddress + i * 4).ToString());    // Save Address. FOR DEBUGGING ONLY 
 
 		// Push entry to list viewer
 		if(FilterEntryTypePass(type) == true)
@@ -1929,18 +2202,6 @@ private void GetEntries(byte[] EepromBytes)
 	}
 }
 #endregion
-		  
-private void Debug_AddColumns()
-{
-	this.columnHeaderDebug1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-	this.columnHeaderDebug1.Text = "Index";
-	this.columnHeaderDebug1.Width = 42;
-	ArchiveViewer.Columns.Insert(ArchiveViewer.Columns.Count - 1, columnHeaderDebug1);
-	this.columnHeaderDebug2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-	this.columnHeaderDebug2.Text = "Address";
-	this.columnHeaderDebug2.Width = 50;
-	ArchiveViewer.Columns.Insert(ArchiveViewer.Columns.Count - 1, columnHeaderDebug2);
-}
 
 #region FILTER METHODS
 
@@ -2086,8 +2347,6 @@ private void ArchiveViewer_SelectedIndexChanged(object sender, EventArgs e)
 			DetailViewer.BringToFront();
 			// Get digital cell and decode it into a DetailViewer item.
 			Int32 digital = Convert.ToInt32(it.SubItems[CODE].Text, 16);
-			//        if (((digital >> 24) & 0xC0) == ERROR_MASK)
-			//           return;
 			ListViewItem digitalItem = new ListViewItem("");
 			arch1.DecodeDigitalCell(digitalItem, digital);
 
@@ -2130,6 +2389,12 @@ private void modelSelector_SelectedIndexChanged(object sender, EventArgs e)
 			break;
 		case "GWF-A-100TR":
 			model = MacModel.A100TR;
+			break;
+		case "GAF-A-20TR":
+			model = MacModel.GAF20TR;
+			break;
+		case "GAF-A-30TR":
+			model = MacModel.GAF30TR;
 			break;
 		default:
 			return;
@@ -2308,7 +2573,6 @@ private void butExport2numCSV_Click(object sender, EventArgs e)
 private void butSetFilter_Click(object sender, EventArgs e)
 {
 	ClearFilter();    // First clear the filter in order to apply new filter 
-
 	//Apply filter from fastest to slowest algorithm
 	ApplyTypeFilter();
 	ApplyDateFilter();
@@ -2480,7 +2744,5 @@ private void butPlotter_Click(object sender, EventArgs e)
 		catch {};
 	}
 }
-
-
 	}
 }
